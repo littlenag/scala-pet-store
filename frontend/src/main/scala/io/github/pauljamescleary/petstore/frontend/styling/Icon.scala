@@ -1,4 +1,4 @@
-package io.github.pauljamescleary.petstore.frontend.components
+package io.github.pauljamescleary.petstore.frontend.styling
 
 import japgolly.scalajs.react.vdom.html_<^._
 
@@ -603,4 +603,3 @@ object Icon {
   def youtubePlay = apply("youtube-play")
   def youtubeSquare = apply("youtube-square")
 }
-

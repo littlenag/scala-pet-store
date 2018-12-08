@@ -3,7 +3,6 @@ package io.github.pauljamescleary.petstore.frontend.services
 import java.nio.ByteBuffer
 
 import boopickle.Default._
-//import boopickle.UnpickleImpl
 import org.scalajs.dom
 
 import scala.concurrent.Future

@@ -24,7 +24,7 @@ micrositeBaseUrl := Settings.name
 val badConsoleFlags = Seq("-Xfatal-warnings", "-Ywarn-unused:imports")
 
 lazy val commonSettings = Def.settings(
-  scalaVersion := "2.12.7",
+  scalaVersion := "2.12.8",
   organization := "io.github.pauljamescleary",
   version      := Settings.version,
   scalacOptions ++= Settings.scalacOptions,

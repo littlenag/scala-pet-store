@@ -1,11 +1,11 @@
-package io.github.pauljamescleary.petstore.frontend.components
+package io.github.pauljamescleary.petstore.frontend.styling
 
+import io.github.pauljamescleary.petstore.frontend.styling.Bootstrap.CommonStyle
+import io.github.pauljamescleary.petstore.frontend.styling.Bootstrap.CommonStyle._
 import japgolly.univeq.UnivEq
-import Bootstrap.CommonStyle
+import scalacss.internal.mutable
 
 import CssSettings._
-import scalacss.internal.mutable
-import Bootstrap.CommonStyle._
 
 class BootstrapStyles(implicit r: mutable.Register) extends StyleSheet.Inline()(r) {
 

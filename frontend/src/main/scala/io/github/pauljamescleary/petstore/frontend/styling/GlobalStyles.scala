@@ -1,4 +1,4 @@
-package io.github.pauljamescleary.petstore.frontend.components
+package io.github.pauljamescleary.petstore.frontend.styling
 
 import CssSettings._
 

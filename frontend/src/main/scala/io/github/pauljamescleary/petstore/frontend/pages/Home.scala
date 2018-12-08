@@ -6,15 +6,14 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import io.github.pauljamescleary.petstore.frontend._
-import PetstoreApp.{Page, HomePage}
+import AppRouter.{HomePageRt, AppPages}
 import components._
 
-import scala.util.Random
 import scala.language.existentials
 
 object Home {
 
-  case class Props(router: RouterCtl[Page], proxy: ModelProxy[Pot[String]])
+  case class Props(router: RouterCtl[AppPages], proxy: ModelProxy[Pot[String]])
 
   case class State(motdWrapper: ReactConnectProxy[Pot[String]])
 
@@ -29,10 +28,10 @@ object Home {
           state.motdWrapper(Motd(_)),
           //Chart(cp),
           // create a link to the To Do view
-          <.div(props.router.link(HomePage)("Check your todos!"))
+          <.div(props.router.link(HomePageRt)("Check your todos!"))
         )
       }
       .build
 
-  def apply(router: RouterCtl[Page], proxy: ModelProxy[Pot[String]]) = component(Props(router, proxy))
+  def apply(router: RouterCtl[AppPages], proxy: ModelProxy[Pot[String]]) = component(Props(router, proxy))
 }

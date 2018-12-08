@@ -119,16 +119,16 @@ object Settings {
    * the special %%% function selects the correct version for each project
    */
   val sharedDependencies = Def.setting(Seq(
-    "com.lihaoyi"   %%% "scalatags"           % Settings.scalaTagsV,
-    "com.lihaoyi"   %%% "autowire"            % versions.autowire,
-    "io.suzaku"     %%% "boopickle"           % versions.booPickle,
-    "com.beachape"  %%% "enumeratum"          % EnumeratumVersion,
-    "com.beachape"  %%% "enumeratum-circe"    % EnumeratumCirceVersion,
-    "io.circe"      %% "circe-generic"        % CirceVersion,
-    "io.circe"      %% "circe-literal"        % CirceVersion,
-    "io.circe"      %% "circe-generic-extras" % CirceVersion,
-    "io.circe"      %% "circe-parser"         % CirceVersion,
-    "io.circe"      %% "circe-java8"          % CirceVersion,
+    "com.lihaoyi"   %%% "scalatags"            % Settings.scalaTagsV,
+    "com.lihaoyi"   %%% "autowire"             % versions.autowire,
+    "io.suzaku"     %%% "boopickle"            % versions.booPickle,
+    "com.beachape"  %%% "enumeratum"           % EnumeratumVersion,
+    "com.beachape"  %%% "enumeratum-circe"     % EnumeratumCirceVersion,
+    "io.circe"      %%% "circe-generic"        % CirceVersion,
+    "io.circe"      %%% "circe-literal"        % CirceVersion,
+    "io.circe"      %%% "circe-generic-extras" % CirceVersion,
+    "io.circe"      %%% "circe-parser"         % CirceVersion,
+    "io.circe"      %%% "circe-java8"          % CirceVersion,
   ))
 
   /** Dependencies only used by the JVM project */
@@ -166,7 +166,6 @@ object Settings {
       "io.github.jmcardon"    %% "tsec-http4s"          % TsecVersion
   ))
 
-  /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
   val scalajsDependencies = Def.setting(Seq(
     "com.github.japgolly.scalajs-react" %%% "core"          % versions.scalajsReact,
