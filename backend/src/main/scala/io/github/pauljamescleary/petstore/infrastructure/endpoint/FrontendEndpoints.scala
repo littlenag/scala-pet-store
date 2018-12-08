@@ -3,7 +3,6 @@ package io.github.pauljamescleary.petstore.infrastructure.endpoint
 import cats.data.{NonEmptyList, OptionT}
 import cats.effect.{ContextShift, Effect}
 import org.http4s.CacheDirective.`no-cache`
-import org.http4s.MediaType.`text/html`
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.{`Cache-Control`, `Content-Type`}
@@ -70,7 +69,7 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
       case GET -> Root =>
         Ok(spaTemplate().render)
           .map(
-            _.withContentType(`Content-Type`(`text/html`, Charset.`UTF-8`))
+            _.withContentType(`Content-Type`(MediaType.text.html, Charset.`UTF-8`))
               .putHeaders(`Cache-Control`(NonEmptyList.of(`no-cache`())))
           )
     }
