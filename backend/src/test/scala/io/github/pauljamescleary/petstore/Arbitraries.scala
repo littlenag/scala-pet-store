@@ -11,6 +11,7 @@ import io.github.pauljamescleary.petstore.domain.{orders, pets}
 import io.github.pauljamescleary.petstore.domain.pets._
 import io.github.pauljamescleary.petstore.domain.pets.PetStatus._
 import io.github.pauljamescleary.petstore.domain.users._
+import io.github.pauljamescleary.petstore.shared.domain.pets.{Pet, PetStatus}
 
 
 trait PetStoreArbitraries {
@@ -55,7 +56,7 @@ trait PetStoreArbitraries {
         .map(_.map(x => s"http://${x}.com"))
         .map(_.toSet)
       id <- Gen.option(Gen.posNum[Long])
-    } yield pets.Pet(name, category, bio, status, tags, photoUrls, id)
+    } yield Pet(name, category, bio, status, tags, photoUrls, id)
   }
 
   implicit val user = Arbitrary[User] {

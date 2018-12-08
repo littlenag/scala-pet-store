@@ -1,19 +1,8 @@
 import sbt.Def
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 import webscalajs.ScalaJSWeb
 
-// Filter out compiler flags to make the repl experience functional...
-val badConsoleFlags = Seq("-Xfatal-warnings", "-Ywarn-unused:imports")
-
-lazy val commonSettings = Def.settings(
-  scalaVersion := "2.12.7",
-  organization := "io.github.pauljamescleary",
-  version      := Settings.version,
-  scalacOptions ++= Settings.scalacOptions,
-  scalacOptions in (Compile, console) ~= (_.filterNot(badConsoleFlags.contains(_))),
-  resolvers += Resolver.sonatypeRepo("snapshots")
-)
+// Top-level settings
 
 enablePlugins(ScalafmtPlugin, JavaAppPackaging, GhpagesPlugin, MicrositesPlugin, TutPlugin)
 
@@ -28,6 +17,20 @@ micrositeName := "Scala Pet Store"
 micrositeDescription := "An example application using FP techniques in Scala"
 
 micrositeBaseUrl := Settings.name
+
+// Settings for backend, frontend, and shared code
+
+// Filter out compiler flags to make the repl experience functional...
+val badConsoleFlags = Seq("-Xfatal-warnings", "-Ywarn-unused:imports")
+
+lazy val commonSettings = Def.settings(
+  scalaVersion := "2.12.7",
+  organization := "io.github.pauljamescleary",
+  version      := Settings.version,
+  scalacOptions ++= Settings.scalacOptions,
+  scalacOptions in (Compile, console) ~= (_.filterNot(badConsoleFlags.contains(_))),
+  resolvers += Resolver.sonatypeRepo("snapshots")
+)
 
 // This function allows triggered compilation to run only when scala files changes
 // It lets change static files freely
@@ -113,13 +116,6 @@ lazy val shared =
     .in(file("shared"))
     .settings(commonSettings)
     .settings(
-      libraryDependencies ++= Seq(
-        "com.lihaoyi" %%% "scalatags"     % Settings.scalaTagsV,
-        "io.circe"    %%% "circe-core"    % Settings.circeV,
-        "io.circe"    %%% "circe-generic" % Settings.circeV,
-        "io.circe"    %%% "circe-parser"  % Settings.circeV
-        //"org.typelevel" %% "cats-effect" % catsEffectV
-      ),
       libraryDependencies ++= Settings.sharedDependencies.value
     )
     // set up settings specific to the JS project

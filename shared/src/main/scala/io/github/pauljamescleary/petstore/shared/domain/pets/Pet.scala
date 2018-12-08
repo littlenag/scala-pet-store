@@ -1,5 +1,8 @@
-package io.github.pauljamescleary.petstore.domain.pets
+package io.github.pauljamescleary.petstore.shared.domain.pets
 
+/**
+  * @author Mark Kegel (mkegel@vast.com)
+  */
 case class Pet(
     name: String,
     category: String,

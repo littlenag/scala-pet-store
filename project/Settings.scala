@@ -87,9 +87,9 @@ object Settings {
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
-    val scala = "2.12.6"
     val scalaDom = "0.9.6"
-    val scalajsReact = "1.2.3"
+    //val scalajsReact = "1.2.3"
+    val scalajsReact = "1.3.1"
     val scalaCSS = "0.5.5"
     val log4js = "1.4.10"
     val autowire = "0.2.6"
@@ -97,16 +97,16 @@ object Settings {
     val diode = "1.1.3"
     val diodeReact = "1.1.3.120"
     val uTest = "0.6.4"
-    val guice = "4.2.1"
 
-    //val react = "16.1.0"
     val react = "16.4.2"
     //val jQuery = "3.3.1"
     //val bootstrap = "4.1.3"
     //val fontAwesome = "4.3.0-1"
     //val chartjs = "2.7.2"
 
-    val jQuery = "1.11.1"
+    val jQueryFacade = "1.2"
+    //val jQuery = "1.11.1"
+    val jQuery = "2.2.1"
     val bootstrap = "3.3.6"
     val fontAwesome = "4.3.0-1"
     val chartjs = "2.1.3"
@@ -119,8 +119,16 @@ object Settings {
    * the special %%% function selects the correct version for each project
    */
   val sharedDependencies = Def.setting(Seq(
-    "com.lihaoyi" %%% "autowire"  % versions.autowire,
-    "io.suzaku"   %%% "boopickle" % versions.booPickle
+    "com.lihaoyi"   %%% "scalatags"           % Settings.scalaTagsV,
+    "com.lihaoyi"   %%% "autowire"            % versions.autowire,
+    "io.suzaku"     %%% "boopickle"           % versions.booPickle,
+    "com.beachape"  %%% "enumeratum"          % EnumeratumVersion,
+    "com.beachape"  %%% "enumeratum-circe"    % EnumeratumCirceVersion,
+    "io.circe"      %% "circe-generic"        % CirceVersion,
+    "io.circe"      %% "circe-literal"        % CirceVersion,
+    "io.circe"      %% "circe-generic-extras" % CirceVersion,
+    "io.circe"      %% "circe-parser"         % CirceVersion,
+    "io.circe"      %% "circe-java8"          % CirceVersion,
   ))
 
   /** Dependencies only used by the JVM project */
@@ -161,14 +169,18 @@ object Settings {
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
   val scalajsDependencies = Def.setting(Seq(
-    "com.github.japgolly.scalajs-react" %%% "core"        % versions.scalajsReact,
-    "com.github.japgolly.scalajs-react" %%% "extra"       % versions.scalajsReact,
-    "com.github.japgolly.scalacss"      %%% "core"        % versions.scalaCSS,
-    "com.github.japgolly.scalacss"      %%% "ext-react"   % versions.scalaCSS,
-    "io.suzaku"                         %%% "diode"       % versions.diode,
-    "io.suzaku"                         %%% "diode-react" % versions.diodeReact,
-    "org.scala-js"                      %%% "scalajs-dom" % versions.scalaDom,
-    "com.lihaoyi"                       %%% "utest"       % versions.uTest % Test
+    "com.github.japgolly.scalajs-react" %%% "core"          % versions.scalajsReact,
+    "com.github.japgolly.scalajs-react" %%% "extra"         % versions.scalajsReact,
+    "com.github.japgolly.scalacss"      %%% "core"          % versions.scalaCSS,
+    "com.github.japgolly.scalacss"      %%% "ext-react"     % versions.scalaCSS,
+    "io.suzaku"                         %%% "diode"         % versions.diode,
+    "io.suzaku"                         %%% "diode-react"   % versions.diodeReact,
+    "io.suzaku"                         %%% "boopickle"     % versions.booPickle,
+    "org.scala-js"                      %%% "scalajs-dom"   % versions.scalaDom,
+    "com.lihaoyi"                       %%% "utest"         % versions.uTest % Test,
+    "com.lihaoyi"                       %%% "scalatags"     % Settings.scalaTagsV,
+    "com.lihaoyi"                       %%% "autowire"      % versions.autowire,
+    "org.querki"                        %%% "jquery-facade" % versions.jQueryFacade
   ))
 
   /** Dependencies for external JS libs that are bundled into a single .js file according to dependency order */

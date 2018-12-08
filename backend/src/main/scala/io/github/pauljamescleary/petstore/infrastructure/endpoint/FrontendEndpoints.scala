@@ -8,7 +8,6 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.{`Cache-Control`, `Content-Type`}
 import org.log4s.getLogger
 import scalatags.Text.TypedTag
-import scalatags.Text.all.Modifier
 
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds

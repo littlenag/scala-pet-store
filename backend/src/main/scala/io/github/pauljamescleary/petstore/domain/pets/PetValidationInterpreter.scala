@@ -4,6 +4,7 @@ import cats._
 import cats.data.EitherT
 import cats.implicits._
 import io.github.pauljamescleary.petstore.domain.{PetAlreadyExistsError, PetNotFoundError}
+import io.github.pauljamescleary.petstore.shared.domain.pets.Pet
 
 class PetValidationInterpreter[F[_]: Monad](repository: PetRepositoryAlgebra[F])
     extends PetValidationAlgebra[F] {
