@@ -13,10 +13,13 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
 import tsec.mac.jca.HMACSHA256
 import tsec.passwordhashers.jca.BCrypt
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Server extends IOApp {
   private val keyGen = HMACSHA256
+
+  implicit def appContextShift: ContextShift[IO] = super.contextShift
 
   def createServer[F[_] : ContextShift : ConcurrentEffect : Timer]: Resource[F, ExitCode] =
     for {
