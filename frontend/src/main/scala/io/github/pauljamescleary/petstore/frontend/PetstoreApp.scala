@@ -14,10 +14,13 @@ import io.github.pauljamescleary.petstore.shared.MyData
 /**
  * Tuturial WebApp entry point
  */
-@JSExportTopLevel("TutorialApp")
-object TutorialApp {
+@JSExportTopLevel("PetstoreApp")
+object PetstoreApp {
 
-  def main(): Unit = ()
+  //@JSExportTopLevel("main")
+  def main(args: Array[String]): Unit = {
+    println("Hello from the Petstore!")
+  }
 
   def appendPar(targetNode: dom.Node, text: String): Unit = {
     val parNode = dom.document.createElement("p")
@@ -45,5 +48,4 @@ object TutorialApp {
         .map(appendPar(dom.document.body, _))
         .onComplete(_ => ())
   }
-
 }

@@ -64,7 +64,7 @@ lazy val backend = (project in file("backend"))
     // This settings makes reStart to rebuild if a scala.js file changes on the client
     watchSources ++= (watchSources in frontend).value,
     // Support stopping the running server
-    mainClass in reStart := Some("org.http4s.scalajsexample.Server"),
+    mainClass in reStart := Some("io.github.pauljamescleary.petstore.Server"),
     fork in run := true,
 
 
@@ -98,9 +98,9 @@ lazy val frontend = (project in file("frontend"))
     dependencyOverrides += "org.webjars.npm" % "js-tokens" % "3.0.2",  // fix for https://github.com/webjars/webjars/issues/1789
     jsDependencies ++= Settings.jsDependencies.value,
     // use Scala.js provided launcher code to start the client app
+    mainClass in Compile := Some("io.github.pauljamescleary.petstore.frontend.PetstoreApp"),
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer in Test := false
-    //mainClass := Some("spatutorial.client.SPAMain")
     //scalaJSModuleKind := ModuleKind.CommonJSModule
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb)

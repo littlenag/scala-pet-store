@@ -39,17 +39,7 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
   val jsScript = "resources/scala-pet-store-frontend-fastopt.js"
   val jsDeps = "resources/scala-pet-store-frontend-jsdeps.js"
 
-  val jsScripts: Seq[Modifier] = {
-    import scalatags.Text.all._
-    List(
-      script(src := jsDeps),
-      script(src := jsScript)
-      //script("org.http4s.scalajsexample.TutorialApp().main()")
-      //script("spatutorial.client.SPAMain().main()")
-    )
-  }
-
-  val spaTemplate: TypedTag[String] = {
+  val indexHTML: TypedTag[String] = {
     import scalatags.Text.all._
 
     // navbar, header footer
@@ -59,7 +49,11 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
       ),
       body(
         div(id := "root"),
-        script(src := jsScript)
+        div(id := "text")(
+          p("some text")
+        ),
+        script(`type`:= "text/javascript", src := jsDeps),
+        script(`type`:= "text/javascript", src := jsScript)
       )
     )
   }
@@ -67,7 +61,7 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
   val indexHtmlEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case GET -> Root =>
-        Ok(spaTemplate().render)
+        Ok(indexHTML().render)
           .map(
             _.withContentType(`Content-Type`(MediaType.text.html, Charset.`UTF-8`))
               .putHeaders(`Cache-Control`(NonEmptyList.of(`no-cache`())))
@@ -96,7 +90,7 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
     )
   )
 
-  val endpoints: HttpRoutes[F] = resourcesEndpoint <+> webJarEndpoint
+  val endpoints: HttpRoutes[F] = resourcesEndpoint <+> webJarEndpoint <+> indexHtmlEndpoint
 }
 
 object FrontendEndpoints {
