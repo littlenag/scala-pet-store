@@ -4,7 +4,7 @@ import config.{DatabaseConfig, PetStoreConfig}
 import domain.users._
 import domain.orders._
 import domain.pets._
-import infrastructure.endpoint.{OrderEndpoints, PetEndpoints, UserEndpoints}
+import infrastructure.endpoint.{FrontendEndpoints, OrderEndpoints, PetEndpoints, UserEndpoints}
 import infrastructure.repository.doobie.{DoobieOrderRepositoryInterpreter, DoobiePetRepositoryInterpreter, DoobieUserRepositoryInterpreter}
 import cats.effect._
 import cats.implicits._
@@ -36,7 +36,8 @@ object Server extends IOApp {
       userService    =  UserService[F](userRepo, userValidation)
       services       =  PetEndpoints.endpoints[F](petService) <+>
                             OrderEndpoints.endpoints[F](orderService) <+>
-                            UserEndpoints.endpoints[F, BCrypt](userService, BCrypt.syncPasswordHasher[F])
+                            UserEndpoints.endpoints[F, BCrypt](userService, BCrypt.syncPasswordHasher[F]) <+>
+                            FrontendEndpoints.endpoints[F]
       httpApp = Router("/" -> services).orNotFound
       _ <- Resource.liftF(DatabaseConfig.initializeDb(conf.db))
       exitCode <- Resource.liftF(
