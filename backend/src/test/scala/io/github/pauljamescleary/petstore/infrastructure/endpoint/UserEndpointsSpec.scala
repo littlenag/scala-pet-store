@@ -9,13 +9,10 @@ import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl._
 import org.http4s.circe._
-
 import tsec.passwordhashers.jca.BCrypt
-
 import domain.users._
 import domain.authentication._
 import infrastructure.repository.inmemory.UserRepositoryInMemoryInterpreter
-
 import org.http4s.client.dsl.Http4sClientDsl
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks

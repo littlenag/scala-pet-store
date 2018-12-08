@@ -1,7 +1,7 @@
-package io.github.pauljamescleary.petstore.frontend.styling
+package io.github.pauljamescleary.petstore.frontend.css
 
-import io.github.pauljamescleary.petstore.frontend.styling.Bootstrap.CommonStyle
-import io.github.pauljamescleary.petstore.frontend.styling.Bootstrap.CommonStyle._
+import io.github.pauljamescleary.petstore.frontend.css.Bootstrap.CommonStyle
+import io.github.pauljamescleary.petstore.frontend.css.Bootstrap.CommonStyle._
 import japgolly.univeq.UnivEq
 import scalacss.internal.mutable
 

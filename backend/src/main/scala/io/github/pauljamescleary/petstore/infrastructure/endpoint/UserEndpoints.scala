@@ -14,11 +14,27 @@ import scala.language.higherKinds
 import domain._
 import domain.users._
 import domain.authentication._
+import io.github.pauljamescleary.petstore.shared.domain.users.User
 import tsec.common.Verified
 import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 
 class UserEndpoints[F[_]: Effect, A] extends Http4sDsl[F] {
   import Pagination._
+
+  implicit class RichSignUp(signupRequest: SignupRequest) {
+    import signupRequest._
+
+    // Create User from the SignupRequest
+    def asUser[PA](hashedPassword: PasswordHash[PA]): User = User(
+      userName,
+      firstName,
+      lastName,
+      email,
+      hashedPassword.toString,
+      phone
+    )
+  }
+
   /* Jsonization of our User type */
 
   implicit val userDecoder: EntityDecoder[F, User] = jsonOf

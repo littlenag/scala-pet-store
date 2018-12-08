@@ -5,8 +5,9 @@ import cats.data.OptionT
 import cats.implicits._
 import doobie._
 import doobie.implicits._
-import io.github.pauljamescleary.petstore.domain.users.{User, UserRepositoryAlgebra}
+import io.github.pauljamescleary.petstore.domain.users.UserRepositoryAlgebra
 import SQLPagination._
+import io.github.pauljamescleary.petstore.shared.domain.users.User
 
 private object UserSQL {
   def insert(user: User): Update0 = sql"""

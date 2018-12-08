@@ -1,4 +1,4 @@
-package io.github.pauljamescleary.petstore.frontend.styling
+package io.github.pauljamescleary.petstore.frontend.css
 
 import japgolly.scalajs.react.vdom.html_<^._
 

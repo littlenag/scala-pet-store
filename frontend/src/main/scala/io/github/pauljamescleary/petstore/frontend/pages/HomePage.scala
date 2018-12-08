@@ -11,11 +11,23 @@ import components._
 
 import scala.language.existentials
 
-object Home {
+object HomePage {
 
   case class Props(router: RouterCtl[AppPages], proxy: ModelProxy[Pot[String]])
 
   case class State(motdWrapper: ReactConnectProxy[Pot[String]])
+
+  import css.CssSettings._
+  import scalacss.ScalaCssReact._
+
+  object Style extends StyleSheet.Inline {
+    import dsl._
+
+    val content = style(textAlign.center,
+      fontSize(30.px),
+      minHeight(450.px),
+      paddingTop(40.px))
+  }
 
   // create the React component for Dashboard
   private val component = ScalaComponent.builder[Props]("Home Page")
@@ -23,12 +35,13 @@ object Home {
       .initialStateFromProps(props => State(props.proxy.connect(m => m)))
       .renderPS { (_, props, state) =>
         <.div(
+          Style.content,
           // header, MessageOfTheDay and chart components
           <.h2("Daily message"),
           state.motdWrapper(Motd(_)),
           //Chart(cp),
-          // create a link to the To Do view
-          <.div(props.router.link(HomePageRt)("Check your todos!"))
+          // create a link to the HomePage
+          <.div(props.router.link(HomePageRt)("Home"))
         )
       }
       .build

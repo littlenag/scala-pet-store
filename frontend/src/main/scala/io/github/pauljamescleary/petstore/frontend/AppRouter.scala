@@ -1,6 +1,6 @@
 package io.github.pauljamescleary.petstore.frontend
 
-import io.github.pauljamescleary.petstore.frontend.pages.Home
+import io.github.pauljamescleary.petstore.frontend.pages.{HomePage, SignInPage}
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import services._
@@ -37,9 +37,10 @@ object AppRouter {
     //val petWrapper = AppCircuit.connect(_.pets)
 
     // wrap/connect components to the circuit
-    (staticRoute("#/home", HomePageRt) ~> renderR(ctl => AppCircuit.wrap(_.motd)(proxy => Home(ctl, proxy)))
+    (staticRoute("#/home", HomePageRt) ~> renderR(ctl => AppCircuit.wrap(_.motd)(proxy => HomePage(ctl, proxy)))
+        | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => AppCircuit.wrap(_.userProfile)(proxy => SignInPage(ctl, proxy)))
         | emptyRule
-        ).notFound(redirectToPage(HomePageRt)(Redirect.Replace))
+        ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
         .renderWith(layout)
   }
 

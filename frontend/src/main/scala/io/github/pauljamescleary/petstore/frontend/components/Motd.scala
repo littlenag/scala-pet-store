@@ -6,8 +6,8 @@ import diode.data.Pot
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import io.github.pauljamescleary.petstore.frontend._
-import styling.Icon
-import styling.Bootstrap._
+import css.Icon
+import css.Bootstrap._
 import services.UpdateMotd
 
 /**
