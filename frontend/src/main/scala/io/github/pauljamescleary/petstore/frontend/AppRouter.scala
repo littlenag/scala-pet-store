@@ -1,5 +1,7 @@
 package io.github.pauljamescleary.petstore.frontend
 
+import io.github.pauljamescleary.petstore.frontend.components.{Footer, TopNav}
+import io.github.pauljamescleary.petstore.frontend.models.Menu
 import io.github.pauljamescleary.petstore.frontend.pages.{HomePage, SignInPage}
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -10,13 +12,13 @@ import services._
   */
 object AppRouter {
   // Define the page routes used in the Petstore
-  sealed trait AppPages
-  case object HomePageRt extends AppPages
-  case object SignInRt extends AppPages
-  case class SignOutRt(dt:String) extends AppPages
+  sealed trait AppPage
+  case object HomePageRt extends AppPage
+  case object SignInRt extends AppPage
+  case object SignOutRt extends AppPage
 
   // base layout for all pages
-  def layout(c: RouterCtl[AppPages], r: Resolution[AppPages]) = {
+  def layoutOld(c: RouterCtl[AppPage], r: Resolution[AppPage]) = {
     <.div(
       // here we use plain Bootstrap class names as these are specific to the top level layout defined here
       <.nav(^.className := "navbar navbar-inverse navbar-fixed-top",
@@ -30,8 +32,21 @@ object AppRouter {
     )
   }
 
+  val mainMenu = Vector(
+    Menu("Home", HomePageRt),
+    Menu("Sign In", SignInRt),
+    Menu("Sign Out", SignOutRt)
+  )
+
+  def layout(c: RouterCtl[AppPage], r: Resolution[AppPage]) =
+    <.div(
+      TopNav(TopNav.Props(mainMenu, r.page, c)),
+      r.render(),
+      Footer()
+    )
+
   // configure the router
-  val routerConfig = RouterConfigDsl[AppPages].buildConfig { dsl =>
+  val routerConfig = RouterConfigDsl[AppPage].buildConfig { dsl =>
     import dsl._
 
     //val petWrapper = AppCircuit.connect(_.pets)
@@ -45,5 +60,42 @@ object AppRouter {
   }
 
   // create the router
-  val router: Router[AppPages] = Router(BaseUrl.until_#, routerConfig)
+  val router: Router[AppPage] = Router(BaseUrl.until_#, routerConfig)
+}
+
+object HeaderStyle {
+  /**
+    * #header {
+    * border: 0 none;
+    *
+    * .navbar-brand {
+    * width: 54px;
+    * position: relative;
+    *
+    * svg {
+    * position: absolute;
+    * top: 12px;
+    * left: 13px;
+    * }
+    * }
+    *
+    * .navbar-nav li .dropdown-menu {
+    * border-top: 0 none;
+    * margin-left: -1px;
+    * }
+    *
+    * .navbar-nav.authenticated a {
+    * padding: 5px;
+    * }
+    *
+    * .navbar-text.navbar-right.authenticated {
+    * margin: 17px 15px 15px 13px;
+    * font-size: 13px;
+    *
+    * span {
+    * font-weight: bold;
+    * }
+    * }
+    * }
+    */
 }

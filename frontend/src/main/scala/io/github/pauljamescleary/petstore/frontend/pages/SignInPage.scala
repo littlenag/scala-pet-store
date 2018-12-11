@@ -7,7 +7,8 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^.{^, _}
 import io.github.pauljamescleary.petstore.frontend._
-import AppRouter.AppPages
+import AppRouter.AppPage
+import io.github.pauljamescleary.petstore.frontend.css.Bootstrap.Panel
 import io.github.pauljamescleary.petstore.frontend.css.GlobalStyles
 import io.github.pauljamescleary.petstore.frontend.services.SignIn
 //import components._
@@ -20,7 +21,7 @@ object SignInPage {
   // shorthand for styles
   @inline private def bss = GlobalStyles.bootstrapStyles
 
-  case class Props(router: RouterCtl[AppPages], proxy: ModelProxy[Pot[UserProfile]])
+  case class Props(router: RouterCtl[AppPage], proxy: ModelProxy[Pot[UserProfile]])
 
   case class State(username: String, password: String)
 
@@ -42,6 +43,10 @@ object SignInPage {
       .initialStateFromProps(props => State("", ""))
       .renderPS { (b, p, s) =>
         <.div(
+          Panel(
+            Panel.Props("Sign In"),
+            <.h2("Hello")
+          ),
           <.form(^.onSubmit ==> {ev => p.proxy.dispatchCB(SignIn(s.username, s.password))},
             <.div(bss.formGroup,
               <.label(^.`for` := "description", "Username"),
@@ -67,5 +72,5 @@ object SignInPage {
       }
       .build
 
-  def apply(router: RouterCtl[AppPages], proxy: ModelProxy[Pot[UserProfile]]) = component(Props(router, proxy))
+  def apply(router: RouterCtl[AppPage], proxy: ModelProxy[Pot[UserProfile]]) = component(Props(router, proxy))
 }

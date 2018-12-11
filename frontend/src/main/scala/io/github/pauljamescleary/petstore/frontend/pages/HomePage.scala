@@ -6,14 +6,14 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import io.github.pauljamescleary.petstore.frontend._
-import AppRouter.{HomePageRt, AppPages}
+import AppRouter.{HomePageRt, AppPage}
 import components._
 
 import scala.language.existentials
 
 object HomePage {
 
-  case class Props(router: RouterCtl[AppPages], proxy: ModelProxy[Pot[String]])
+  case class Props(router: RouterCtl[AppPage], proxy: ModelProxy[Pot[String]])
 
   case class State(motdWrapper: ReactConnectProxy[Pot[String]])
 
@@ -46,5 +46,5 @@ object HomePage {
       }
       .build
 
-  def apply(router: RouterCtl[AppPages], proxy: ModelProxy[Pot[String]]) = component(Props(router, proxy))
+  def apply(router: RouterCtl[AppPage], proxy: ModelProxy[Pot[String]]) = component(Props(router, proxy))
 }

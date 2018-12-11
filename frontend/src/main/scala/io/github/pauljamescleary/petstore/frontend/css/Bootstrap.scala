@@ -57,6 +57,7 @@ object Bootstrap {
         )
       ).build
 
+
     def apply(props: Props, children: VdomNode*) = component(props)(children: _*)
     def apply() = component
   }
