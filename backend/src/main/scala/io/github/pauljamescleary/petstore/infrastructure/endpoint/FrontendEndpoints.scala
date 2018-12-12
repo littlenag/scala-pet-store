@@ -31,7 +31,9 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
   def getResource(pathInfo: String) = F.delay(getClass.getResource(pathInfo))
 
   // only allow js assets
-  def isJsAsset(asset: WebjarAsset): Boolean = asset.asset.endsWith(".js")
+  def isJsAsset(asset: WebjarAsset): Boolean = {
+    asset.asset.endsWith(".js") || asset.asset.endsWith(".css")
+  }
 
   def allowAsset(asset: WebjarAsset) = true
 
@@ -44,14 +46,15 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
     // navbar, header footer
     html(
       head(
-        script(src := jsDeps)
+        link(rel := "stylesheet", href := "/webjars/bootstrap/3.3.6/dist/css/bootstrap.css"),
+        script(`type`:= "text/javascript", src := jsDeps)
       ),
       body(
         div(id := "root"),
         div(id := "text")(
           p("some text")
         ),
-        script(`type`:= "text/javascript", src := jsDeps),
+        //script(`type`:= "text/javascript", src := jsDeps),
         script(`type`:= "text/javascript", src := jsScript)
       )
     )
@@ -67,29 +70,30 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
           )
     }
 
-
-  val resourcesEndpoint: HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      //case req @ GET -> "webjars" /: path =>
-      //  logger.info(s"webjars: $path")
-      //  webjars.run(req.withPathInfo(path.toString))
-
-      case req @ GET -> "resources" /: path if supportedStaticExtensions.exists(req.pathInfo.endsWith) =>
-        StaticFile.fromResource[F](path.toString, ec, req.some)
-          .orElse(OptionT.liftF(getResource(path.toString)).flatMap(StaticFile.fromURL[F](_, ec, req.some)))
-          .map(_.putHeaders(`Cache-Control`(NonEmptyList.of(`no-cache`()))))
-          .fold(NotFound())(F.pure)
-          .flatten
-    }
-
-  val webJarEndpoint: HttpRoutes[F] = webjarService(
+  val webjars: HttpRoutes[F] = webjarService(
     Config(
       filter = isJsAsset,
       blockingExecutionContext = ec
     )
   )
 
-  val endpoints: HttpRoutes[F] = resourcesEndpoint <+> webJarEndpoint <+> indexHtmlEndpoint
+  val resourcesEndpoint: HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case req @ GET -> "webjars" /: path =>
+        logger.info(s"webjars: $path")
+        webjars(req.withPathInfo(path.toString))
+            .fold(NotFound())(F.pure)
+            .flatten
+
+      case req @ GET -> "resources" /: path if supportedStaticExtensions.exists(req.pathInfo.endsWith) =>
+        StaticFile.fromResource[F](path.toString, ec, req.some)
+            .orElse(OptionT.liftF(getResource(path.toString)).flatMap(StaticFile.fromURL[F](_, ec, req.some)))
+            .map(_.putHeaders(`Cache-Control`(NonEmptyList.of(`no-cache`()))))
+            .fold(NotFound())(F.pure)
+            .flatten
+    }
+
+  val endpoints: HttpRoutes[F] = resourcesEndpoint <+> indexHtmlEndpoint
 }
 
 object FrontendEndpoints {

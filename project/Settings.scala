@@ -98,7 +98,8 @@ object Settings {
     val booPickle = "1.3.0"
     val uTest = "0.6.4"
 
-    val react = "16.4.2"
+    val react = "16.5.2"
+    val jsTokens = "4.0.0"
     //val jQuery = "3.3.1"
     //val bootstrap = "4.1.3"
     //val fontAwesome = "4.3.0-1"
@@ -131,39 +132,51 @@ object Settings {
     "io.circe"      %%% "circe-java8"          % CirceVersion,
   ))
 
-  /** Dependencies only used by the JVM project */
-  val jvmDependencies = Def.setting(Seq(
-      "org.typelevel"         %% "cats-core"            % CatsVersion,
-      "io.circe"              %% "circe-generic"        % CirceVersion,
-      "io.circe"              %% "circe-literal"        % CirceVersion,
-      "io.circe"              %% "circe-generic-extras" % CirceVersion,
-      "io.circe"              %% "circe-parser"         % CirceVersion,
-      "io.circe"              %% "circe-java8"          % CirceVersion,
-      "org.tpolecat"          %% "doobie-core"          % DoobieVersion,
-      "org.tpolecat"          %% "doobie-h2"            % DoobieVersion,
-      "org.tpolecat"          %% "doobie-scalatest"     % DoobieVersion,
-      "org.tpolecat"          %% "doobie-hikari"        % DoobieVersion,
-      "com.beachape"          %% "enumeratum"           % EnumeratumVersion,
-      "com.beachape"          %% "enumeratum-circe"     % EnumeratumCirceVersion,
-      "com.h2database"        %  "h2"                   % H2Version,
-      "org.http4s"            %% "http4s-blaze-server"  % Http4sVersion,
-      "org.http4s"            %% "http4s-circe"         % Http4sVersion,
-      "org.http4s"            %% "http4s-dsl"           % Http4sVersion,
-      "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
-      "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
-      "com.github.pureconfig" %% "pureconfig"           % PureConfigVersion,
-      "org.http4s"            %% "http4s-blaze-client"  % Http4sVersion     % Test,
-      "org.scalacheck"        %% "scalacheck"           % ScalaCheckVersion % Test,
-      "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % Test,
+  /**
+    * Dependencies only used by the Backend project. Includes:
+    *   * scala and java deps
+    *   * webjars
+    *
+    */
+  val backendDependencies = Def.setting(Seq(
+    "org.typelevel"         %% "cats-core"            % CatsVersion,
+    "io.circe"              %% "circe-generic"        % CirceVersion,
+    "io.circe"              %% "circe-literal"        % CirceVersion,
+    "io.circe"              %% "circe-generic-extras" % CirceVersion,
+    "io.circe"              %% "circe-parser"         % CirceVersion,
+    "io.circe"              %% "circe-java8"          % CirceVersion,
+    "org.tpolecat"          %% "doobie-core"          % DoobieVersion,
+    "org.tpolecat"          %% "doobie-h2"            % DoobieVersion,
+    "org.tpolecat"          %% "doobie-scalatest"     % DoobieVersion,
+    "org.tpolecat"          %% "doobie-hikari"        % DoobieVersion,
+    "com.beachape"          %% "enumeratum"           % EnumeratumVersion,
+    "com.beachape"          %% "enumeratum-circe"     % EnumeratumCirceVersion,
+    "com.h2database"        %  "h2"                   % H2Version,
+    "org.http4s"            %% "http4s-blaze-server"  % Http4sVersion,
+    "org.http4s"            %% "http4s-circe"         % Http4sVersion,
+    "org.http4s"            %% "http4s-dsl"           % Http4sVersion,
+    "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
+    "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
+    "com.github.pureconfig" %% "pureconfig"           % PureConfigVersion,
+    "org.http4s"            %% "http4s-blaze-client"  % Http4sVersion     % Test,
+    "org.scalacheck"        %% "scalacheck"           % ScalaCheckVersion % Test,
+    "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % Test,
 
-      // Authentication dependencies
-      "io.github.jmcardon"    %% "tsec-common"          % TsecVersion,
-      "io.github.jmcardon"    %% "tsec-password"        % TsecVersion,
-      "io.github.jmcardon"    %% "tsec-mac"             % TsecVersion,
-      "io.github.jmcardon"    %% "tsec-signatures"      % TsecVersion,
-      "io.github.jmcardon"    %% "tsec-jwt-mac"         % TsecVersion,
-      "io.github.jmcardon"    %% "tsec-jwt-sig"         % TsecVersion,
-      "io.github.jmcardon"    %% "tsec-http4s"          % TsecVersion
+    // Authentication dependencies
+    "io.github.jmcardon"    %% "tsec-common"          % TsecVersion,
+    "io.github.jmcardon"    %% "tsec-password"        % TsecVersion,
+    "io.github.jmcardon"    %% "tsec-mac"             % TsecVersion,
+    "io.github.jmcardon"    %% "tsec-signatures"      % TsecVersion,
+    "io.github.jmcardon"    %% "tsec-jwt-mac"         % TsecVersion,
+    "io.github.jmcardon"    %% "tsec-jwt-sig"         % TsecVersion,
+    "io.github.jmcardon"    %% "tsec-http4s"          % TsecVersion,
+
+    "org.webjars.npm"  % "bootstrap"           % versions.bootstrap,
+    "org.webjars.npm"  % "react"               % versions.react,
+    "org.webjars.npm"  % "react-dom"           % versions.react,
+    "org.webjars.npm"  % "js-tokens"           % versions.jsTokens
+    //"org.webjars"      % "chartjs"             % "2.1.3"
+
   ))
 
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
@@ -190,7 +203,7 @@ object Settings {
     "org.webjars.npm"   % "react-dom"      % versions.react     / "umd/react-dom-server.browser.development.js" minified  "umd/react-dom-server.browser.production.min.js" dependsOn "umd/react-dom.development.js" commonJSName "ReactDOMServer",
     "org.webjars"       % "jquery"         % versions.jQuery    / "jquery.js"    minified "jquery.min.js",
     "org.webjars"       % "bootstrap"      % versions.bootstrap / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
-    "org.webjars"       % "chartjs"        % versions.chartjs   / "Chart.js"     minified "Chart.min.js",
+    //"org.webjars"       % "chartjs"        % versions.chartjs   / "Chart.js"     minified "Chart.min.js",
     "org.webjars"       % "log4javascript" % versions.log4js    / "js/log4javascript_uncompressed.js" minified "js/log4javascript.js"
   ))
 }

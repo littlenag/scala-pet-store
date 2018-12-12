@@ -46,14 +46,7 @@ lazy val backend = (project in file("backend"))
   )
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Settings.jvmDependencies.value,
-    libraryDependencies ++= Seq(
-      //"org.webjars.npm"  % "bootstrap"           % "3.3.7",
-      //"org.webjars.npm"  % "react"               % "16.4.2",
-      //"org.webjars.npm"  % "react-dom"           % "16.4.2",
-      //"org.webjars.npm"  % "js-tokens"           % "4.0.0",
-      //"org.webjars"      % "chartjs"             % "2.1.3"
-    ),
+    libraryDependencies ++= Settings.backendDependencies.value,
     // Allows to read the generated JS on client
     resources in Compile += (fastOptJS in (frontend, Compile)).value.data,
     // Lets the backend to read the .map file for js
@@ -74,7 +67,7 @@ lazy val backend = (project in file("backend"))
     // triggers scalaJSPipeline when using compile or continuous compilation
     //compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
     // connect to the client project
-    //scalaJSProjects := clients,
+    //scalaJSProjects := Seq(frontend),
     //pipelineStages in Assets := Seq(scalaJSPipeline),
     //pipelineStages := Seq(digest, gzip),
     // compress CSS
