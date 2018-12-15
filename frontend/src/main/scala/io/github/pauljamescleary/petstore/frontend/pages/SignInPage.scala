@@ -31,10 +31,23 @@ object SignInPage {
   object Style extends StyleSheet.Inline {
     import dsl._
 
-    val content = style(textAlign.center,
-      fontSize(30.px),
+    val outerDiv = style(textAlign.center,
+      //fontSize(20.px),
+      //minHeight(450.px),
+      //width(400.px),
+      alignItems.flexStart,
+      paddingTop(120.px),
+      display.flex,
+      flexDirection.column
+    )
+
+    val innerDiv = style(textAlign.center,
+      //fontSize(20.px),
       minHeight(450.px),
-      paddingTop(40.px))
+      width(400.px),
+      alignItems.flexStart
+      //paddingTop(120.px)
+    )
   }
 
   // create the React component for Dashboard
@@ -42,31 +55,31 @@ object SignInPage {
       // create and store the connect proxy in state for later use
       .initialStateFromProps(props => State("", ""))
       .renderPS { (b, p, s) =>
-        <.div(
-          Panel(
-            Panel.Props("Sign In"),
-            <.h2("Hello")
-          ),
-          <.form(^.onSubmit ==> {ev => p.proxy.dispatchCB(SignIn(s.username, s.password))},
-            <.div(bss.formGroup,
-              <.label(^.`for` := "description", "Username"),
-              <.input.text(bss.formControl,
-                ^.id := "username",
-                ^.value := s.username,
-                ^.placeholder := "Username",
-                ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(username = text))}
-              )
-            ),
-            <.div(bss.formGroup,
-              <.label(^.`for` := "description", "Password"),
-              <.input.text(bss.formControl,
-                ^.id := "password",
-                ^.value := s.password,
-                ^.placeholder := "Password",
-                ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(password = text))}
-              )
-            ),
-            <.button("Submit")
+        <.div(Style.outerDiv,
+          <.div(Style.innerDiv,
+          Panel(Panel.Props("Sign In"),
+            <.form(^.onSubmit ==> {ev => p.proxy.dispatchCB(SignIn(s.username, s.password))},
+              <.div(bss.formGroup,
+                <.label(^.`for` := "description", "Username"),
+                <.input.text(bss.formControl,
+                  ^.id := "username",
+                  ^.value := s.username,
+                  ^.placeholder := "Username",
+                  ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(username = text))}
+                )
+              ),
+              <.div(bss.formGroup,
+                <.label(^.`for` := "description", "Password"),
+                <.input.text(bss.formControl,
+                  ^.id := "password",
+                  ^.value := s.password,
+                  ^.placeholder := "Password",
+                  ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(password = text))}
+                )
+              ),
+              <.button("Submit")
+            )
+          )
           )
         )
       }

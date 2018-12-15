@@ -67,7 +67,7 @@ class BootstrapStyles(implicit r: mutable.Register) extends StyleSheet.Inline()(
 
   val labelAsBadge = style(addClassName("label-as-badge"), borderRadius(1.em))
 
-  val navbar = styleWrap("nav", "navbar-nav")
+  val navbar = styleWrap("nav", "navbar-nav", "navbar-default", "navbar-fixed-top")
 
   val formGroup = styleWrap("form-group")
   val formControl = styleWrap("form-control")

@@ -34,8 +34,7 @@ object HomePage {
       // create and store the connect proxy in state for later use
       .initialStateFromProps(props => State(props.proxy.connect(m => m)))
       .renderPS { (_, props, state) =>
-        <.div(
-          Style.content,
+        <.div(Style.content,
           // header, MessageOfTheDay and chart components
           <.h2("Daily message"),
           state.motdWrapper(Motd(_)),

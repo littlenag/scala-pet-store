@@ -1,6 +1,6 @@
 import sbt.Def
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
-import webscalajs.ScalaJSWeb
+//import webscalajs.ScalaJSWeb
 
 // Top-level settings
 
@@ -62,16 +62,6 @@ lazy val backend = (project in file("backend"))
     // Support stopping the running server
     mainClass in reStart := Some("io.github.pauljamescleary.petstore.Server"),
     fork in run := true,
-
-
-    // triggers scalaJSPipeline when using compile or continuous compilation
-    //compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
-    // connect to the client project
-    //scalaJSProjects := Seq(frontend),
-    //pipelineStages in Assets := Seq(scalaJSPipeline),
-    //pipelineStages := Seq(digest, gzip),
-    // compress CSS
-    //LessKeys.compress in Assets := true
   )
   .dependsOn(sharedJvm)
 
@@ -97,9 +87,8 @@ lazy val frontend = (project in file("frontend"))
     mainClass in Compile := Some("io.github.pauljamescleary.petstore.frontend.PetstoreApp"),
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer in Test := false
-    //scalaJSModuleKind := ModuleKind.CommonJSModule
   )
-  .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(sharedJs)
 
 
@@ -112,7 +101,7 @@ lazy val shared =
       libraryDependencies ++= Settings.sharedDependencies.value
     )
     // set up settings specific to the JS project
-    .jsConfigure(_ enablePlugins ScalaJSWeb)
+    //.jsConfigure(_ enablePlugins ScalaJSWeb)
 
 
 lazy val sharedJvm = shared.jvm

@@ -24,9 +24,9 @@ resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
 // ScalaJS and associated plugins
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.26")
 addSbtPlugin("com.typesafe.sbt" % "sbt-less" % "1.1.2")
-addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.0.8-0.6")
-addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.3")
-addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.2")
+//addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.0.8-0.6")
+//addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.3")
+//addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.2")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "0.6.0")
 
 // Extract metadata from sbt and make it available to the code

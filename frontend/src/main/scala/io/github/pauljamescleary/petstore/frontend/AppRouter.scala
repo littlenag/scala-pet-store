@@ -17,23 +17,7 @@ object AppRouter {
   case object SignInRt extends AppPage
   case object SignOutRt extends AppPage
 
-  // base layout for all pages
-  def layoutOld(c: RouterCtl[AppPage], r: Resolution[AppPage]) = {
-    <.div(
-      // here we use plain Bootstrap class names as these are specific to the top level layout defined here
-      <.nav(^.className := "navbar navbar-inverse navbar-fixed-top",
-        <.div(^.className := "container",
-          <.div(^.className := "navbar-header", <.span(^.className := "navbar-brand", "Petstore")),
-          <.div(^.className := "collapse navbar-collapse")
-        )
-      ),
-      // currently active module is shown in this container
-      <.div(^.className := "container", r.render())
-    )
-  }
-
   val mainMenu = Vector(
-    Menu("Home", HomePageRt),
     Menu("Sign In", SignInRt),
     Menu("Sign Out", SignOutRt)
   )

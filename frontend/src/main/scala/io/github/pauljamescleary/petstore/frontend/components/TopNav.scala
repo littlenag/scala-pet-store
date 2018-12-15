@@ -1,7 +1,7 @@
 package io.github.pauljamescleary.petstore.frontend.components
 
 import io.github.pauljamescleary.petstore.frontend._
-import AppRouter.AppPage
+import AppRouter.{AppPage, HomePageRt}
 import models.Menu
 import css.CssSettings._
 import scalacss.ScalaCssReact._
@@ -26,12 +26,12 @@ object TopNav {
 
     val menuItem = styleF.bool { selected =>
       styleS(
-        padding(20.px),
+        //padding(20.px),
         fontSize(1.5.em),
         cursor.pointer,
-        color(c"rgb(244, 233, 233)"),
-        mixinIfElse(selected)(backgroundColor(c"#E8433F"), fontWeight._500)(
-          &.hover(backgroundColor(c"#B6413E")))
+        color(c"rgb(244, 233, 233)")
+        //,mixinIfElse(selected)(backgroundColor(c"#E8433F"), fontWeight._500)(
+        //  &.hover(backgroundColor(c"#B6413E")))
       )
     }
   }
@@ -48,16 +48,23 @@ object TopNav {
       .render_P { P =>
         <.header(
           <.nav(bootstrapStyles.navbar,
-            <.ul(
-              Style.navMenu,
+            <.div(^.`class` := "container-fluid",
+              <.div(^.`class` := "navbar-header",
+                <.a(^.`class` := "navbar-brand", P.ctrl setOnClick HomePageRt)("QALocate")
+              ),
+            <.ul.apply(
+              //Style.navMenu,
+              ^.`class` := "nav navbar-nav",
               P.menus.toTagMod { item =>
                 <.li(
                   ^.key := item.name,
                   Style.menuItem(item.route.getClass == P.selectedPage.getClass),
-                  item.name,
-                  P.ctrl setOnClick item.route
+                  <.a(^.`class` := "navbar-brand", P.ctrl setOnClick item.route)(item.name)
+                  //,item.name
+                  //,P.ctrl setOnClick item.route
                 )
               }
+            )
             )
           )
         )

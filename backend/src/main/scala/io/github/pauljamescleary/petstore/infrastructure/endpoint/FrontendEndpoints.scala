@@ -32,7 +32,7 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
 
   // only allow js assets
   def isJsAsset(asset: WebjarAsset): Boolean = {
-    asset.asset.endsWith(".js") || asset.asset.endsWith(".css")
+    asset.asset.endsWith(".js") || asset.asset.endsWith(".css") || asset.asset.endsWith(".map")
   }
 
   def allowAsset(asset: WebjarAsset) = true
