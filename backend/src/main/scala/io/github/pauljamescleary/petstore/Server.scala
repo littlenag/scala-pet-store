@@ -37,7 +37,7 @@ object Server extends IOApp {
       services       =  PetEndpoints.endpoints[F](petService) <+>
                             OrderEndpoints.endpoints[F](orderService) <+>
                             UserEndpoints.endpoints[F, BCrypt](userService, BCrypt.syncPasswordHasher[F]) <+>
-                            FrontendEndpoints.endpoints[F]
+                            FrontendEndpoints.endpoints[F]()
       httpApp = Router("/" -> services).orNotFound
       _ <- Resource.liftF(DatabaseConfig.initializeDb(conf.db))
       exitCode <- Resource.liftF(

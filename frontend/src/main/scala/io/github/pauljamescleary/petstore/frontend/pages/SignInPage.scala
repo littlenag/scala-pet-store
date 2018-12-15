@@ -1,6 +1,5 @@
 package io.github.pauljamescleary.petstore.frontend.pages
 
-import diode.react.ReactPot._
 import diode.data.Pot
 import diode.react._
 import japgolly.scalajs.react._
@@ -11,7 +10,6 @@ import AppRouter.AppPage
 import io.github.pauljamescleary.petstore.frontend.css.Bootstrap.Panel
 import io.github.pauljamescleary.petstore.frontend.css.GlobalStyles
 import io.github.pauljamescleary.petstore.frontend.services.SignIn
-//import components._
 import io.github.pauljamescleary.petstore.frontend.services.UserProfile
 
 import scala.language.existentials

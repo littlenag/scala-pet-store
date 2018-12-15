@@ -52,11 +52,9 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
     case SignIn(username, password) =>
       // make a local update and inform server
       println("Tried to sign in")
-      effectOnly(Effect(AjaxClient[PetstoreApi].signIn(LoginRequest(username,password)).call().flatMap {
-        case None => Future.failed(new RuntimeException("Authentication Rejected"))
-        case Some(user) => Future.successful(Authenticated(user))
-      }))
+      effectOnly(Effect(UsersClient.login(LoginRequest(username,password)).map { user => Authenticated(user) } ))
     case Authenticated(user) =>
+      println("Sign in accepted")
       updated(Ready(UserProfile(user)))
   }
 }

@@ -86,7 +86,9 @@ lazy val frontend = (project in file("frontend"))
     // use Scala.js provided launcher code to start the client app
     mainClass in Compile := Some("io.github.pauljamescleary.petstore.frontend.PetstoreApp"),
     scalaJSUseMainModuleInitializer := true,
-    scalaJSUseMainModuleInitializer in Test := false
+    scalaJSUseMainModuleInitializer in Test := false,
+    scalaJSLinkerConfig ~= { _.withOptimizer(false).withSourceMap(true).withPrettyPrint(true) },
+    scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) }
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(sharedJs)

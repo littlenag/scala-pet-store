@@ -6,8 +6,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import io.github.pauljamescleary.petstore.frontend._
-import AppRouter.{HomePageRt, AppPage}
-import components._
+import AppRouter.AppPage
 
 import scala.language.existentials
 
@@ -24,7 +23,7 @@ object HomePage {
     import dsl._
 
     val content = style(textAlign.center,
-      fontSize(30.px),
+      //fontSize(30.px),
       minHeight(450.px),
       paddingTop(40.px))
   }
@@ -36,11 +35,11 @@ object HomePage {
       .renderPS { (_, props, state) =>
         <.div(Style.content,
           // header, MessageOfTheDay and chart components
-          <.h2("Daily message"),
-          state.motdWrapper(Motd(_)),
+          <.h3("Home page")
+          //state.motdWrapper(Motd(_)),
           //Chart(cp),
           // create a link to the HomePage
-          <.div(props.router.link(HomePageRt)("Home"))
+          //<.div(props.router.link(HomePageRt)("Home"))
         )
       }
       .build
