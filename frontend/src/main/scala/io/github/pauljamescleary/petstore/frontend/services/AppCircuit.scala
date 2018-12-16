@@ -8,11 +8,9 @@ import diode._
 import diode.data._
 import diode.util._
 import diode.react.ReactConnector
-import boopickle.Default._
-import io.github.pauljamescleary.petstore.domain.authentication.LoginRequest
+import io.github.pauljamescleary.petstore.domain.authentication.{LoginRequest, SignupRequest}
 import io.github.pauljamescleary.petstore.shared.domain.users.User
 
-import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 // Actions :: Pet management
@@ -30,11 +28,13 @@ case class UpdateMotd(potResult: Pot[String] = Empty) extends PotAction[String, 
 
 // Actions :: Authentication
 case class SignIn(username:String, password:String) extends Action
-
 case class Authenticated(user:User) extends Action
 
+case class SignUp(username:String, email:String, password:String) extends Action
+case class UserCreated(user:User) extends Action
+
 // The base model of our application
-case class RootModel(userProfile:Pot[UserProfile], pets: Pot[Pets], motd: Pot[String])
+case class RootModel(userProfile:Pot[UserProfile], pets: Pot[Pets])
 
 case class UserProfile(user:User) {
   def updated(user: User): UserProfile = {
@@ -50,11 +50,17 @@ case class UserProfile(user:User) {
 class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends ActionHandler(modelRW) {
   override def handle = {
     case SignIn(username, password) =>
-      // make a local update and inform server
       println("Tried to sign in")
-      effectOnly(Effect(UsersClient.login(LoginRequest(username,password)).map { user => Authenticated(user) } ))
+      updated(Pending(), Effect(UsersClient.login(LoginRequest(username,password)).map { user => Authenticated(user) } ))
     case Authenticated(user) =>
       println("Sign in accepted")
+      updated(Ready(UserProfile(user)))
+
+    case SignUp(username, email, password) =>
+      println("Tried to sign up")
+      updated(Pending(), Effect(UsersClient.signup(SignupRequest(username,"", "", email, password, "")).map { user => UserCreated(user)}))
+    case UserCreated(user) =>
+      println("Sign up accepted")
       updated(Ready(UserProfile(user)))
   }
 }
@@ -87,7 +93,7 @@ class PetHandler[M](modelRW: ModelRW[M, Pot[Pets]]) extends ActionHandler(modelR
       updated(Ready(Pets(pets)))
 //    case UpdatePet(pet) =>
       // make a local update and inform server
-//      updated(value.map(_.updated(pet)), Effect(AjaxClient[PetstoreApi].updateTodo(pet).call().map(UpdateAllTodos)))
+      //updated(value.map(_.updated(pet)), Effect(AjaxClient[PetstoreApi].updateTodo(pet).call().map(UpdateAllTodos)))
 //    case DeletePet(pet) =>
       // make a local update and inform server
 //      updated(value.map(_.remove(pet)), Effect(AjaxClient[PetstoreApi].deleteTodo(pet.id).call().map(UpdateAllTodos)))
@@ -99,25 +105,31 @@ class PetHandler[M](modelRW: ModelRW[M, Pot[Pets]]) extends ActionHandler(modelR
   *
   * @param modelRW Reader/Writer to access the model
   */
+/*
 class MotdHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandler(modelRW) {
+  import boopickle.Default._
+
   implicit val runner = new RunAfterJS
 
   override def handle = {
     case action: UpdateMotd =>
-      val updateF = action.effect(AjaxClient[PetstoreApi].welcomeMsg("User X").call())(identity)
+      val updateF = action.effect(AjaxClient[PetstoreApi].welcomeMsg("User X").call())(identity(_))
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }
+*/
 
 // Application circuit
 object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   // initial application model
-  override protected def initialModel = RootModel(Empty, Unavailable, Unavailable)
+  override protected def initialModel = RootModel(
+    Empty,         // because the user isn't logged in
+    Unavailable    // would become available once the user logs in
+  )
 
   // combine all handlers into one
   override protected val actionHandler = composeHandlers(
     new UserProfileHandler(zoomRW(_.userProfile)((m, v) => m.copy(userProfile = v))),
-    new PetHandler(zoomRW(_.pets)((m, v) => m.copy(pets = v))),
-    new MotdHandler(zoomRW(_.motd)((m, v) => m.copy(motd = v)))
+    new PetHandler(zoomRW(_.pets)((m, v) => m.copy(pets = v)))
   )
 }

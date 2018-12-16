@@ -51,10 +51,6 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
       ),
       body(
         div(id := "root"),
-        div(id := "text")(
-          p("some text")
-        ),
-        //script(`type`:= "text/javascript", src := jsDeps),
         script(`type`:= "text/javascript", src := jsScript)
       )
     )

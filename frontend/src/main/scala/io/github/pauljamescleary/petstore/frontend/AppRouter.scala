@@ -2,7 +2,7 @@ package io.github.pauljamescleary.petstore.frontend
 
 import io.github.pauljamescleary.petstore.frontend.components.{Footer, TopNav}
 import io.github.pauljamescleary.petstore.frontend.models.Menu
-import io.github.pauljamescleary.petstore.frontend.pages.{HomePage, SignInPage}
+import io.github.pauljamescleary.petstore.frontend.pages.{HomePage, SignInPage, SignUpPage}
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import services._
@@ -15,11 +15,12 @@ object AppRouter {
   sealed trait AppPage
   case object HomePageRt extends AppPage
   case object SignInRt extends AppPage
-  case object SignOutRt extends AppPage
+  case object SignUpRt extends AppPage
+  case object LogOutRt extends AppPage
 
   val mainMenu = Vector(
     Menu("Sign In", SignInRt),
-    Menu("Sign Out", SignOutRt)
+    Menu("Sign Up", SignUpRt)
   )
 
   def layout(c: RouterCtl[AppPage], r: Resolution[AppPage]) =
@@ -35,9 +36,13 @@ object AppRouter {
 
     //val petWrapper = AppCircuit.connect(_.pets)
 
+    val rootModelWrapper = AppCircuit.connect(x => x)
+    val userProfileWrapper = AppCircuit.connect(_.userProfile)
+
     // wrap/connect components to the circuit
-    (staticRoute("#/home", HomePageRt) ~> renderR(ctl => AppCircuit.wrap(_.motd)(proxy => HomePage(ctl, proxy)))
-        | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => AppCircuit.wrap(_.userProfile)(proxy => SignInPage(ctl, proxy)))
+    (staticRoute("#/home", HomePageRt) ~> renderR(ctl => rootModelWrapper(HomePage(ctl,_)))
+        | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => userProfileWrapper(SignInPage(ctl,_)))
+        | staticRoute("#/sign-up", SignUpRt) ~> renderR(ctl => userProfileWrapper(SignUpPage(ctl,_)))
         | emptyRule
         ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
         .renderWith(layout)

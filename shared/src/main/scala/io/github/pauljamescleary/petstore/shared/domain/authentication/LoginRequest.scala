@@ -20,3 +20,8 @@ final case class SignupRequest(
                                   password: String,
                                   phone: String,
                               )
+
+object SignupRequest {
+  implicit val decodeSignupReq = deriveDecoder[SignupRequest]
+  implicit val encodeSignupReq = deriveEncoder[SignupRequest]
+}
