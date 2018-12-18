@@ -50,20 +50,47 @@ object SignInPage {
   }
 
   class Backend($: BackendScope[Props, State]) {
+
     def render(p: Props, s: State) = {
-      println("re rendering sign in")
-      if (p.userProfile().isReady) {
-        p.router.set(HomePageRt).runNow()
+      p.userProfile().renderReady { up =>
+        p.router.set(HomePageRt).async.runNow()
         <.div(
           Style.outerDiv,
-          p.userProfile().get.toString
+          up.toString
         )
-      } else if (p.userProfile().isPending) {
-        <.div(
-          Style.outerDiv,
-          "Pending"
+      }
+
+      p.userProfile().renderEmpty {
+        <.div(Style.outerDiv,
+          <.div(Style.innerDiv,
+            Panel(Panel.Props("Sign In"),
+              <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
+                <.div(bss.formGroup,
+                  <.label(^.`for` := "description", "Username"),
+                  <.input.text(bss.formControl,
+                    ^.id := "username",
+                    ^.value := s.username,
+                    ^.placeholder := "Username",
+                    ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(username = text)) }
+                  )
+                ),
+                <.div(bss.formGroup,
+                  <.label(^.`for` := "description", "Password"),
+                  <.input.text(bss.formControl,
+                    ^.id := "password",
+                    ^.value := s.password,
+                    ^.placeholder := "Password",
+                    ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
+                  )
+                ),
+                <.button("Submit")
+              )
+            )
+          )
         )
-      } else {
+      }
+
+      p.userProfile().renderEmpty {
         <.div(Style.outerDiv,
           <.div(Style.innerDiv,
             Panel(Panel.Props("Sign In"),
