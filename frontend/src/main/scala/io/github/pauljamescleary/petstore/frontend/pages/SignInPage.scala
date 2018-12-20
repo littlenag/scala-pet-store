@@ -8,6 +8,7 @@ import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^.{^, _}
 import io.github.pauljamescleary.petstore.frontend._
 import AppRouter.{AppPage, HomePageRt}
+import diode.data.PotState.PotEmpty
 import io.github.pauljamescleary.petstore.frontend.css.Bootstrap.Panel
 import io.github.pauljamescleary.petstore.frontend.css.GlobalStyles
 import io.github.pauljamescleary.petstore.frontend.services.SignIn
@@ -52,73 +53,81 @@ object SignInPage {
   class Backend($: BackendScope[Props, State]) {
 
     def render(p: Props, s: State) = {
-      p.userProfile().renderReady { up =>
-        p.router.set(HomePageRt).async.runNow()
-        <.div(
-          Style.outerDiv,
-          up.toString
-        )
-      }
-
-      p.userProfile().renderEmpty {
-        <.div(Style.outerDiv,
-          <.div(Style.innerDiv,
-            Panel(Panel.Props("Sign In"),
-              <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
-                <.div(bss.formGroup,
-                  <.label(^.`for` := "description", "Username"),
-                  <.input.text(bss.formControl,
-                    ^.id := "username",
-                    ^.value := s.username,
-                    ^.placeholder := "Username",
-                    ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(username = text)) }
-                  )
-                ),
-                <.div(bss.formGroup,
-                  <.label(^.`for` := "description", "Password"),
-                  <.input.text(bss.formControl,
-                    ^.id := "password",
-                    ^.value := s.password,
-                    ^.placeholder := "Password",
-                    ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
-                  )
-                ),
-                <.button("Submit")
+      <.div(
+        p.userProfile().renderReady { up =>
+          // This seems to be the easy way to redirect. but have to make sure to run AFTER rendering!
+          p.router.set(HomePageRt).async.runNow()
+          <.div(
+            Style.outerDiv,
+            up.toString
+          )
+        },
+        p.userProfile().renderPending { _ =>
+          <.div(
+            Style.outerDiv,
+            <.h3("Signing In...")
+          )
+        },
+        p.userProfile().renderFailed { ex =>
+          <.div(Style.outerDiv,
+            <.div(Style.innerDiv,
+              Panel(Panel.Props("Sign In -- Failed!"),
+                <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
+                  <.div(bss.formGroup,
+                    <.label(^.`for` := "description", "Username"),
+                    <.input.text(bss.formControl,
+                      ^.id := "username",
+                      ^.value := s.username,
+                      ^.placeholder := "Username",
+                      ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(username = text)) }
+                    )
+                  ),
+                  <.div(bss.formGroup,
+                    <.label(^.`for` := "description", "Password"),
+                    <.input.text(bss.formControl,
+                      ^.id := "password",
+                      ^.value := s.password,
+                      ^.placeholder := "Password",
+                      ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
+                    )
+                  ),
+                  <.button("Submit")
+                )
               )
             )
           )
-        )
-      }
-
-      p.userProfile().renderEmpty {
-        <.div(Style.outerDiv,
-          <.div(Style.innerDiv,
-            Panel(Panel.Props("Sign In"),
-              <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
-                <.div(bss.formGroup,
-                  <.label(^.`for` := "description", "Username"),
-                  <.input.text(bss.formControl,
-                    ^.id := "username",
-                    ^.value := s.username,
-                    ^.placeholder := "Username",
-                    ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(username = text)) }
-                  )
-                ),
-                <.div(bss.formGroup,
-                  <.label(^.`for` := "description", "Password"),
-                  <.input.text(bss.formControl,
-                    ^.id := "password",
-                    ^.value := s.password,
-                    ^.placeholder := "Password",
-                    ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
-                  )
-                ),
-                <.button("Submit")
+        },
+        // Pending is conflated with Empty, so test state instead
+        if (p.userProfile().state == PotEmpty) {
+          <.div(Style.outerDiv,
+            <.div(Style.innerDiv,
+              Panel(Panel.Props("Sign In"),
+                <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
+                  <.div(bss.formGroup,
+                    <.label(^.`for` := "description", "Username"),
+                    <.input.text(bss.formControl,
+                      ^.id := "username",
+                      ^.value := s.username,
+                      ^.placeholder := "Username",
+                      ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(username = text)) }
+                    )
+                  ),
+                  <.div(bss.formGroup,
+                    <.label(^.`for` := "description", "Password"),
+                    <.input.text(bss.formControl,
+                      ^.id := "password",
+                      ^.value := s.password,
+                      ^.placeholder := "Password",
+                      ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
+                    )
+                  ),
+                  <.button("Submit")
+                )
               )
             )
           )
-        )
-      }
+        } else EmptyVdom
+      )
     }
   }
 

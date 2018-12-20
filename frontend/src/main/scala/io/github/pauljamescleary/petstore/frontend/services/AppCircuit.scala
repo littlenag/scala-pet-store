@@ -29,6 +29,7 @@ case class UpdateMotd(potResult: Pot[String] = Empty) extends PotAction[String, 
 // Actions :: Authentication
 case class SignIn(username:String, password:String) extends Action
 case class Authenticated(user:User) extends Action
+case class SignInError(ex:Throwable) extends Action
 
 case class SignUp(username:String, email:String, password:String) extends Action
 case class UserCreated(user:User) extends Action
@@ -51,10 +52,20 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
   override def handle = {
     case SignIn(username, password) =>
       println("Tried to sign in")
-      updated(Pending(), Effect(UsersClient.login(LoginRequest(username,password)).map { user => Authenticated(user) } ))
+      updated(Pending(),
+        Effect(
+          UsersClient.login(LoginRequest(username,password))
+              .map[Action] { user => Authenticated(user) }
+              .recover { case x => SignInError(x) }
+        )
+      )
     case Authenticated(user) =>
       println("Sign in accepted")
       updated(Ready(UserProfile(user)))
+
+    case SignInError(ex) =>
+      println("Sign in failed")
+      updated(Failed(ex))
 
     case SignUp(username, email, password) =>
       println("Tried to sign up")
