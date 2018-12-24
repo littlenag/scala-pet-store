@@ -50,7 +50,7 @@ object SignUpPage {
   // create the React component for Dashboard
   private val component = ScalaComponent.builder[Props]("SignUp")
       // create and store the connect proxy in state for later use
-      .initialStateFromProps(props => State("", "", ""))
+      .initialState(State("", "", ""))
       .renderPS { (b, p, s) =>
         <.div(Style.outerDiv,
           <.div(Style.innerDiv,

@@ -33,6 +33,7 @@ case class SignInError(ex:Throwable) extends Action
 
 case class SignUp(username:String, email:String, password:String) extends Action
 case class UserCreated(user:User) extends Action
+case class SignUpError(ex:Throwable) extends Action
 
 // The base model of our application
 case class RootModel(userProfile:Pot[UserProfile], pets: Pot[Pets])
@@ -69,10 +70,21 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
 
     case SignUp(username, email, password) =>
       println("Tried to sign up")
-      updated(Pending(), Effect(UsersClient.signup(SignupRequest(username,"", "", email, password, "")).map { user => UserCreated(user)}))
+      updated(Pending(),
+        Effect(
+          UsersClient.signup(
+            SignupRequest(username,"", "", email, password, ""))
+              .map[Action] { user => UserCreated(user) }
+              .recover { case x => SignInError(x) }
+        )
+      )
     case UserCreated(user) =>
       println("Sign up accepted")
       updated(Ready(UserProfile(user)))
+
+    case SignUpError(ex) =>
+      println("Sign up failed")
+      updated(Failed(ex))
   }
 }
 

@@ -7,7 +7,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^.{^, _}
 import io.github.pauljamescleary.petstore.frontend._
-import AppRouter.{AppPage, HomePageRt}
+import AppRouter.{AppPage, HomePageRt, SignUpRt}
 import diode.data.PotState.PotEmpty
 import io.github.pauljamescleary.petstore.frontend.css.Bootstrap.Panel
 import io.github.pauljamescleary.petstore.frontend.css.GlobalStyles
@@ -91,7 +91,10 @@ object SignInPage {
                       ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
                     )
                   ),
-                  <.button("Submit")
+                  <.button("Submit"),
+                  <.div(
+                    <.span("Already a member?", p.router.link(SignUpRt)(" Sign in now"))
+                  )
                 )
               )
             )
@@ -121,7 +124,10 @@ object SignInPage {
                       ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
                     )
                   ),
-                  <.button("Submit")
+                  <.button("Submit"),
+                  <.div(
+                    <.span("Already a member?", p.router.link(SignUpRt)(" Sign in now"))
+                  )
                 )
               )
             )
