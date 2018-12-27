@@ -75,7 +75,7 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
           UsersClient.signup(
             SignupRequest(username,"", "", email, password, ""))
               .map[Action] { user => UserCreated(user) }
-              .recover { case x => SignInError(x) }
+              .recover { case x => SignUpError(x) }
         )
       )
     case UserCreated(user) =>
