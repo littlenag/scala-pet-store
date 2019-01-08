@@ -55,7 +55,7 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
       println("Tried to sign in")
       updated(Pending(),
         Effect(
-          UsersClient.login(LoginRequest(username,password))
+          PetStoreClient.login(LoginRequest(username,password))
               .map[Action] { user => Authenticated(user) }
               .recover { case x => SignInError(x) }
         )
@@ -72,7 +72,7 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
       println("Tried to sign up")
       updated(Pending(),
         Effect(
-          UsersClient.signup(
+          PetStoreClient.signup(
             SignupRequest(username,"", "", email, password, ""))
               .map[Action] { user => UserCreated(user) }
               .recover { case x => SignUpError(x) }

@@ -30,17 +30,12 @@ object HomePage {
   }
 
   // create the React component for Dashboard
-  private val component = ScalaComponent.builder[Props]("Home Page")
+  private val component = ScalaComponent.builder[Props]("Pets")
       // create and store the connect proxy in state for later use
       //.initialStateFromProps(props => State(props.proxy))
       .renderP { (_, props) =>
         <.div(Style.content,
-          // header, MessageOfTheDay and chart components
-          <.h3("Home page")
-          //state.motdWrapper(Motd(_)),
-          //Chart(cp),
-          // create a link to the HomePage
-          //<.div(props.router.link(HomePageRt)("Home"))
+          <.h3("Pets")
         )
       }
       .build

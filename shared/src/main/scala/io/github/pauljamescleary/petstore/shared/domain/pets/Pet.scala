@@ -1,5 +1,7 @@
 package io.github.pauljamescleary.petstore.shared.domain.pets
 
+import io.github.pauljamescleary.petstore.shared.JsonSerializers._
+
 case class Pet(
     name: String,
     category: String,
@@ -9,3 +11,8 @@ case class Pet(
     photoUrls: Set[String] = Set.empty,
     id: Option[Long] = None
 )
+
+object Pet {
+  implicit val decodePet = deriveDecoder[Pet]
+  implicit val encodePet = deriveEncoder[Pet]
+}

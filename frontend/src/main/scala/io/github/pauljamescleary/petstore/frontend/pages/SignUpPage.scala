@@ -22,7 +22,7 @@ object SignUpPage {
 
   case class Props(router: RouterCtl[AppPage], userProfile: ModelProxy[Pot[UserProfile]])
 
-  case class State(username: String, email:String, password: String)
+  case class State(username: String, email:String, password1: String, password2: String)
 
   import css.CssSettings._
   import scalacss.ScalaCssReact._
@@ -52,7 +52,7 @@ object SignUpPage {
   // create the React component for Dashboard
   private val component = ScalaComponent.builder[Props]("SignUp")
       // create and store the connect proxy in state for later use
-      .initialState(State("", "", ""))
+      .initialState(State("", "", "", ""))
       .renderPS { (b, p, s) =>
         <.div(
           p.userProfile().renderReady { up =>
@@ -73,7 +73,7 @@ object SignUpPage {
             <.div(Style.outerDiv,
               <.div(Style.innerDiv,
                 Panel(Panel.Props(s"Sign Up -- There was an error: ${ex.getMessage}"),
-                  <.form(^.onSubmit ==> {ev => p.userProfile.dispatchCB(SignUp(s.username, s.email, s.password))},
+                  <.form(^.onSubmit ==> {ev => p.userProfile.dispatchCB(SignUp(s.username, s.email, s.password1))},
                     <.div(bss.formGroup,
                       <.label(^.`for` := "description", "Username"),
                       <.input.text(bss.formControl,
@@ -96,12 +96,21 @@ object SignUpPage {
                       <.label(^.`for` := "description", "Password"),
                       <.input.text(bss.formControl,
                         ^.id := "password",
-                        ^.value := s.password,
+                        ^.value := s.password1,
                         ^.placeholder := "Password",
-                        ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(password = text))}
+                        ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(password1 = text))}
                       )
                     ),
-                    <.button("Submit")
+                    <.div(bss.formGroup,
+                      <.label(^.`for` := "description", "Confirm Password"),
+                      <.input.text(bss.formControl,
+                        ^.id := "password",
+                        ^.value := s.password2,
+                        ^.placeholder := "Password",
+                        ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(password2 = text))}
+                      )
+                    ),
+                    <.button(^.disabled := {s.password1 != s.password2})("Submit")
                   )
                 )
               )
@@ -112,7 +121,7 @@ object SignUpPage {
             <.div(Style.outerDiv,
               <.div(Style.innerDiv,
                 Panel(Panel.Props("Sign Up"),
-                  <.form(^.onSubmit ==> {ev => p.userProfile.dispatchCB(SignUp(s.username, s.email, s.password))},
+                  <.form(^.onSubmit ==> {ev => p.userProfile.dispatchCB(SignUp(s.username, s.email, s.password1))},
                     <.div(bss.formGroup,
                       <.label(^.`for` := "description", "Username"),
                       <.input.text(bss.formControl,
@@ -135,12 +144,21 @@ object SignUpPage {
                       <.label(^.`for` := "description", "Password"),
                       <.input.text(bss.formControl,
                         ^.id := "password",
-                        ^.value := s.password,
+                        ^.value := s.password1,
                         ^.placeholder := "Password",
-                        ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(password = text))}
+                        ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(password1 = text))}
                       )
                     ),
-                    <.button("Submit")
+                    <.div(bss.formGroup,
+                      <.label(^.`for` := "description", "Confirm Password"),
+                      <.input.text(bss.formControl,
+                        ^.id := "password",
+                        ^.value := s.password2,
+                        ^.placeholder := "Password",
+                        ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; b.modState(_.copy(password2 = text))}
+                      )
+                    ),
+                    <.button(^.disabled := {s.password1 != s.password2})("Submit")
                   )
                 )
               )
