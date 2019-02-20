@@ -12,9 +12,8 @@ import org.http4s.{EntityDecoder, HttpRoutes}
 
 import scala.language.higherKinds
 import domain._
-import domain.users._
+import domain.users.{User, _}
 import domain.authentication._
-import io.github.pauljamescleary.petstore.shared.domain.users.User
 import tsec.common.Verified
 import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 
@@ -120,7 +119,7 @@ class UserEndpoints[F[_]: Effect, A] extends Http4sDsl[F] {
         } yield resp
     }
 
-  def endpoints(userService: UserService[F], cryptService: PasswordHasher[F, A]): HttpRoutes[F] =
+  def endpoints(userService: UserService[F, A], cryptService: PasswordHasher[F, A]): HttpRoutes[F] =
     loginEndpoint(userService, cryptService) <+>
     signupEndpoint(userService, cryptService) <+>
     updateEndpoint(userService) <+>
@@ -131,7 +130,7 @@ class UserEndpoints[F[_]: Effect, A] extends Http4sDsl[F] {
 
 object UserEndpoints {
   def endpoints[F[_]: Effect, A](
-    userService: UserService[F],
+    userService: UserService[F,A],
     cryptService: PasswordHasher[F, A]
   ): HttpRoutes[F] =
     new UserEndpoints[F, A].endpoints(userService, cryptService)

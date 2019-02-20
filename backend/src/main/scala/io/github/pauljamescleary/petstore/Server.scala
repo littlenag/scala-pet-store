@@ -33,7 +33,7 @@ object Server extends IOApp {
       petService     =  PetService[F](petRepo, petValidation)
       userValidation =  UserValidationInterpreter[F](userRepo)
       orderService   =  OrderService[F](orderRepo)
-      userService    =  UserService[F](userRepo, userValidation)
+      userService    =  UserService[F,BCrypt](userRepo, userValidation, BCrypt.syncPasswordHasher[F])
       services       =  PetEndpoints.endpoints[F](petService) <+>
                             OrderEndpoints.endpoints[F](orderService) <+>
                             UserEndpoints.endpoints[F, BCrypt](userService, BCrypt.syncPasswordHasher[F]) <+>

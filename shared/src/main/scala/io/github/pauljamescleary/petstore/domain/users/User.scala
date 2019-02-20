@@ -1,4 +1,4 @@
-package io.github.pauljamescleary.petstore.shared.domain.users
+package io.github.pauljamescleary.petstore.domain.users
 
 import io.github.pauljamescleary.petstore.shared.JsonSerializers._
 

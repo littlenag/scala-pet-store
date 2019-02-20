@@ -1,4 +1,4 @@
-package io.github.pauljamescleary.petstore.shared
+package io.github.pauljamescleary.petstore
 
 import boopickle.Default._
 

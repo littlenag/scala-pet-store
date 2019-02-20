@@ -6,11 +6,11 @@ import boopickle.Default._
 import cats.effect.{ContextShift, Effect, IO}
 import org.http4s.dsl.Http4sDsl
 import cats.data.{NonEmptyList, OptionT}
+import io.github.pauljamescleary.petstore.domain.UserAuthenticationFailedError
 import io.github.pauljamescleary.petstore.domain.authentication.LoginRequest
 import io.github.pauljamescleary.petstore.domain.orders.OrderService
-import io.github.pauljamescleary.petstore.domain.users.UserService
+import io.github.pauljamescleary.petstore.domain.users.{User, UserService}
 import io.github.pauljamescleary.petstore.shared.PetstoreApi
-import io.github.pauljamescleary.petstore.shared.domain.users.User
 import org.http4s.CacheDirective.`no-cache`
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
@@ -21,11 +21,12 @@ import scalatags.Text.TypedTag
 
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
+import scala.util.control.NonFatal
 
 /**
   *
   */
-class AutowireEndpoints[F[_]: Effect] extends Http4sDsl[F] {
+class AutowireEndpoints[F[_]: Effect,A] extends Http4sDsl[F] {
 
   private[this] val logger = getLogger
 
@@ -37,7 +38,7 @@ class AutowireEndpoints[F[_]: Effect] extends Http4sDsl[F] {
   /* Needed for service composition via |+| */
   import cats.implicits._
 
-  def endpoints(apiService: ApiService[F])(implicit ec:ExecutionContext): HttpRoutes[F] =
+  def endpoints(apiService: ApiService[F,A])(implicit ec:ExecutionContext): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> "autowire" /: path =>
         // get the request body as Array[Byte]
@@ -61,8 +62,8 @@ class AutowireEndpoints[F[_]: Effect] extends Http4sDsl[F] {
     }}
 
 object AutowireEndpoints {
-  def endpoints[F[_]: Effect](userService: UserService[F], orderService: OrderService[F])(implicit ec:ExecutionContext): HttpRoutes[F] =
-    new AutowireEndpoints[F].endpoints(new ApiService(userService, orderService))
+  def endpoints[F[_]: Effect,A](userService: UserService[F,A], orderService: OrderService[F])(implicit ec:ExecutionContext): HttpRoutes[F] =
+    new AutowireEndpoints[F,A].endpoints(new ApiService(userService, orderService))
 }
 
 object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
@@ -70,8 +71,14 @@ object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
   override def write[R: Pickler](r: R) = Pickle.intoBytes(r)
 }
 
-class ApiService[F[_]: Effect](userService: UserService[F], orderService: OrderService[F]) extends PetstoreApi {
-  override def logIn(creds: LoginRequest): Either[String, User] = Left("Not Implemented")
+class ApiService[F[_]: Effect,A](userService: UserService[F,A], orderService: OrderService[F]) extends PetstoreApi {
+  override def logIn(creds: LoginRequest): Either[UserAuthenticationFailedError, User] = {
+    try {
+      Effect.toIOFromRunAsync(userService.login(creds).value).unsafeRunSync()
+    } catch {
+      case NonFatal(ex) => Left(UserAuthenticationFailedError(creds.userName))
+    }
+  }
 
   override def logOut(): Either[String, Unit] = Left("Not implemented")
 }

@@ -1,7 +1,5 @@
 package io.github.pauljamescleary.petstore.domain.users
 
-import io.github.pauljamescleary.petstore.shared.domain.users.User
-
 trait UserRepositoryAlgebra[F[_]] {
   def create(user: User): F[User]
 

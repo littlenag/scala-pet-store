@@ -1,7 +1,7 @@
 package io.github.pauljamescleary.petstore.frontend.services
 
 import io.github.pauljamescleary.petstore.domain.authentication.{LoginRequest, SignupRequest}
-import io.github.pauljamescleary.petstore.shared.domain.users.User
+import io.github.pauljamescleary.petstore.domain.users.User
 import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -10,9 +10,8 @@ import io.github.pauljamescleary.petstore.domain.orders.OrderStatus._
 import io.github.pauljamescleary.petstore.domain.{orders, pets}
 import io.github.pauljamescleary.petstore.domain.pets._
 import io.github.pauljamescleary.petstore.domain.pets.PetStatus._
-import io.github.pauljamescleary.petstore.domain.users._
+import io.github.pauljamescleary.petstore.domain.users.{User, _}
 import io.github.pauljamescleary.petstore.shared.domain.pets.{Pet, PetStatus}
-import io.github.pauljamescleary.petstore.shared.domain.users.User
 
 
 trait PetStoreArbitraries {

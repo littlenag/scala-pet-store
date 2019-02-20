@@ -9,7 +9,7 @@ import diode.data._
 import diode.util._
 import diode.react.ReactConnector
 import io.github.pauljamescleary.petstore.domain.authentication.{LoginRequest, SignupRequest}
-import io.github.pauljamescleary.petstore.shared.domain.users.User
+import io.github.pauljamescleary.petstore.domain.users.User
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 

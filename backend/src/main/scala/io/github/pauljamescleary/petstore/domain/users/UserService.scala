@@ -3,10 +3,24 @@ package io.github.pauljamescleary.petstore.domain.users
 import cats._
 import cats.data._
 import cats.syntax.functor._
-import io.github.pauljamescleary.petstore.domain.{UserAlreadyExistsError, UserNotFoundError}
-import io.github.pauljamescleary.petstore.shared.domain.users.User
+import io.github.pauljamescleary.petstore.domain.authentication.LoginRequest
+import io.github.pauljamescleary.petstore.domain.{UserAlreadyExistsError, UserAuthenticationFailedError, UserNotFoundError}
+import tsec.common.Verified
+import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 
-class UserService[F[_]: Monad](userRepo: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F]) {
+class UserService[F[_]: Monad, A](userRepo: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F], cryptService: PasswordHasher[F, A]) {
+
+  def login(login:LoginRequest): EitherT[F, UserAuthenticationFailedError, User] = {
+    val name = login.userName
+
+    for {
+      user <- getUserByName(name).leftMap(_ => UserAuthenticationFailedError(name))
+      checkResult <- EitherT.liftF(cryptService.checkpw(login.password, PasswordHash[A](user.hash)))
+      resp <-
+          if(checkResult == Verified) EitherT.rightT[F, UserAuthenticationFailedError](user)
+          else EitherT.leftT[F, User](UserAuthenticationFailedError(name))
+    } yield resp
+  }
 
   def createUser(user: User): EitherT[F, UserAlreadyExistsError, User] =
     for {
@@ -36,6 +50,6 @@ class UserService[F[_]: Monad](userRepo: UserRepositoryAlgebra[F], validation: U
 }
 
 object UserService {
-  def apply[F[_]: Monad](repository: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F]): UserService[F] =
-    new UserService[F](repository, validation)
+  def apply[F[_]: Monad, A](repository: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F], cryptService: PasswordHasher[F, A]): UserService[F,A] =
+    new UserService[F,A](repository, validation, cryptService)
 }
