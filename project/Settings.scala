@@ -94,9 +94,10 @@ object Settings {
     val diodeReact = "1.1.4.131"
     val scalaCSS = "0.5.5"
     val log4js = "1.4.10"
-    val autowire = "0.2.6"
-    val booPickle = "1.3.0"
+    //val autowire = "0.2.6"
+    //val booPickle = "1.3.0"
     val uTest = "0.6.4"
+    val typedApi = "0.2.0"
 
     val react = "16.5.2"
     val jsTokens = "4.0.0"
@@ -116,27 +117,9 @@ object Settings {
   }
 
   /**
-   * These dependencies are shared between JS and JVM projects
-   * the special %%% function selects the correct version for each project
-   */
-  val sharedDependencies = Def.setting(Seq(
-    "com.lihaoyi"   %%% "scalatags"            % Settings.scalaTagsV,
-    "com.lihaoyi"   %%% "autowire"             % versions.autowire,
-    "io.suzaku"     %%% "boopickle"            % versions.booPickle,
-    //"com.beachape"  %%% "enumeratum"           % EnumeratumVersion,
-    "com.beachape"  %%% "enumeratum-circe"     % EnumeratumCirceVersion,
-    "io.circe"      %%% "circe-generic"        % CirceVersion,
-    "io.circe"      %%% "circe-literal"        % CirceVersion,
-    "io.circe"      %%% "circe-generic-extras" % CirceVersion,
-    "io.circe"      %%% "circe-parser"         % CirceVersion,
-    "io.circe"      %%% "circe-java8"          % CirceVersion,
-  ))
-
-  /**
     * Dependencies only used by the Backend project. Includes:
-    *   * scala and java deps
-    *   * webjars
-    *
+    *   - scala and java deps
+    *   - webjars
     */
   val backendDependencies = Def.setting(Seq(
     "org.typelevel"         %% "cats-core"            % CatsVersion,
@@ -163,6 +146,8 @@ object Settings {
     "org.scalacheck"        %% "scalacheck"           % ScalaCheckVersion % Test,
     "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % Test,
 
+    "com.github.pheymann"   %% "typedapi-server"      % versions.typedApi,
+
     // Authentication dependencies
     "io.github.jmcardon"    %% "tsec-common"          % TsecVersion,
     "io.github.jmcardon"    %% "tsec-password"        % TsecVersion,
@@ -172,6 +157,8 @@ object Settings {
     "io.github.jmcardon"    %% "tsec-jwt-sig"         % TsecVersion,
     "io.github.jmcardon"    %% "tsec-http4s"          % TsecVersion,
 
+
+    // FIXME i don't think these need to be here
     "org.webjars.npm"  % "bootstrap"           % versions.bootstrap,
     "org.webjars.npm"  % "react"               % versions.react,
     "org.webjars.npm"  % "react-dom"           % versions.react,
@@ -179,20 +166,41 @@ object Settings {
     //"org.webjars"      % "chartjs"             % "2.1.3"
   ))
 
-  /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
-  val scalajsDependencies = Def.setting(Seq(
-    "com.github.japgolly.scalajs-react" %%% "core"          % versions.scalajsReact,
-    "com.github.japgolly.scalajs-react" %%% "extra"         % versions.scalajsReact,
-    "com.github.japgolly.scalacss"      %%% "core"          % versions.scalaCSS,
-    "com.github.japgolly.scalacss"      %%% "ext-react"     % versions.scalaCSS,
-    "io.suzaku"                         %%% "diode"         % versions.diode,
-    "io.suzaku"                         %%% "diode-react"   % versions.diodeReact,
-    "io.suzaku"                         %%% "boopickle"     % versions.booPickle,
-    "org.scala-js"                      %%% "scalajs-dom"   % versions.scalaDom,
-    "com.lihaoyi"                       %%% "utest"         % versions.uTest % Test,
-    "com.lihaoyi"                       %%% "scalatags"     % Settings.scalaTagsV,
-    "com.lihaoyi"                       %%% "autowire"      % versions.autowire,
-    "org.querki"                        %%% "jquery-facade" % versions.jQueryFacade
+  /**
+    * These dependencies are shared between JS and JVM projects
+    * the special %%% function selects the correct version for each project
+    */
+  val sharedDependencies = Def.setting(Seq(
+    "com.github.pheymann"   %%% "typedapi-client"      % versions.typedApi,
+
+    "com.lihaoyi"   %%% "scalatags"            % Settings.scalaTagsV,
+    //"com.lihaoyi"   %%% "autowire"             % versions.autowire,
+    //"io.suzaku"     %%% "boopickle"            % versions.booPickle,
+    //"com.beachape"  %%% "enumeratum"           % EnumeratumVersion,
+    "com.beachape"  %%% "enumeratum-circe"     % EnumeratumCirceVersion,
+    "io.circe"      %%% "circe-generic"        % CirceVersion,
+    "io.circe"      %%% "circe-literal"        % CirceVersion,
+    "io.circe"      %%% "circe-generic-extras" % CirceVersion,
+    "io.circe"      %%% "circe-parser"         % CirceVersion,
+    "io.circe"      %%% "circe-java8"          % CirceVersion,
+  ))
+
+  /** Dependencies only used by the ScalaJS project (note the use of %%% instead of %%) */
+  val frontendDependencies = Def.setting(Seq(
+    // ScalaJS client support
+    "com.github.pheymann"               %%% "typedapi-js-client"   % versions.typedApi,
+    "com.github.japgolly.scalajs-react" %%% "core"                 % versions.scalajsReact,
+    "com.github.japgolly.scalajs-react" %%% "extra"                % versions.scalajsReact,
+    "com.github.japgolly.scalacss"      %%% "core"                 % versions.scalaCSS,
+    "com.github.japgolly.scalacss"      %%% "ext-react"            % versions.scalaCSS,
+    "io.suzaku"                         %%% "diode"                % versions.diode,
+    "io.suzaku"                         %%% "diode-react"          % versions.diodeReact,
+    //"io.suzaku"                         %%% "boopickle"            % versions.booPickle,
+    "org.scala-js"                      %%% "scalajs-dom"          % versions.scalaDom,
+    "com.lihaoyi"                       %%% "utest"                % versions.uTest % Test,
+    "com.lihaoyi"                       %%% "scalatags"            % Settings.scalaTagsV,
+    //"com.lihaoyi"                       %%% "autowire"             % versions.autowire,
+    "org.querki"                        %%% "jquery-facade"        % versions.jQueryFacade
   ))
 
   /** Dependencies for external JS libs that are bundled into a single .js file according to dependency order */

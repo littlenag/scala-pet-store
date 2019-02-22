@@ -4,10 +4,13 @@ import io.github.pauljamescleary.petstore.domain.UserAuthenticationFailedError
 import io.github.pauljamescleary.petstore.domain.authentication.LoginRequest
 import io.github.pauljamescleary.petstore.domain.users.User
 
-// Autowire API
-trait PetstoreApi {
-  def logIn(creds:LoginRequest): Either[UserAuthenticationFailedError, User]
-  def logOut(): Either[String,Unit]
+import typedapi._
+
+
+// Typed API
+object PetstoreApi {
+
+
 
 
 }

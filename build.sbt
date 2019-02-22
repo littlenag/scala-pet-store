@@ -80,7 +80,7 @@ lazy val frontend = (project in file("frontend"))
     // Put the jsdeps file on a place reachable for the server
     crossTarget in (Compile, packageJSDependencies) := (resourceManaged in Compile).value,
     testFrameworks += new TestFramework("utest.runner.Framework"),
-    libraryDependencies ++= Settings.scalajsDependencies.value,
+    libraryDependencies ++= Settings.frontendDependencies.value,
     dependencyOverrides += "org.webjars.npm" % "js-tokens" % "3.0.2",  // fix for https://github.com/webjars/webjars/issues/1789
     jsDependencies ++= Settings.jsDependencies.value,
     // use Scala.js provided launcher code to start the client app

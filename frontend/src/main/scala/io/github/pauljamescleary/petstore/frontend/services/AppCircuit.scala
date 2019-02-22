@@ -3,7 +3,6 @@ package io.github.pauljamescleary.petstore.frontend.services
 import io.github.pauljamescleary.petstore._
 import domain.pets.Pet
 import shared.PetstoreApi
-import autowire._
 import diode._
 import diode.data._
 import diode.util._
@@ -122,25 +121,6 @@ class PetHandler[M](modelRW: ModelRW[M, Pot[Pets]]) extends ActionHandler(modelR
 //      updated(value.map(_.remove(pet)), Effect(AjaxClient[PetstoreApi].deleteTodo(pet.id).call().map(UpdateAllTodos)))
   }
 }
-
-/**
-  * Handles actions related to the Motd
-  *
-  * @param modelRW Reader/Writer to access the model
-  */
-/*
-class MotdHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandler(modelRW) {
-  import boopickle.Default._
-
-  implicit val runner = new RunAfterJS
-
-  override def handle = {
-    case action: UpdateMotd =>
-      val updateF = action.effect(AjaxClient[PetstoreApi].welcomeMsg("User X").call())(identity(_))
-      action.handleWith(this, updateF)(PotAction.handler())
-  }
-}
-*/
 
 // Application circuit
 object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {

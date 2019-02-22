@@ -1,8 +1,5 @@
 package io.github.pauljamescleary.petstore.infrastructure.endpoint
 
-import java.nio.ByteBuffer
-
-import boopickle.Default.{Pickle, Pickler, Unpickle}
 import cats.data.{NonEmptyList, OptionT}
 import cats.effect.{ContextShift, Effect}
 import org.http4s.CacheDirective.`no-cache`
