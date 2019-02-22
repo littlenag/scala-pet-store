@@ -1,7 +1,7 @@
 package io.github.pauljamescleary.petstore.frontend.services
 
 import io.github.pauljamescleary.petstore._
-import shared.domain.pets.Pet
+import domain.pets.Pet
 import shared.PetstoreApi
 import autowire._
 import diode._

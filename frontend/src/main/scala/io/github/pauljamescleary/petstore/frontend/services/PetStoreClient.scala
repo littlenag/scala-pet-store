@@ -1,13 +1,13 @@
 package io.github.pauljamescleary.petstore.frontend.services
 
 import io.github.pauljamescleary.petstore.domain.authentication.{LoginRequest, SignupRequest}
+import io.github.pauljamescleary.petstore.domain.pets.Pet
 import io.github.pauljamescleary.petstore.domain.users.User
 import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import io.github.pauljamescleary.petstore.shared.JsonSerializers._
-import io.github.pauljamescleary.petstore.shared.domain.pets.Pet
 
 /**
   * @author Mark Kegel (mkegel@vast.com)

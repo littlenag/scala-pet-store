@@ -41,7 +41,7 @@ class UserEndpoints[F[_]: Effect, A] extends Http4sDsl[F] {
 
   implicit val signupReqDecoder: EntityDecoder[F, SignupRequest] = jsonOf
 
-  private def loginEndpoint(userService: UserService[F], cryptService: PasswordHasher[F, A]): HttpRoutes[F] =
+  private def loginEndpoint(userService: UserService[F,A], cryptService: PasswordHasher[F, A]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "login" =>
         val action: EitherT[F, UserAuthenticationFailedError, User] = for {
@@ -60,7 +60,7 @@ class UserEndpoints[F[_]: Effect, A] extends Http4sDsl[F] {
         }
     }
 
-  private def signupEndpoint(userService: UserService[F], crypt: PasswordHasher[F, A]): HttpRoutes[F] =
+  private def signupEndpoint(userService: UserService[F,A], crypt: PasswordHasher[F, A]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "users" =>
         val action = for {
@@ -77,7 +77,7 @@ class UserEndpoints[F[_]: Effect, A] extends Http4sDsl[F] {
         }
     }
 
-  private def updateEndpoint(userService: UserService[F]): HttpRoutes[F] =
+  private def updateEndpoint(userService: UserService[F,A]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ PUT -> Root / "users" / name =>
         val action = for {
@@ -92,7 +92,7 @@ class UserEndpoints[F[_]: Effect, A] extends Http4sDsl[F] {
         }
     }
 
-  private def listEndpoint(userService: UserService[F]): HttpRoutes[F] =
+  private def listEndpoint(userService: UserService[F,A]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case GET -> Root / "users" :? PageSizeMatcher(pageSize) :? OffsetMatcher(offset) =>
         for {
@@ -101,7 +101,7 @@ class UserEndpoints[F[_]: Effect, A] extends Http4sDsl[F] {
         } yield resp
     }
 
-  private def searchByNameEndpoint(userService: UserService[F]): HttpRoutes[F] =
+  private def searchByNameEndpoint(userService: UserService[F,A]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case GET -> Root / "users" / userName =>
         userService.getUserByName(userName).value.flatMap {
@@ -110,7 +110,7 @@ class UserEndpoints[F[_]: Effect, A] extends Http4sDsl[F] {
         }
     }
 
-  private def deleteUserEndpoint(userService: UserService[F]): HttpRoutes[F] =
+  private def deleteUserEndpoint(userService: UserService[F,A]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case DELETE -> Root / "users" / userName =>
         for {
