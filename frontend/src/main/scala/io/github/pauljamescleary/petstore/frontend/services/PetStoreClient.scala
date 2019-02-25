@@ -11,6 +11,7 @@ import io.circe._
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
+import io.github.pauljamescleary.petstore.domain.PetAlreadyExistsError
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,8 +42,16 @@ object PetStoreClient {
 
   private val cm = ClientManager(Ajax, getOrigin)
 
-  private val (loginT, signupT) = deriveAll(PetstoreApi.Api)
+  private val (loginEP, signupT) = deriveAll(PetstoreApi.UsersApi)
 
-  def login(req: LoginRequest): Future[User] = loginT(req).run[Future](cm)
+  def login(req: LoginRequest): Future[User] = loginEP(req).run[Future](cm)
   def signup(req: SignupRequest): Future[User] = signupT(req).run[Future](cm)
+
+
+  private val (listPetsEP, createPetEP) = deriveAll(PetstoreApi.PetsApi)
+
+  def listPets(pageSize:Int = 10, offset:Int = 0): Future[List[Pet]] = listPetsEP(pageSize, offset).run[Future](cm)
+  def createPet(req: Pet): Future[Either[PetAlreadyExistsError,Pet]] = createPetEP(req).run[Future](cm)
+
+
 }
