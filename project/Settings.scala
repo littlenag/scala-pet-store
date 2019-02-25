@@ -189,7 +189,8 @@ object Settings {
   /** Dependencies only used by the ScalaJS project (note the use of %%% instead of %%) */
   val frontendDependencies = Def.setting(Seq(
     // ScalaJS client support
-    "com.github.pheymann"               %%% "typedapi-client"      % versions.typedApi,
+    //"com.github.pheymann"               %%% "typedapi-client"      % versions.typedApi,
+    "com.github.pheymann"               %%% "typedapi-js-client"      % versions.typedApi,
     "com.github.japgolly.scalajs-react" %%% "core"                 % versions.scalajsReact,
     "com.github.japgolly.scalajs-react" %%% "extra"                % versions.scalajsReact,
     "com.github.japgolly.scalacss"      %%% "core"                 % versions.scalaCSS,

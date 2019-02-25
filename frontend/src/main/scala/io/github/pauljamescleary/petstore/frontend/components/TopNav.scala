@@ -50,7 +50,7 @@ object TopNav {
           <.nav(bootstrapStyles.navbar,
             <.div(^.`class` := "container-fluid",
               <.div(^.`class` := "navbar-header",
-                <.a(^.`class` := "navbar-brand", P.ctrl setOnClick HomePageRt)("QALocate")
+                <.a(^.`class` := "navbar-brand", P.ctrl setOnClick HomePageRt)("Pet Store")
               ),
             <.ul.apply(
               //Style.navMenu,
