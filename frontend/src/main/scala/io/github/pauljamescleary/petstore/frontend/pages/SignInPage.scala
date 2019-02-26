@@ -32,10 +32,6 @@ object SignInPage {
     import dsl._
 
     val outerDiv = style(textAlign.center,
-      //fontSize(20.px),
-      //minHeight(450.px),
-      //width(400.px),
-
       alignItems.flexStart,
       paddingTop(120.px),
       display.flex,
@@ -43,19 +39,15 @@ object SignInPage {
     )
 
     val innerDiv = style(textAlign.center,
-      //fontSize(20.px),
       minHeight(450.px),
       width(400.px),
       alignItems.flexStart,
       float.none,
       margin(0 px, auto)
-
-      //paddingTop(120.px)
     )
 
-    val colCentered = style(
-      float.none,
-      margin(0 px, auto)
+    val links = style(
+      margin(17 px)
     )
   }
 
@@ -84,7 +76,8 @@ object SignInPage {
         ),
         <.button("Submit"),
         <.div(
-          <.span("Already a member?", p.router.link(SignUpRt)(" Sign in now"))
+          Style.links,
+          <.span(p.router.link(SignUpRt)("Create an account."))
         )
       )
     }

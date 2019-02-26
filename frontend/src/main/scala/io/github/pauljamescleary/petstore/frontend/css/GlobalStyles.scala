@@ -15,4 +15,9 @@ object GlobalStyles extends StyleSheet.Inline {
   )
 
   val bootstrapStyles = new BootstrapStyles
+
+  val colCentered = style(
+    float.none,
+    margin(0 px, auto)
+  )
 }
