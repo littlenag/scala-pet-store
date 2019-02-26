@@ -52,6 +52,4 @@ object PetStoreClient {
 
   def listPets(pageSize:Int = 10, offset:Int = 0): Future[List[Pet]] = listPetsEP(pageSize, offset).run[Future](cm)
   def createPet(req: Pet): Future[Either[PetAlreadyExistsError,Pet]] = createPetEP(req).run[Future](cm)
-
-
 }
