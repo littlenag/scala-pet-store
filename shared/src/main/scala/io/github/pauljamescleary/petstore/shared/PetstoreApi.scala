@@ -1,7 +1,7 @@
 package io.github.pauljamescleary.petstore.shared
 
 import io.github.pauljamescleary.petstore.domain
-import domain.PetAlreadyExistsError
+import domain.{PetAlreadyExistsError, PetNotFoundError}
 import domain.authentication.{LoginRequest, SignupRequest}
 import domain.pets.Pet
 import domain.users.User
@@ -43,6 +43,17 @@ object PetstoreApi {
       method = Post[Json, Either[PetAlreadyExistsError,Pet]],
       body = ReqBody[Json, Pet],
       path = Root / "pets",
+      headers = `allow-origin`)  :|:
+    // PUT {body:Pet} /pets/{id:Long} => Pet (update)
+    apiWithBody(
+      method = Post[Json, Either[PetNotFoundError.type,Pet]],
+      body = ReqBody[Json, Pet],
+      path = Root / "pets",
+      headers = `allow-origin`) :|:
+    // DELETE /pets/{id:Long} => () (delete)
+    api(
+      method = Delete[Json, Unit],
+      path = Root / "pets" / Segment[Long]("id"),
       headers = `allow-origin`)
 }
 

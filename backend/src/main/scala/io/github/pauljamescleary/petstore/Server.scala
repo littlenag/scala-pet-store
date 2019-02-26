@@ -1,5 +1,6 @@
 package io.github.pauljamescleary.petstore
 
+import cats.Monad
 import config._
 import domain.users._
 import domain.orders._
@@ -39,6 +40,10 @@ object Server extends IOApp {
                             FrontendEndpoints.endpoints[F]()
       httpApp = Router("/" -> services).orNotFound
       _ <- Resource.liftF(DatabaseConfig.initializeDb(conf.db))
+      // Add some test data
+      _ <- Resource.liftF(petService.create(Pet("Fred", "dog", "very friendly")).value)
+      _ <- Resource.liftF(petService.create(Pet("Emmy", "cat", "meow")).value)
+      _ <- Resource.liftF(petService.create(Pet("Carrie", "dog", "sleepy")).value)
       server <-
         BlazeServerBuilder[F]
         .bindHttp(conf.server.port, conf.server.host)

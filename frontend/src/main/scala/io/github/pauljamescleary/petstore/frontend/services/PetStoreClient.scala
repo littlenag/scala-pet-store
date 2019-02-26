@@ -11,7 +11,7 @@ import io.circe._
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
-import io.github.pauljamescleary.petstore.domain.PetAlreadyExistsError
+import io.github.pauljamescleary.petstore.domain.{PetAlreadyExistsError, PetNotFoundError, ValidationError}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -48,8 +48,21 @@ object PetStoreClient {
   def signup(req: SignupRequest): Future[User] = signupT(req).run[Future](cm)
 
 
-  private val (listPetsEP, createPetEP) = deriveAll(PetstoreApi.PetsApi)
+  private val (listPetsEP, createPetEP, updatePetEP, deletePetEP) = deriveAll(PetstoreApi.PetsApi)
 
   def listPets(pageSize:Int = 10, offset:Int = 0): Future[List[Pet]] = listPetsEP(pageSize, offset).run[Future](cm)
-  def createPet(req: Pet): Future[Either[PetAlreadyExistsError,Pet]] = createPetEP(req).run[Future](cm)
+  def createPet(req: Pet): Future[Either[PetAlreadyExistsError,Pet]] = {
+    if (req.id.isDefined) Future.failed(new RuntimeException("Creation forbids an id."))
+    else createPetEP(req).run[Future](cm)
+  }
+  def updatePet(req: Pet): Future[Either[PetNotFoundError.type,Pet]] = {
+    if (req.id.isEmpty) Future.failed(new RuntimeException("Updating requires an id."))
+    else updatePetEP(req).run[Future](cm)
+  }
+  def deletePet(id: Long): Future[Unit] = deletePetEP(id).run[Future](cm)
+
+  def upsertPet(req:Pet): Future[Either[ValidationError, Pet]] = {
+    if (req.id.isDefined) updatePet(req)
+    else createPet(req)
+  }
 }

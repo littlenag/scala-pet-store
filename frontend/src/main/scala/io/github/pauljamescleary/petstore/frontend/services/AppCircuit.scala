@@ -1,6 +1,7 @@
 package io.github.pauljamescleary.petstore.frontend.services
 
 import io.github.pauljamescleary.petstore._
+import frontend.logger._
 import domain.pets.Pet
 import shared.PetstoreApi
 import diode._
@@ -15,15 +16,15 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 // Actions :: Pet management
 case object RefreshPets extends Action
 
+case object PetsModified extends Action
+
 case class UpdateAllPets(pets: Seq[Pet]) extends Action
 
-case class UpdatePet(pet: Pet) extends Action
+case class UpsertPet(pet: Pet) extends Action
+case class UpdateFailed(pet: Pet) extends Action
 
 case class DeletePet(item: Pet) extends Action
-
-case class UpdateMotd(potResult: Pot[String] = Empty) extends PotAction[String, UpdateMotd] {
-  override def next(value: Pot[String]) = UpdateMotd(value)
-}
+case class DeleteFailed(item: Pet) extends Action
 
 // Actions :: Authentication
 case class SignIn(username:String, password:String) extends Action
@@ -35,7 +36,7 @@ case class UserCreated(user:User) extends Action
 case class SignUpError(ex:Throwable) extends Action
 
 // The base model of our application
-case class RootModel(userProfile:Pot[UserProfile], pets: Pot[Pets])
+case class RootModel(userProfile:Pot[UserProfile], pets: Pot[PetsData])
 
 case class UserProfile(user:User) {
   def updated(user: User): UserProfile = {
@@ -51,7 +52,7 @@ case class UserProfile(user:User) {
 class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends ActionHandler(modelRW) {
   override def handle = {
     case SignIn(username, password) =>
-      println("Tried to sign in")
+      log.debug("Tried to sign in")
       updated(Pending(),
         Effect(
           PetStoreClient.login(LoginRequest(username,password))
@@ -60,15 +61,15 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
         )
       )
     case Authenticated(user) =>
-      println("Sign in accepted")
+      log.debug("Sign in accepted")
       updated(Ready(UserProfile(user)))
 
     case SignInError(ex) =>
-      println("Sign in failed")
+      log.debug("Sign in failed")
       updated(Failed(ex))
 
     case SignUp(username, email, password) =>
-      println("Tried to sign up")
+      log.debug("Tried to sign up")
       updated(Pending(),
         Effect(
           PetStoreClient.signup(
@@ -78,27 +79,27 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
         )
       )
     case UserCreated(user) =>
-      println("Sign up accepted")
+      log.debug("Sign up accepted")
       updated(Ready(UserProfile(user)))
 
     case SignUpError(ex) =>
-      println("Sign up failed")
+      log.debug("Sign up failed")
       updated(Failed(ex))
   }
 }
 
-case class Pets(items: Seq[Pet]) {
-  def updated(newItem: Pet) = {
-    items.indexWhere(_.id == newItem.id) match {
+case class PetsData(pets: Seq[Pet]) {
+  def updated(newPet: Pet) = {
+    pets.indexWhere(_.id == newPet.id) match {
       case -1 =>
         // add new
-        Pets(items :+ newItem)
+        PetsData(pets :+ newPet)
       case idx =>
         // replace old
-        Pets(items.updated(idx, newItem))
+        PetsData(pets.updated(idx, newPet))
     }
   }
-  def remove(item: Pet) = Pets(items.filterNot(_ == item))
+  def remove(pet: Pet) = PetsData(pets.filterNot(_ == pet))
 }
 
 /**
@@ -106,19 +107,24 @@ case class Pets(items: Seq[Pet]) {
   *
   * @param modelRW Reader/Writer to access the model
   */
-class PetHandler[M](modelRW: ModelRW[M, Pot[Pets]]) extends ActionHandler(modelRW) {
+class PetHandler[M](modelRW: ModelRW[M, Pot[PetsData]]) extends ActionHandler(modelRW) {
   override def handle: PartialFunction[Any, ActionResult[M]] = {
-//    case RefreshPets =>
-//      effectOnly(Effect(AjaxClient[PetstoreApi].getAllPets().call().map(UpdateAllPets)))
+    case RefreshPets =>
+      effectOnly(Effect(PetStoreClient.listPets().map(UpdateAllPets)))
     case UpdateAllPets(pets) =>
-      // got new todos, update model
-      updated(Ready(Pets(pets)))
-//    case UpdatePet(pet) =>
+      // got new pets, update model
+      updated(Ready(PetsData(pets)))
+    case UpsertPet(pet) =>
       // make a local update and inform server
-      //updated(value.map(_.updated(pet)), Effect(AjaxClient[PetstoreApi].updateTodo(pet).call().map(UpdateAllTodos)))
-//    case DeletePet(pet) =>
+      val eff = Effect(PetStoreClient.upsertPet(pet).map(_ => NoAction).recover{case _ => RefreshPets})
+      updated(value.map(_.updated(pet)), eff)
+    case DeletePet(pet) =>
       // make a local update and inform server
-//      updated(value.map(_.remove(pet)), Effect(AjaxClient[PetstoreApi].deleteTodo(pet.id).call().map(UpdateAllTodos)))
+      val eff = pet.id match {
+        case Some(id) => Effect(PetStoreClient.deletePet(id).map(_ => NoAction).recover{case _ => RefreshPets})
+        case None => Effect.action(NoAction)
+      }
+      updated(value.map(_.remove(pet)), eff)
   }
 }
 

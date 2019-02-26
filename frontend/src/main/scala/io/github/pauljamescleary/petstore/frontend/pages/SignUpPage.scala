@@ -30,14 +30,16 @@ object SignUpPage {
   object Style extends StyleSheet.Inline {
     import dsl._
 
-    val outerDiv = style(textAlign.center,
+    val outerDiv = style(
+      textAlign.center,
       alignItems.flexStart,
       paddingTop(120.px),
       display.flex,
       flexDirection.column
     )
 
-    val innerDiv = style(textAlign.center,
+    val innerDiv = style(
+      textAlign.left,
       //fontSize(20.px),
       minHeight(450.px),
       width(400.px),
