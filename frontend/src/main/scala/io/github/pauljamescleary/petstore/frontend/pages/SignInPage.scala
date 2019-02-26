@@ -35,6 +35,7 @@ object SignInPage {
       //fontSize(20.px),
       //minHeight(450.px),
       //width(400.px),
+
       alignItems.flexStart,
       paddingTop(120.px),
       display.flex,
@@ -45,12 +46,48 @@ object SignInPage {
       //fontSize(20.px),
       minHeight(450.px),
       width(400.px),
-      alignItems.flexStart
+      alignItems.flexStart,
+      float.none,
+      margin(0 px, auto)
+
       //paddingTop(120.px)
+    )
+
+    val colCentered = style(
+      float.none,
+      margin(0 px, auto)
     )
   }
 
   class Backend($: BackendScope[Props, State]) {
+
+    def signInForm(p: Props, s: State) = {
+      <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
+        <.div(bss.formGroup,
+          <.label(^.`for` := "description", "Username"),
+          <.input.text(bss.formControl,
+            ^.id := "username",
+            ^.value := s.username,
+            ^.placeholder := "Username",
+            ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(username = text)) }
+          )
+        ),
+        <.div(bss.formGroup,
+          <.label(^.`for` := "description", "Password"),
+          <.input.text(bss.formControl,
+            ^.id := "password",
+            ^.value := s.password,
+            ^.`type` := "password",
+            ^.placeholder := "Password",
+            ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
+          )
+        ),
+        <.button("Submit"),
+        <.div(
+          <.span("Already a member?", p.router.link(SignUpRt)(" Sign in now"))
+        )
+      )
+    }
 
     def render(p: Props, s: State) = {
       <.div(
@@ -71,32 +108,7 @@ object SignInPage {
         p.userProfile().renderFailed { ex =>
           <.div(Style.outerDiv,
             <.div(Style.innerDiv,
-              Panel(Panel.Props("Sign In -- Failed!"),
-                <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
-                  <.div(bss.formGroup,
-                    <.label(^.`for` := "description", "Username"),
-                    <.input.text(bss.formControl,
-                      ^.id := "username",
-                      ^.value := s.username,
-                      ^.placeholder := "Username",
-                      ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(username = text)) }
-                    )
-                  ),
-                  <.div(bss.formGroup,
-                    <.label(^.`for` := "description", "Password"),
-                    <.input.text(bss.formControl,
-                      ^.id := "password",
-                      ^.value := s.password,
-                      ^.placeholder := "Password",
-                      ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
-                    )
-                  ),
-                  <.button("Submit"),
-                  <.div(
-                    <.span("Already a member?", p.router.link(SignUpRt)(" Sign in now"))
-                  )
-                )
-              )
+              Panel(Panel.Props("Sign In -- Failed!"), signInForm(p,s))
             )
           )
         },
@@ -104,32 +116,7 @@ object SignInPage {
         if (p.userProfile().state == PotEmpty) {
           <.div(Style.outerDiv,
             <.div(Style.innerDiv,
-              Panel(Panel.Props("Sign In"),
-                <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
-                  <.div(bss.formGroup,
-                    <.label(^.`for` := "description", "Username"),
-                    <.input.text(bss.formControl,
-                      ^.id := "username",
-                      ^.value := s.username,
-                      ^.placeholder := "Username",
-                      ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(username = text)) }
-                    )
-                  ),
-                  <.div(bss.formGroup,
-                    <.label(^.`for` := "description", "Password"),
-                    <.input.text(bss.formControl,
-                      ^.id := "password",
-                      ^.value := s.password,
-                      ^.placeholder := "Password",
-                      ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
-                    )
-                  ),
-                  <.button("Submit"),
-                  <.div(
-                    <.span("Already a member?", p.router.link(SignUpRt)(" Sign in now"))
-                  )
-                )
-              )
+              Panel(Panel.Props("Sign In"), signInForm(p,s))
             )
           )
         } else EmptyVdom
