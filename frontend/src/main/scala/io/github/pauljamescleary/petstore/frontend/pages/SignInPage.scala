@@ -118,7 +118,7 @@ object SignInPage {
   }
 
   // create the React component
-  val component = ScalaComponent.builder[Props]("SignIn")
+  val component = ScalaComponent.builder[Props]("Sign In")
       .initialState(State("", ""))
       .renderBackend[Backend]
       .build

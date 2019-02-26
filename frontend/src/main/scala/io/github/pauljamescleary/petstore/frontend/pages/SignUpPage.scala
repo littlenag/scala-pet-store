@@ -8,7 +8,7 @@ import io.github.pauljamescleary.petstore.frontend.AppRouter.{AppPage, HomePageR
 import io.github.pauljamescleary.petstore.frontend._
 import io.github.pauljamescleary.petstore.frontend.css.Bootstrap.Panel
 import io.github.pauljamescleary.petstore.frontend.css.GlobalStyles
-import io.github.pauljamescleary.petstore.frontend.services.{SignIn, SignUp, UserProfile}
+import io.github.pauljamescleary.petstore.frontend.services.{SignUp, UserProfile}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^.{^, _}
@@ -138,7 +138,7 @@ object SignUpPage {
   }
 
     // create the React component for Dashboard
-  private val component = ScalaComponent.builder[Props]("SignUp")
+  private val component = ScalaComponent.builder[Props]("Sign Up")
     // create and store the connect proxy in state for later use
     .initialState(State("", "", "", ""))
     .renderBackend[Backend]

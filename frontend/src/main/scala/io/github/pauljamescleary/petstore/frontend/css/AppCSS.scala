@@ -1,7 +1,6 @@
 package io.github.pauljamescleary.petstore.frontend.css
 
-import io.github.pauljamescleary.petstore.frontend.components.TopNav
-import io.github.pauljamescleary.petstore.frontend.pages.{HomePage, SignInPage, SignUpPage}
+import io.github.pauljamescleary.petstore.frontend.pages.{HomePage, SignInPage, SignUpPage, AppMenu}
 import scalacss.internal.mutable.GlobalRegistry
 
 object AppCSS {
@@ -14,7 +13,7 @@ object AppCSS {
       SignInPage.Style,
       SignUpPage.Style,
       HomePage.Style,
-      TopNav.Style)
+      AppMenu.Style)
     GlobalRegistry.register(GlobalStyles.bootstrapStyles)
     GlobalRegistry.onRegistration(_.addToDocument())
   }

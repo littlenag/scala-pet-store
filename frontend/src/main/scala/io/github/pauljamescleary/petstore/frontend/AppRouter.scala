@@ -1,8 +1,7 @@
 package io.github.pauljamescleary.petstore.frontend
 
-import io.github.pauljamescleary.petstore.frontend.components.{Footer, TopNav}
-import io.github.pauljamescleary.petstore.frontend.models.Menu
-import io.github.pauljamescleary.petstore.frontend.pages.{HomePage, SignInPage, SignUpPage}
+import io.github.pauljamescleary.petstore.frontend.components.Footer
+import io.github.pauljamescleary.petstore.frontend.pages.{AppMenu, HomePage, SignInPage, SignUpPage}
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import services._
@@ -18,14 +17,11 @@ object AppRouter {
   case object SignUpRt extends AppPage
   case object LogOutRt extends AppPage
 
-  val mainMenu = Vector(
-    Menu("Sign In", SignInRt),
-    Menu("Sign Up", SignUpRt)
-  )
+  val userProfileWrapper = AppCircuit.connect(_.userProfile)
 
   def layout(c: RouterCtl[AppPage], r: Resolution[AppPage]) =
     <.div(
-      TopNav(TopNav.Props(mainMenu, r.page, c)),
+      userProfileWrapper(AppMenu(_, r.page, c)),
       r.render(),
       Footer()
     )
@@ -37,7 +33,6 @@ object AppRouter {
     //val petWrapper = AppCircuit.connect(_.pets)
 
     val rootModelWrapper = AppCircuit.connect(x => x)
-    val userProfileWrapper = AppCircuit.connect(_.userProfile)
 
     // wrap/connect components to the circuit
     (staticRoute("#/home", HomePageRt) ~> renderR(ctl => rootModelWrapper(HomePage(ctl,_)))
