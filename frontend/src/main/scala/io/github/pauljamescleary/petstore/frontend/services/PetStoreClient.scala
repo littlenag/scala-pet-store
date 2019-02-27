@@ -56,8 +56,10 @@ object PetStoreClient {
     else createPetEP(req).run[Future](cm)
   }
   def updatePet(req: Pet): Future[Either[PetNotFoundError.type,Pet]] = {
-    if (req.id.isEmpty) Future.failed(new RuntimeException("Updating requires an id."))
-    else updatePetEP(req).run[Future](cm)
+    req.id match {
+      case None => Future.failed(new RuntimeException("Updating requires an id."))
+      case Some(id) => updatePetEP(id,req).run[Future](cm)
+    }
   }
   def deletePet(id: Long): Future[Unit] = deletePetEP(id).run[Future](cm)
 

@@ -55,6 +55,12 @@ object PetList {
             "Available"
           ),
           <.span(" "),
+          <.span("TYPE: " + pet.category),
+          <.span(" "),
+          <.span("BIO: " + pet.bio),
+          <.span(" "),
+          <.span("ID: " + pet.id),
+          <.span(" "),
           pet.status match {
             case Adopted | Pending => <.s(pet.status.toString)
             case Available => <.span(pet.status.toString)

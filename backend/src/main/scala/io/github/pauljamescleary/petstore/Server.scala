@@ -1,6 +1,5 @@
 package io.github.pauljamescleary.petstore
 
-import cats.Monad
 import config._
 import domain.users._
 import domain.orders._

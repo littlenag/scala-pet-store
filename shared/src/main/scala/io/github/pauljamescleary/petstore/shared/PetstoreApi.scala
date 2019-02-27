@@ -46,9 +46,9 @@ object PetstoreApi {
       headers = `allow-origin`)  :|:
     // PUT {body:Pet} /pets/{id:Long} => Pet (update)
     apiWithBody(
-      method = Post[Json, Either[PetNotFoundError.type,Pet]],
+      method = Put[Json, Either[PetNotFoundError.type,Pet]],
       body = ReqBody[Json, Pet],
-      path = Root / "pets",
+      path = Root / "pets" / Segment[Long]("id"),
       headers = `allow-origin`) :|:
     // DELETE /pets/{id:Long} => () (delete)
     api(
