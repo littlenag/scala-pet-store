@@ -9,6 +9,8 @@ import scala.language.implicitConversions
 import scala.scalajs.js
 import scalacss.ScalaCssReact._
 
+import io.github.pauljamescleary.petstore.frontend.logger._
+
 import CssSettings._
 
 /**
@@ -98,9 +100,11 @@ object Bootstrap {
       .componentDidMount(scope => Callback {
         val p = scope.props
         // instruct Bootstrap to show the modal
-        $(scope.getDOMNode.asElement()).show(100, () => js.Dynamic.literal("backdrop" -> p.backdrop, "keyboard" -> p.keyboard, "show" -> true))
+        log.debug("Constructing Modal")
+        $(scope.getDOMNode.asElement()).show(10, () => js.Dynamic.literal("backdrop" -> p.backdrop, "keyboard" -> p.keyboard, "show" -> true))
         // register event listener to be notified when the modal is closed
         $(scope.getDOMNode.asElement()).on("hidden.bs.modal", null, null, scope.backend.hidden _)
+        log.debug("Done constructing Modal")
       })
       .build
 

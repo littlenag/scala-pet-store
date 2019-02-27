@@ -78,36 +78,27 @@ object Settings {
   val FlywayVersion          = "5.2.4"
   val TsecVersion            = "0.1.0-M2"
 
-  //val Http4sVersion = "0.18.12"
   val utestV = "0.6.2"
   val scalaJsDomV = "0.9.6"
   val scalaTagsV = "0.6.7"
-  val circeV = "0.9.3"
-  val catsEffectV = "0.10.1"
+  //val circeV = "0.9.3"
+  //val CatsEffectV = "0.10.1"
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
     val scalaDom = "0.9.6"
-    //val scalajsReact = "1.2.3"
     val scalajsReact = "1.3.1"
     val diode = "1.1.4"
     val diodeReact = "1.1.4.131"
     val scalaCSS = "0.5.5"
     val log4js = "1.4.10"
-    //val autowire = "0.2.6"
-    //val booPickle = "1.3.0"
     val uTest = "0.6.4"
     val typedApi = "0.2.0"
 
     val react = "16.5.2"
     val jsTokens = "4.0.0"
-    //val jQuery = "3.3.1"
-    //val bootstrap = "4.1.3"
-    //val fontAwesome = "4.3.0-1"
-    //val chartjs = "2.7.2"
 
     val jQueryFacade = "1.2"
-    //val jQuery = "1.11.1"
     val jQuery = "2.2.1"
     val bootstrap = "3.3.6"
     val fontAwesome = "4.3.0-1"
@@ -175,8 +166,6 @@ object Settings {
     "com.github.pheymann"   %%% "typedapi-client"      % versions.typedApi,
 
     "com.lihaoyi"   %%% "scalatags"            % Settings.scalaTagsV,
-    //"com.lihaoyi"   %%% "autowire"             % versions.autowire,
-    //"io.suzaku"     %%% "boopickle"            % versions.booPickle,
     //"com.beachape"  %%% "enumeratum"           % EnumeratumVersion,
     "com.beachape"  %%% "enumeratum-circe"     % EnumeratumCirceVersion,
     "io.circe"      %%% "circe-generic"        % CirceVersion,
@@ -190,18 +179,16 @@ object Settings {
   val frontendDependencies = Def.setting(Seq(
     // ScalaJS client support
     //"com.github.pheymann"               %%% "typedapi-client"      % versions.typedApi,
-    "com.github.pheymann"               %%% "typedapi-js-client"      % versions.typedApi,
+    "com.github.pheymann"               %%% "typedapi-js-client"   % versions.typedApi,
     "com.github.japgolly.scalajs-react" %%% "core"                 % versions.scalajsReact,
     "com.github.japgolly.scalajs-react" %%% "extra"                % versions.scalajsReact,
     "com.github.japgolly.scalacss"      %%% "core"                 % versions.scalaCSS,
     "com.github.japgolly.scalacss"      %%% "ext-react"            % versions.scalaCSS,
     "io.suzaku"                         %%% "diode"                % versions.diode,
     "io.suzaku"                         %%% "diode-react"          % versions.diodeReact,
-    //"io.suzaku"                         %%% "boopickle"            % versions.booPickle,
     "org.scala-js"                      %%% "scalajs-dom"          % versions.scalaDom,
     "com.lihaoyi"                       %%% "utest"                % versions.uTest % Test,
     "com.lihaoyi"                       %%% "scalatags"            % Settings.scalaTagsV,
-    //"com.lihaoyi"                       %%% "autowire"             % versions.autowire,
     "org.querki"                        %%% "jquery-facade"        % versions.jQueryFacade
   ))
 
