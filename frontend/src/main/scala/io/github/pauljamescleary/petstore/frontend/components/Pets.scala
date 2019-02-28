@@ -87,7 +87,7 @@ object PetForm {
     }
 
     def formClosed(state: State, props: Props): Callback =
-    // call parent handler with the new item and whether form was OK or cancelled
+      // call parent handler with the new item and whether form was OK or cancelled
       props.submitHandler(state.pet, state.cancelled)
 
     def updateBio(e: ReactEventFromInput) = {

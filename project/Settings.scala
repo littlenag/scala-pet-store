@@ -78,33 +78,45 @@ object Settings {
   val FlywayVersion          = "5.2.4"
   val TsecVersion            = "0.1.0-M2"
 
-  val utestV = "0.6.2"
-  val scalaJsDomV = "0.9.6"
-  val scalaTagsV = "0.6.7"
-  //val circeV = "0.9.3"
-  //val CatsEffectV = "0.10.1"
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
+    val scalaTags = "0.6.7"
     val scalaDom = "0.9.6"
+
     val scalajsReact = "1.3.1"
+    val reactNpm = "16.5.2"
+    val jsTokensNpm = "3.0.2"
     val diode = "1.1.4"
     val diodeReact = "1.1.4.131"
+
+    val scalajsReactBridge = "0.7.0"
+
     val scalaCSS = "0.5.5"
+
     val log4js = "1.4.10"
     val uTest = "0.6.4"
     val typedApi = "0.2.0"
 
-    val react = "16.5.2"
-    val jsTokens = "4.0.0"
-
     val jQueryFacade = "1.2"
-    val jQuery = "2.2.1"
-    val bootstrap = "3.3.6"
+    val jQueryNpm = "2.2.1"
+    val bootstrapNpm = "3.3.6"
     val fontAwesome = "4.3.0-1"
-    val chartjs = "2.1.3"
 
-    val scalajsScripts = "1.1.2"
+
+    // react + bootstrap:  https://github.com/aparo/scalajs-react-extra
+    // very very out-of-date
+
+    // bootstrap facade:   https://github.com/Karasiq/scalajs-bootstrap
+    // up to date, but not react friendly
+
+    val scalajsReactComponents = "1.0.0-M2"
+    // react + material:   https://github.com/chandu0101/scalajs-react-components
+    // out of date, but likely friendly
+    // sample: https://github.com/abdheshkumar/scalajs-material-ui
+
+    // react bridge:       https://github.com/payalabs/scalajs-react-bridge
+    // would allow [ReactBootstrap](http://react-bootstrap.github.io/)
   }
 
   /**
@@ -149,12 +161,12 @@ object Settings {
     "io.github.jmcardon"    %% "tsec-http4s"          % TsecVersion,
 
 
-    // FIXME i don't think these need to be here
-    "org.webjars.npm"  % "bootstrap"           % versions.bootstrap,
-    "org.webjars.npm"  % "react"               % versions.react,
-    "org.webjars.npm"  % "react-dom"           % versions.react,
-    "org.webjars.npm"  % "js-tokens"           % versions.jsTokens
-    //"org.webjars"      % "chartjs"             % "2.1.3"
+    // Required in order to avoid linking errors
+    "org.webjars.npm"  % "bootstrap"           % versions.bootstrapNpm,
+    "org.webjars.npm"  % "react"               % versions.reactNpm,
+    "org.webjars.npm"  % "react-dom"           % versions.reactNpm,
+    "org.webjars.npm"  % "js-tokens"           % versions.jsTokensNpm,
+    "org.webjars.npm"  % "material-ui"         % "0.20.0"
   ))
 
   /**
@@ -165,7 +177,7 @@ object Settings {
     "com.github.pheymann"   %%% "typedapi-shared"      % versions.typedApi,
     "com.github.pheymann"   %%% "typedapi-client"      % versions.typedApi,
 
-    "com.lihaoyi"   %%% "scalatags"            % Settings.scalaTagsV,
+    "com.lihaoyi"   %%% "scalatags"            % versions.scalaTags,
     //"com.beachape"  %%% "enumeratum"           % EnumeratumVersion,
     "com.beachape"  %%% "enumeratum-circe"     % EnumeratumCirceVersion,
     "io.circe"      %%% "circe-generic"        % CirceVersion,
@@ -177,30 +189,31 @@ object Settings {
 
   /** Dependencies only used by the ScalaJS project (note the use of %%% instead of %%) */
   val frontendDependencies = Def.setting(Seq(
-    // ScalaJS client support
-    //"com.github.pheymann"               %%% "typedapi-client"      % versions.typedApi,
-    "com.github.pheymann"               %%% "typedapi-js-client"   % versions.typedApi,
-    "com.github.japgolly.scalajs-react" %%% "core"                 % versions.scalajsReact,
-    "com.github.japgolly.scalajs-react" %%% "extra"                % versions.scalajsReact,
-    "com.github.japgolly.scalacss"      %%% "core"                 % versions.scalaCSS,
-    "com.github.japgolly.scalacss"      %%% "ext-react"            % versions.scalaCSS,
-    "io.suzaku"                         %%% "diode"                % versions.diode,
-    "io.suzaku"                         %%% "diode-react"          % versions.diodeReact,
-    "org.scala-js"                      %%% "scalajs-dom"          % versions.scalaDom,
-    "com.lihaoyi"                       %%% "utest"                % versions.uTest % Test,
-    "com.lihaoyi"                       %%% "scalatags"            % Settings.scalaTagsV,
-    "org.querki"                        %%% "jquery-facade"        % versions.jQueryFacade
+    "com.github.pheymann"               %%% "typedapi-js-client"        % versions.typedApi,
+    "com.github.japgolly.scalajs-react" %%% "core"                      % versions.scalajsReact, // withSources (),
+    "com.github.japgolly.scalajs-react" %%% "extra"                     % versions.scalajsReact,
+    "com.github.japgolly.scalacss"      %%% "core"                      % versions.scalaCSS,
+    "com.github.japgolly.scalacss"      %%% "ext-react"                 % versions.scalaCSS,
+    "com.olvind"                        %%% "scalajs-react-components"  % versions.scalajsReactComponents,
+    "io.suzaku"                         %%% "diode"                     % versions.diode,
+    "io.suzaku"                         %%% "diode-react"               % versions.diodeReact,
+    "org.scala-js"                      %%% "scalajs-dom"               % versions.scalaDom,
+    "com.lihaoyi"                       %%% "utest"                     % versions.uTest % Test,
+    "com.lihaoyi"                       %%% "scalatags"                 % versions.scalaTags,
+    "com.payalabs"                      %%% "scalajs-react-bridge"      % versions.scalajsReactBridge,
+    "org.querki"                        %%% "jquery-facade"             % versions.jQueryFacade
   ))
 
   /** Dependencies for external JS libs that are bundled into a single .js file according to dependency order */
   val jsDependencies = Def.setting(Seq(
-    //"org.webjars.npm"   % "js-tokens"      % "4.0.0"            / "js-tokens/4.0.0/index.js" commonJSName "jsTokens",
-    "org.webjars.npm"   % "react"          % versions.react     / "umd/react.development.js" minified "umd/react.production.min.js" commonJSName "React",
-    "org.webjars.npm"   % "react-dom"      % versions.react     / "umd/react-dom.development.js" minified  "umd/react-dom.production.min.js" dependsOn "umd/react.development.js" commonJSName "ReactDOM",
-    "org.webjars.npm"   % "react-dom"      % versions.react     / "umd/react-dom-server.browser.development.js" minified  "umd/react-dom-server.browser.production.min.js" dependsOn "umd/react-dom.development.js" commonJSName "ReactDOMServer",
-    "org.webjars"       % "jquery"         % versions.jQuery    / "jquery.js"    minified "jquery.min.js",
-    "org.webjars"       % "bootstrap"      % versions.bootstrap / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
+    "org.webjars.npm"   % "react"          % versions.reactNpm     / "umd/react.development.js" minified "umd/react.production.min.js" commonJSName "React",
+    "org.webjars.npm"   % "react-dom"      % versions.reactNpm     / "umd/react-dom.development.js" minified  "umd/react-dom.production.min.js" dependsOn "umd/react.development.js" commonJSName "ReactDOM",
+    "org.webjars.npm"   % "react-dom"      % versions.reactNpm     / "umd/react-dom-server.browser.development.js" minified  "umd/react-dom-server.browser.production.min.js" dependsOn "umd/react-dom.development.js" commonJSName "ReactDOMServer",
+    "org.webjars"       % "jquery"         % versions.jQueryNpm    / "jquery.js"    minified "jquery.min.js",
+    "org.webjars"       % "bootstrap"      % versions.bootstrapNpm / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
+    "org.webjars"       % "log4javascript" % versions.log4js       / "js/log4javascript_uncompressed.js" minified "js/log4javascript.js",
+    "org.webjars.npm"   % "material-ui"    % "0.20.0"              / ""
     //"org.webjars"       % "chartjs"        % versions.chartjs   / "Chart.js"     minified "Chart.min.js",
-    "org.webjars"       % "log4javascript" % versions.log4js    / "js/log4javascript_uncompressed.js" minified "js/log4javascript.js"
+    //"org.webjars.npm"   % "js-tokens"      % "4.0.0"            / "js-tokens/4.0.0/index.js" commonJSName "jsTokens",
   ))
 }

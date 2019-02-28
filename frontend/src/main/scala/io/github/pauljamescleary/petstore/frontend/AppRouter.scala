@@ -46,7 +46,3 @@ object AppRouter {
   // create the router
   val router: Router[AppPage] = Router(BaseUrl.until_#, routerConfig)
 }
-
-object HeaderStyle {
-
-}

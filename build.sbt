@@ -1,3 +1,4 @@
+import Settings.versions
 import sbt.Def
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 //import webscalajs.ScalaJSWeb
@@ -87,12 +88,19 @@ lazy val frontend = (project in file("frontend"))
     mainClass in Compile := Some("io.github.pauljamescleary.petstore.frontend.PetstoreApp"),
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer in Test := false,
-    scalaJSLinkerConfig ~= { _.withOptimizer(false).withSourceMap(true).withPrettyPrint(true) },
+    scalaJSLinkerConfig := {
+      val fastOptJSURI = (artifactPath in (Compile, fastOptJS)).value.toURI
+      scalaJSLinkerConfig.value
+        .withRelativizeSourceMapBase(Some(fastOptJSURI))
+        .withOptimizer(false)
+        .withSourceMap(true)
+        .withPrettyPrint(true)
+    },
+    //scalaJSLinkerConfig ~= { x => x },
     scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) }
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(sharedJs)
-
 
 lazy val shared =
   crossProject(JSPlatform, JVMPlatform)
