@@ -14,3 +14,12 @@
 
     // awesome example app
     // https://github.com/abdheshkumar/scalajs-material-ui
+    
+    
+    shared-fastopt-bundle.js
+    app-bundle.js
+    
+    ./shared/.js/target/scala-2.12/scalajs-bundler/main/shared-fastopt-bundle.js
+    ./frontend/target/scala-2.12/scalajs-bundler/main/app-bundle.js
+    ./backend/target/web/classes/main/META-INF/resources/webjars/scala-pet-store/0.0.1-SNAPSHOT/shared-fastopt-bundle.js
+    ./backend/target/web/classes/main/META-INF/resources/webjars/scala-pet-store/0.0.1-SNAPSHOT/app-bundle.js

@@ -41,21 +41,30 @@ lazy val backend = (project in file("backend"))
     pipelineStages in Assets := Seq(scalaJSPipeline),
 
     libraryDependencies ++= Settings.backendDependencies.value,
+
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
 
+
     // do a fastOptJS on reStart
-    reStart := (reStart dependsOn (fastOptJS in (frontend, Compile))).evaluated,
+    reStart := (reStart dependsOn ((fastOptJS / webpack) in (frontend, Compile))).evaluated,
+
     // This settings makes reStart to rebuild if a scala.js file changes on the client
     watchSources ++= (watchSources in frontend).value,
+
     // Support stopping the running server
     mainClass in reStart := Some("io.github.pauljamescleary.petstore.Server"),
+
     fork in run := true,
   )
   .dependsOn(sharedJvm)
   .enablePlugins(SbtWeb, WebScalaJSBundlerPlugin)
 
 ///
+
+// https://github.com/scalacenter/scalajs-bundler/issues/111
+lazy val npmDevOverrides = Seq( "source-map-loader" -> "git+https://github.com/shishkin/source-map-loader#fetch-http-maps" )
+
 
 lazy val frontend = (project in file("frontend"))
   .settings(
@@ -138,6 +147,12 @@ lazy val frontend = (project in file("frontend"))
     // as expected by the scalajs-react facade
     //webpackConfigFile := Some(baseDirectory.value / "webpack.config.js"),
 
+    // https://github.com/scalacenter/scalajs-bundler/issues/111
+    version in webpack := "4.28.1",
+    version in startWebpackDevServer := "3.1.14",
+    npmDevDependencies in Compile ++= npmDevOverrides,
+    npmResolutions in Compile := npmDevOverrides.toMap,
+
     // Uniformises fastOptJS/fullOptJS output file name
     artifactPath in(Compile, fastOptJS) := ((crossTarget in(Compile, fastOptJS)).value / "app.js"),
     artifactPath in(Compile, packageJSDependencies) := ((crossTarget in(Compile, fastOptJS)).value / "deps.js"),
@@ -150,6 +165,8 @@ lazy val frontend = (project in file("frontend"))
   )
   .enablePlugins(ScalaJSBundlerPlugin,ScalaJSWeb)
   .dependsOn(sharedJs)
+
+lazy val foo = fastOptJS / webpack
 
 lazy val shared =
   crossProject(JSPlatform, JVMPlatform)

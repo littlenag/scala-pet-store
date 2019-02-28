@@ -44,16 +44,15 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
     html(
       head(
         meta(charset := "UTF-8"),
-        title("Scala Pet Store"),
+        title("Scala Pet Store")
         // FIXME should be unnecessary with webpack
-        link(rel := "stylesheet", href := "/webjars/bootstrap/3.3.6/dist/css/bootstrap.css"),
+        //link(rel := "stylesheet", href := "/webjars/bootstrap/3.3.6/dist/css/bootstrap.css"),
       ),
       body(
         // This div is where our SPA is rendered.
         div(`class` := "app-container", id := "root"),
-        script(`type`:= "text/javascript", src := "resources/global.js"),
-        script(`type`:= "text/javascript", src := "resources/deps.js"),
-        script(`type`:= "text/javascript", src := "resources/app.js")
+        script(`type`:= "text/javascript", src := "/webjars/scala-pet-store/0.0.1-SNAPSHOT/shared-fastopt-bundle.js"),
+        script(`type`:= "text/javascript", src := "/webjars/scala-pet-store/0.0.1-SNAPSHOT/app-bundle.js")
       )
     )
   }
