@@ -9,7 +9,7 @@ import domain.pets.Pet
 import domain.pets.PetStatus.{Adopted, Available, Pending}
 import frontend.logger._
 import frontend.css.Bootstrap.{Button, Modal, Panel}
-import frontend.css.{GlobalStyles, Icon}
+import frontend.css.{GlobalStyles, FontAwesome}
 import frontend.services.{DeletePet, PetsData, RefreshPets, UpsertPet}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -54,7 +54,7 @@ object Pets {
             item => p.proxy.dispatchCB(DeletePet(item))
           )
         ),
-        Button(Button.Props(editPet(None)), Icon.plusSquare, " New")),
+        Button(Button.Props(editPet(None)), FontAwesome.plusSquare, " New")),
         // if the dialog is open, add it to the panel
         if (s.showPetForm) PetForm(PetForm.Props(s.selectedItem, petEdited))
         else // otherwise add an empty placeholder
@@ -111,7 +111,7 @@ object PetForm {
       val headerText = if (s.pet.id.isEmpty) "Add new pet" else "Edit pet"
       Modal(Modal.Props(
         // header contains a cancel button (X)
-        header = hide => <.span(<.button(^.tpe := "button", bss.close, ^.onClick --> hide, Icon.close), <.h4(headerText)),
+        header = hide => <.span(<.button(^.tpe := "button", bss.close, ^.onClick --> hide, FontAwesome.close), <.h4(headerText)),
         // footer has the OK button that submits the form before hiding it
         footer = hide => <.span(Button(Button.Props(submitForm() >> hide), "OK")),
         // this is called after the modal has been hidden (animation is completed)

@@ -101,22 +101,9 @@ object Settings {
     val jQueryFacade = "1.2"
     val jQueryNpm = "2.2.1"
     val bootstrapNpm = "3.3.6"
-    val fontAwesome = "4.3.0-1"
-
-
-    // react + bootstrap:  https://github.com/aparo/scalajs-react-extra
-    // very very out-of-date
-
-    // bootstrap facade:   https://github.com/Karasiq/scalajs-bootstrap
-    // up to date, but not react friendly
+    //val fontAwesome = "4.3.0-1"
 
     val scalajsReactComponents = "1.0.0-M2"
-    // react + material:   https://github.com/chandu0101/scalajs-react-components
-    // out of date, but likely friendly
-    // sample: https://github.com/abdheshkumar/scalajs-material-ui
-
-    // react bridge:       https://github.com/payalabs/scalajs-react-bridge
-    // would allow [ReactBootstrap](http://react-bootstrap.github.io/)
   }
 
   /**
@@ -158,15 +145,15 @@ object Settings {
     "io.github.jmcardon"    %% "tsec-signatures"      % TsecVersion,
     "io.github.jmcardon"    %% "tsec-jwt-mac"         % TsecVersion,
     "io.github.jmcardon"    %% "tsec-jwt-sig"         % TsecVersion,
-    "io.github.jmcardon"    %% "tsec-http4s"          % TsecVersion,
+    "io.github.jmcardon"    %% "tsec-http4s"          % TsecVersion
 
 
     // Required in order to avoid linking errors
-    "org.webjars.npm"  % "bootstrap"           % versions.bootstrapNpm,
-    "org.webjars.npm"  % "react"               % versions.reactNpm,
-    "org.webjars.npm"  % "react-dom"           % versions.reactNpm,
-    "org.webjars.npm"  % "js-tokens"           % versions.jsTokensNpm,
-    "org.webjars.npm"  % "material-ui"         % "0.20.0"
+    //"org.webjars.npm"  % "bootstrap"           % versions.bootstrapNpm,
+    //"org.webjars.npm"  % "react"               % versions.reactNpm,
+    //"org.webjars.npm"  % "react-dom"           % versions.reactNpm,
+    //"org.webjars.npm"  % "js-tokens"           % versions.jsTokensNpm,
+    //"org.webjars.npm"  % "material-ui"         % "0.20.0"
   ))
 
   /**
@@ -185,6 +172,9 @@ object Settings {
     "io.circe"      %%% "circe-generic-extras" % CirceVersion,
     "io.circe"      %%% "circe-parser"         % CirceVersion,
     "io.circe"      %%% "circe-java8"          % CirceVersion,
+
+    // Shared so that the JSWriter macro can be compiled separately
+    "com.payalabs"                      %%% "scalajs-react-bridge"      % versions.scalajsReactBridge
   ))
 
   /** Dependencies only used by the ScalaJS project (note the use of %%% instead of %%) */
@@ -201,10 +191,17 @@ object Settings {
     "com.lihaoyi"                       %%% "utest"                     % versions.uTest % Test,
     "com.lihaoyi"                       %%% "scalatags"                 % versions.scalaTags,
     "com.payalabs"                      %%% "scalajs-react-bridge"      % versions.scalajsReactBridge,
+
+    // Facades of other JavaScript libraries
     "org.querki"                        %%% "jquery-facade"             % versions.jQueryFacade
   ))
 
-  /** Dependencies for external JS libs that are bundled into a single .js file according to dependency order */
+  /**
+    * Dependencies for external JS libs that are bundled into a single .js file according to dependency order
+    *
+    * NOTE this is deprecated, REMOVE ME!
+    */
+    /*
   val jsDependencies = Def.setting(Seq(
     "org.webjars.npm"   % "react"          % versions.reactNpm     / "umd/react.development.js" minified "umd/react.production.min.js" commonJSName "React",
     "org.webjars.npm"   % "react-dom"      % versions.reactNpm     / "umd/react-dom.development.js" minified  "umd/react-dom.production.min.js" dependsOn "umd/react.development.js" commonJSName "ReactDOM",
@@ -212,8 +209,8 @@ object Settings {
     "org.webjars"       % "jquery"         % versions.jQueryNpm    / "jquery.js"    minified "jquery.min.js",
     "org.webjars"       % "bootstrap"      % versions.bootstrapNpm / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
     "org.webjars"       % "log4javascript" % versions.log4js       / "js/log4javascript_uncompressed.js" minified "js/log4javascript.js",
-    "org.webjars.npm"   % "material-ui"    % "0.20.0"              / ""
     //"org.webjars"       % "chartjs"        % versions.chartjs   / "Chart.js"     minified "Chart.min.js",
     //"org.webjars.npm"   % "js-tokens"      % "4.0.0"            / "js-tokens/4.0.0/index.js" commonJSName "jsTokens",
   ))
+  */
 }

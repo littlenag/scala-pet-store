@@ -37,21 +37,23 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
 
   def allowAsset(asset: WebjarAsset) = true
 
-  val jsScript = "resources/scala-pet-store-frontend-fastopt.js"
-  val jsDeps = "resources/scala-pet-store-frontend-jsdeps.js"
-
   val indexHTML: TypedTag[String] = {
     import scalatags.Text.all._
+    import scalatags.Text.tags2.title
 
-    // navbar, header footer
     html(
       head(
+        meta(charset := "UTF-8"),
+        title("Scala Pet Store"),
+        // FIXME should be unnecessary with webpack
         link(rel := "stylesheet", href := "/webjars/bootstrap/3.3.6/dist/css/bootstrap.css"),
-        script(`type`:= "text/javascript", src := jsDeps)
       ),
       body(
-        div(id := "root"),
-        script(`type`:= "text/javascript", src := jsScript)
+        // This div is where our SPA is rendered.
+        div(`class` := "app-container", id := "root"),
+        script(`type`:= "text/javascript", src := "resources/global.js"),
+        script(`type`:= "text/javascript", src := "resources/deps.js"),
+        script(`type`:= "text/javascript", src := "resources/app.js")
       )
     )
   }

@@ -1,7 +1,5 @@
-import Settings.versions
 import sbt.Def
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
-//import webscalajs.ScalaJSWeb
 
 // Top-level settings
 
@@ -33,29 +31,19 @@ lazy val commonSettings = Def.settings(
   resolvers += Resolver.sonatypeRepo("snapshots")
 )
 
-// This function allows triggered compilation to run only when scala files changes
-// It lets change static files freely
-def includeInTrigger(f: java.io.File): Boolean =
-  f.isFile && {
-    val name = f.getName.toLowerCase
-    name.endsWith(".scala") || name.endsWith(".js")
-  }
-
 lazy val backend = (project in file("backend"))
   .settings(
     name := Settings.name
   )
   .settings(commonSettings: _*)
   .settings(
+    scalaJSProjects := Seq(frontend,sharedJs),
+    pipelineStages in Assets := Seq(scalaJSPipeline),
+
     libraryDependencies ++= Settings.backendDependencies.value,
-    // Allows to read the generated JS on client
-    resources in Compile += (fastOptJS in (frontend, Compile)).value.data,
-    // Lets the backend to read the .map file for js
-    resources in Compile += (fastOptJS in (frontend, Compile)).value
-      .map((x: sbt.File) => new File(x.getAbsolutePath + ".map"))
-      .data,
-    // Lets the server read the jsdeps file
-    (managedResources in Compile) += (artifactPath in (frontend, Compile, packageJSDependencies)).value,
+    // triggers scalaJSPipeline when using compile or continuous compilation
+    compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
+
     // do a fastOptJS on reStart
     reStart := (reStart dependsOn (fastOptJS in (frontend, Compile))).evaluated,
     // This settings makes reStart to rebuild if a scala.js file changes on the client
@@ -65,6 +53,7 @@ lazy val backend = (project in file("backend"))
     fork in run := true,
   )
   .dependsOn(sharedJvm)
+  .enablePlugins(SbtWeb, WebScalaJSBundlerPlugin)
 
 ///
 
@@ -75,15 +64,14 @@ lazy val frontend = (project in file("frontend"))
   .settings(commonSettings: _*)
   .settings(
     // Build a js dependencies file
-    skip in packageJSDependencies := false,
+    //skip in packageJSDependencies := false,
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
 
     // Put the jsdeps file on a place reachable for the server
-    crossTarget in (Compile, packageJSDependencies) := (resourceManaged in Compile).value,
+    //crossTarget in (Compile, packageJSDependencies) := (resourceManaged in Compile).value,
     testFrameworks += new TestFramework("utest.runner.Framework"),
-    libraryDependencies ++= Settings.frontendDependencies.value,
-    dependencyOverrides += "org.webjars.npm" % "js-tokens" % "3.0.2",  // fix for https://github.com/webjars/webjars/issues/1789
-    jsDependencies ++= Settings.jsDependencies.value,
+    //dependencyOverrides += "org.webjars.npm" % "js-tokens" % "3.0.2",  // fix for https://github.com/webjars/webjars/issues/1789
+    //jsDependencies ++= Settings.jsDependencies.value,
     // use Scala.js provided launcher code to start the client app
     mainClass in Compile := Some("io.github.pauljamescleary.petstore.frontend.PetstoreApp"),
     scalaJSUseMainModuleInitializer := true,
@@ -96,10 +84,71 @@ lazy val frontend = (project in file("frontend"))
         .withSourceMap(true)
         .withPrettyPrint(true)
     },
-    //scalaJSLinkerConfig ~= { x => x },
-    scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) }
+    scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) },
+
+    libraryDependencies ++= Settings.frontendDependencies.value,
+
+    npmDependencies in Compile ++= Seq(
+      //"react-event-listener" -> "0.6.6",
+      //"@material-ui/core" ->  "3.9.2",
+
+      //"@babel/runtime" ->  "7.3.4",
+
+      //"classnames" ->  "2.2.5",
+      //"cross-env" ->  "5.1.2",
+
+      //"i18next" ->  "11.3.2",
+      //"i18next-browser-languagedetector" ->  "2.2.0",
+
+      //"material-ui" ->  "1.0.0-beta.4",
+      //"material-ui-chip-input" ->  "1.0.0-beta.4",
+      //"material-ui-icons" ->  "1.0.0-beta.17",
+      //"material-ui-pickers" ->  "1.0.0-rc.9",
+      //"moment" ->  "2.22.1",
+
+      "react-bootstrap" -> "1.0.0-beta.5",
+      "bootstrap" -> "4.2.1",
+      "jquery" -> "3.3.1",
+      "popper.js" -> "1.14.6",
+
+      //"npm" ->  "6.0.0",
+
+      "log4javascript" ->  "1.4.15",
+
+      //"react" ->  "16.3.0",
+      "react" ->  "16.8.3",
+      "react-dom" ->  "16.8.3"
+      //"react-clamp-lines" ->  "1.1.0",
+      //"react-custom-scrollbars" ->  "4.2.1",
+      //"react-i18next" ->  "7.6.1",
+      //"react-popper" ->  "0.10.4",
+      //"react-router-dom" ->  "4.2.2",
+      //"react-scroll" ->  "1.7.9",
+      //"react-select" ->  "1.2.1",
+      //"validator" ->  "9.4.1",
+      //"@types/recompose" ->  "0.26.1",
+      //"recompose" ->  "0.27.1",
+
+      //"i18next-xhr-backend" -> "1.4.3",
+      //"uglifyjs-webpack-plugin" -> "^2.0.1",
+      //"numeral" -> "~2.0.6"
+    ),
+
+    // Use a custom config file to export the JS dependencies to the global namespace,
+    // as expected by the scalajs-react facade
+    //webpackConfigFile := Some(baseDirectory.value / "webpack.config.js"),
+
+    // Uniformises fastOptJS/fullOptJS output file name
+    artifactPath in(Compile, fastOptJS) := ((crossTarget in(Compile, fastOptJS)).value / "app.js"),
+    artifactPath in(Compile, packageJSDependencies) := ((crossTarget in(Compile, fastOptJS)).value / "deps.js"),
+    artifactPath in(Test, fastOptJS) := ((crossTarget in(Test, fastOptJS)).value / "app.test.js"),
+    artifactPath in(Test, packageJSDependencies) := ((crossTarget in(Test, fastOptJS)).value / "deps.test.js"),
+    artifactPath in(Compile, fullOptJS) := ((crossTarget in(Compile, fullOptJS)).value / "app.min.js"),
+    artifactPath in(Compile, packageMinifiedJSDependencies) := ((crossTarget in(Compile, fullOptJS)).value / "deps.min.js"),
+    artifactPath in(Test, fullOptJS) := ((crossTarget in(Test, fullOptJS)).value / "app.min.test.js"),
+    artifactPath in(Test, packageMinifiedJSDependencies) := ((crossTarget in(Test, fullOptJS)).value / "deps.min.test.js")
   )
-  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalaJSBundlerPlugin,ScalaJSWeb)
   .dependsOn(sharedJs)
 
 lazy val shared =
@@ -110,6 +159,7 @@ lazy val shared =
     .settings(
       libraryDependencies ++= Settings.sharedDependencies.value
     )
+    .enablePlugins(ScalaJSBundlerPlugin,ScalaJSWeb)
     // set up settings specific to the JS project
     //.jsConfigure(_ enablePlugins ScalaJSWeb)
 

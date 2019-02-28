@@ -21,6 +21,8 @@ object Bootstrap {
   // shorthand for styles
   @inline private def bss = GlobalStyles.bootstrapStyles
 
+  // FIXME this should be replaced by react-bootstrap
+
   //@js.native
   //trait BootstrapJQuery extends JQuery {
   //  def modal(action: String): BootstrapJQuery = js.native
