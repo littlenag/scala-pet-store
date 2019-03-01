@@ -8,9 +8,10 @@ import io.github.pauljamescleary.petstore.frontend
 import domain.pets.Pet
 import domain.pets.PetStatus.{Adopted, Available, Pending}
 import frontend.logger._
-import frontend.css.Bootstrap.{Button, Modal, Panel}
-import frontend.css.{GlobalStyles, FontAwesome}
+import frontend.css.Bootstrap.{Modal, Panel}
+import frontend.css.{FontAwesomeCss, FontAwesomeTags, GlobalStyles}
 import frontend.services.{DeletePet, PetsData, RefreshPets, UpsertPet}
+import io.github.pauljamescleary.petstore.frontend.bootstrap.Button
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import scalacss.ScalaCssReact._
@@ -43,22 +44,26 @@ object Pets {
     }
 
     def render(p: Props, s: State) =
-      Panel(Panel.Props("Pets in the Kennel"), <.div(
-        p.proxy().renderFailed(ex => "Error loading"),
-        p.proxy().renderPending(_ > 500, _ => "Loading..."),
-        p.proxy().render(pd =>
-          PetList(
-            pd.pets,
-            item => p.proxy.dispatchCB(UpsertPet(item)),
-            item => editPet(Some(item)),
-            item => p.proxy.dispatchCB(DeletePet(item))
-          )
-        ),
-        Button(Button.Props(editPet(None)), FontAwesome.plusSquare, " New")),
-        // if the dialog is open, add it to the panel
-        if (s.showPetForm) PetForm(PetForm.Props(s.selectedItem, petEdited))
-        else // otherwise add an empty placeholder
-          VdomArray.empty())
+      Panel(Panel.Props("Pets in the Kennel"),
+        <.div(
+          p.proxy().renderFailed(ex => "Error loading"),
+          p.proxy().renderPending(_ > 500, _ => "Loading..."),
+          p.proxy().render(pd =>
+            PetList(
+              pd.pets,
+              item => p.proxy.dispatchCB(UpsertPet(item)),
+              item => editPet(Some(item)),
+              item => p.proxy.dispatchCB(DeletePet(item))
+            )
+          ),
+          Button(onClick = editPet(None).toJsCallback)(FontAwesomeTags.plusSquare, " New"),
+          // if the dialog is open, add it to the panel
+          if (s.showPetForm)
+            PetForm(PetForm.Props(s.selectedItem, petEdited))
+          else // otherwise add an empty placeholder
+            VdomArray.empty()
+        )
+      )
   }
 
   // create the React component for To Do management
@@ -111,9 +116,9 @@ object PetForm {
       val headerText = if (s.pet.id.isEmpty) "Add new pet" else "Edit pet"
       Modal(Modal.Props(
         // header contains a cancel button (X)
-        header = hide => <.span(<.button(^.tpe := "button", bss.close, ^.onClick --> hide, FontAwesome.close), <.h4(headerText)),
+        header = hide => <.span(<.button(^.tpe := "button", bss.close, ^.onClick --> hide, FontAwesomeTags.close), <.h4(headerText)),
         // footer has the OK button that submits the form before hiding it
-        footer = hide => <.span(Button(Button.Props(submitForm() >> hide), "OK")),
+        footer = hide => <.span(Button(onClick = (submitForm() >> hide).toJsCallback)("OK")),
         // this is called after the modal has been hidden (animation is completed)
         closed = formClosed(s, p)),
         <.div(bss.formGroup,

@@ -17,10 +17,10 @@ import japgolly.scalajs.react.vdom.html_<^._
 
 /**
   * Navigation menu for the application.
+  *
+  * Relies directly on bootstrap navbar being loaded.
   */
 object AppMenu {
-
-  import io.github.pauljamescleary.petstore.frontend.css.GlobalStyles._
 
   object Style extends StyleSheet.Inline {
 
@@ -92,7 +92,6 @@ object AppMenu {
     def render(p: Props, s: State) = {
       <.header(
         <.nav(
-          //bootstrapStyles.navbar,
           ^.`class` := "navbar navbar-expand-lg navbar-dark bg-dark fixed-top",
           <.a(^.`class` := "navbar-brand", p.ctrl setOnClick HomePageRt)("Pet Store"),
           p.userProfile().render { up => authenticated(up,p)},

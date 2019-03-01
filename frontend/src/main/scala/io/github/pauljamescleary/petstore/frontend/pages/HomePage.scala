@@ -26,7 +26,7 @@ object HomePage {
     val content = style(textAlign.center,
       //fontSize(30.px),
       minHeight(450.px),
-      paddingTop(40.px))
+      paddingTop(80.px))
   }
 
   // create the React component for Dashboard

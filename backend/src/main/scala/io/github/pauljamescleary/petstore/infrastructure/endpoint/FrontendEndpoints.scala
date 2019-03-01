@@ -30,9 +30,10 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
 
   def getResource(pathInfo: String) = F.delay(getClass.getResource(pathInfo))
 
-  // only allow js assets
-  def isJsAsset(asset: WebjarAsset): Boolean = {
-    asset.asset.endsWith(".js") || asset.asset.endsWith(".css") || asset.asset.endsWith(".map")
+  // only allow js/font/image assets
+  def isPublicAsset(asset: WebjarAsset): Boolean = {
+    val extensions = Seq(".js", ".css", ".map", ".ttf", ".woff", ".woff2", ".eot", ".svg", ".png")
+    extensions.exists(ext => asset.asset.endsWith(ext))
   }
 
   def allowAsset(asset: WebjarAsset) = true
@@ -45,13 +46,11 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
       head(
         meta(charset := "UTF-8"),
         title("Scala Pet Store")
-        // FIXME should be unnecessary with webpack
-        //link(rel := "stylesheet", href := "/webjars/bootstrap/3.3.6/dist/css/bootstrap.css"),
       ),
       body(
         // This div is where our SPA is rendered.
         div(`class` := "app-container", id := "root"),
-        script(`type`:= "text/javascript", src := "/webjars/scala-pet-store/0.0.1-SNAPSHOT/shared-fastopt-bundle.js"),
+        script(`type`:= "text/javascript", src := "/webjars/scala-pet-store/0.0.1-SNAPSHOT/shared-bundle.js"),
         script(`type`:= "text/javascript", src := "/webjars/scala-pet-store/0.0.1-SNAPSHOT/app-bundle.js")
       )
     )
@@ -69,13 +68,20 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
 
   val webjars: HttpRoutes[F] = webjarService(
     Config(
-      filter = isJsAsset,
+      filter = isPublicAsset,
       blockingExecutionContext = ec
     )
   )
 
   val resourcesEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
+      case req @ GET -> "fonts" /: path =>
+        logger.info(s"font: $path")
+        logger.info(s"webjar path: ${"/scala-pet-store/0.0.1-SNAPSHOT/fonts" + path.toString}")
+        webjars(req.withPathInfo("/scala-pet-store/0.0.1-SNAPSHOT/fonts" + path.toString))
+          .fold(NotFound())(F.pure)
+          .flatten
+
       case req @ GET -> "webjars" /: path =>
         logger.info(s"webjars: $path")
         webjars(req.withPathInfo(path.toString))

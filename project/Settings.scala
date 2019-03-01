@@ -148,14 +148,6 @@ object Settings {
     "io.github.jmcardon"    %% "tsec-jwt-mac"         % TsecVersion,
     "io.github.jmcardon"    %% "tsec-jwt-sig"         % TsecVersion,
     "io.github.jmcardon"    %% "tsec-http4s"          % TsecVersion
-
-
-    // Required in order to avoid linking errors
-    //"org.webjars.npm"  % "bootstrap"           % versions.bootstrapNpm,
-    //"org.webjars.npm"  % "react"               % versions.reactNpm,
-    //"org.webjars.npm"  % "react-dom"           % versions.reactNpm,
-    //"org.webjars.npm"  % "js-tokens"           % versions.jsTokensNpm,
-    //"org.webjars.npm"  % "material-ui"         % "0.20.0"
   ))
 
   /**
@@ -166,17 +158,17 @@ object Settings {
     "com.github.pheymann"   %%% "typedapi-shared"      % versions.typedApi,
     "com.github.pheymann"   %%% "typedapi-client"      % versions.typedApi,
 
-    "com.lihaoyi"   %%% "scalatags"            % versions.scalaTags,
+    "com.lihaoyi"   %%% "scalatags"             % versions.scalaTags,
     //"com.beachape"  %%% "enumeratum"           % EnumeratumVersion,
-    "com.beachape"  %%% "enumeratum-circe"     % EnumeratumCirceVersion,
-    "io.circe"      %%% "circe-generic"        % CirceVersion,
-    "io.circe"      %%% "circe-literal"        % CirceVersion,
-    "io.circe"      %%% "circe-generic-extras" % CirceVersion,
-    "io.circe"      %%% "circe-parser"         % CirceVersion,
-    "io.circe"      %%% "circe-java8"          % CirceVersion,
+    "com.beachape"  %%% "enumeratum-circe"      % EnumeratumCirceVersion,
+    "io.circe"      %%% "circe-generic"         % CirceVersion,
+    "io.circe"      %%% "circe-literal"         % CirceVersion,
+    "io.circe"      %%% "circe-generic-extras"  % CirceVersion,
+    "io.circe"      %%% "circe-parser"          % CirceVersion,
+    "io.circe"      %%% "circe-java8"           % CirceVersion,
 
     // Shared so that the JSWriter macro can be compiled separately
-    "com.payalabs"                      %%% "scalajs-react-bridge"      % versions.scalajsReactBridge
+    "com.payalabs"  %%% "scalajs-react-bridge"  % versions.scalajsReactBridge
   ))
 
   /** Dependencies only used by the ScalaJS project (note the use of %%% instead of %%) */
@@ -184,36 +176,82 @@ object Settings {
     "com.github.pheymann"               %%% "typedapi-js-client"        % versions.typedApi,
     "com.github.japgolly.scalajs-react" %%% "core"                      % versions.scalajsReact, // withSources (),
     "com.github.japgolly.scalajs-react" %%% "extra"                     % versions.scalajsReact,
+    "com.olvind"                        %%% "scalajs-react-components"  % versions.scalajsReactComponents,
+    "com.payalabs"                      %%% "scalajs-react-bridge"      % versions.scalajsReactBridge,
+
     "com.github.japgolly.scalacss"      %%% "core"                      % versions.scalaCSS,
     "com.github.japgolly.scalacss"      %%% "ext-react"                 % versions.scalaCSS,
-    "com.olvind"                        %%% "scalajs-react-components"  % versions.scalajsReactComponents,
+
     "io.suzaku"                         %%% "diode"                     % versions.diode,
     "io.suzaku"                         %%% "diode-react"               % versions.diodeReact,
+
     "org.scala-js"                      %%% "scalajs-dom"               % versions.scalaDom,
+
     "com.lihaoyi"                       %%% "utest"                     % versions.uTest % Test,
-    "com.lihaoyi"                       %%% "scalatags"                 % versions.scalaTags,
-    "com.payalabs"                      %%% "scalajs-react-bridge"      % versions.scalajsReactBridge,
+    //"com.lihaoyi"                       %%% "scalatags"                 % versions.scalaTags,
 
     // Facades of other JavaScript libraries
     "com.github.karasiq"                %%% "scalajs-bootstrap-v4"      % versions.bootstrapFacade,
-    "org.querki"                        %%% "jquery-facade"             % versions.jQueryFacade
+    "org.querki"                        %%% "jquery-facade"             % versions.jQueryFacade      // TODO remove me
   ))
 
-  /**
-    * Dependencies for external JS libs that are bundled into a single .js file according to dependency order
-    *
-    * NOTE this is deprecated, REMOVE ME!
-    */
-    /*
-  val jsDependencies = Def.setting(Seq(
-    "org.webjars.npm"   % "react"          % versions.reactNpm     / "umd/react.development.js" minified "umd/react.production.min.js" commonJSName "React",
-    "org.webjars.npm"   % "react-dom"      % versions.reactNpm     / "umd/react-dom.development.js" minified  "umd/react-dom.production.min.js" dependsOn "umd/react.development.js" commonJSName "ReactDOM",
-    "org.webjars.npm"   % "react-dom"      % versions.reactNpm     / "umd/react-dom-server.browser.development.js" minified  "umd/react-dom-server.browser.production.min.js" dependsOn "umd/react-dom.development.js" commonJSName "ReactDOMServer",
-    "org.webjars"       % "jquery"         % versions.jQueryNpm    / "jquery.js"    minified "jquery.min.js",
-    "org.webjars"       % "bootstrap"      % versions.bootstrapNpm / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
-    "org.webjars"       % "log4javascript" % versions.log4js       / "js/log4javascript_uncompressed.js" minified "js/log4javascript.js",
-    //"org.webjars"       % "chartjs"        % versions.chartjs   / "Chart.js"     minified "Chart.min.js",
-    //"org.webjars.npm"   % "js-tokens"      % "4.0.0"            / "js-tokens/4.0.0/index.js" commonJSName "jsTokens",
-  ))
-  */
+  val npmDeps = Seq(
+    //"react-event-listener" -> "0.6.6",
+    //"@material-ui/core" ->  "3.9.2",
+
+    //"@babel/runtime" ->  "7.3.4",
+
+    //"classnames" ->  "2.2.5",
+    //"cross-env" ->  "5.1.2",
+
+    //"i18next" ->  "11.3.2",
+    //"i18next-browser-languagedetector" ->  "2.2.0",
+
+    //"material-ui" ->  "1.0.0-beta.4",
+    //"material-ui-chip-input" ->  "1.0.0-beta.4",
+    //"material-ui-icons" ->  "1.0.0-beta.17",
+    //"material-ui-pickers" ->  "1.0.0-rc.9",
+    //"moment" ->  "2.22.1",
+
+    "webpack-merge" -> "4.1.0",
+
+    "@fortawesome/fontawesome-free" -> "5.7.2",
+
+    "react-bootstrap" -> "1.0.0-beta.5",
+    "bootstrap" -> "4.1.1",
+    "jquery" -> "3.2.1",
+    "popper.js" -> "1.14.6",
+
+    "log4javascript" ->  "1.4.15",
+
+    "react" ->  "16.8.3",
+    "react-dom" ->  "16.8.3"
+    //"react-clamp-lines" ->  "1.1.0",
+    //"react-custom-scrollbars" ->  "4.2.1",
+    //"react-i18next" ->  "7.6.1",
+    //"react-popper" ->  "0.10.4",
+    //"react-router-dom" ->  "4.2.2",
+    //"react-scroll" ->  "1.7.9",
+    //"react-select" ->  "1.2.1",
+    //"validator" ->  "9.4.1",
+    //"@types/recompose" ->  "0.26.1",
+    //"recompose" ->  "0.27.1",
+
+    //"i18next-xhr-backend" -> "1.4.3",
+    //"uglifyjs-webpack-plugin" -> "^2.0.1",
+    //"numeral" -> "~2.0.6"
+  )
+
+  val npmDevDeps = Seq(
+    // Webpack Loaders for CSS and more
+    "css-loader" -> "0.28.9",
+    "postcss-loader" -> "^2.1.1",
+    "precss" -> "^3.1.2",
+    //"extract-text-webpack-plugin" -> "3.0.2",
+    "file-loader" -> "1.1.6",
+    "node-sass" -> "4.9.2",
+    "sass-loader" -> "6.0.7",
+    "style-loader" -> "0.20.0",
+    "url-loader" -> "0.6.2"
+  )
 }

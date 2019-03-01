@@ -1,13 +1,21 @@
 package io.github.pauljamescleary.petstore.frontend.css
 
 import japgolly.scalajs.react.vdom.html_<^._
+import org.scalajs.dom.{Element, Node}
+
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
+
+@native
+@JSImport("@fortawesome/fontawesome-free/css/all.css", JSImport.Namespace)
+object FontAwesomeCss extends js.Object
 
 /**
  * Provides type-safe access to Font Awesome icons
  */
-object FontAwesome {
+object FontAwesomeTags {
   type Icon = VdomNode
-  def apply(name: String): Icon = <.i(^.className := s"fa fa-$name")
+  def apply(name: String): Icon = <.i(^.className := s"fas fa-$name")
 
   def adjust = apply("adjust")
   def adn = apply("adn")

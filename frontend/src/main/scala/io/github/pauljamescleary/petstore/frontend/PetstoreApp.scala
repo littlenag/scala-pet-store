@@ -1,7 +1,8 @@
 package io.github.pauljamescleary.petstore.frontend
 
 import com.karasiq.bootstrap.jquery.BootstrapJQueryContext
-import css.AppCSS
+import css.{AppCSS, FontAwesomeCss}
+import io.github.pauljamescleary.petstore.frontend.bootstrap.ReactBootstrap
 import org.scalajs.dom
 
 import scala.scalajs.js
@@ -22,6 +23,10 @@ object PetstoreApp {
 
     BootstrapJQueryContext.useNpmImports()
     BootstrapCss
+
+    js.Dynamic.global.ReactBootstrap = ReactBootstrap
+
+    FontAwesomeCss
 
     // create stylesheet
     AppCSS.load
