@@ -23,14 +23,6 @@ object Bootstrap {
 
   // FIXME this should be replaced by react-bootstrap
 
-  //@js.native
-  //trait BootstrapJQuery extends JQuery {
-  //  def modal(action: String): BootstrapJQuery = js.native
-  //  def modal(options: js.Any): BootstrapJQuery = js.native
-  //}
-
-  //implicit def jq2bootstrap(jq: JQuery): BootstrapJQuery = jq.asInstanceOf[BootstrapJQuery]
-
   // Common Bootstrap contextual styles
   object CommonStyle extends Enumeration {
     val default, primary, success, info, warning, danger = Value

@@ -63,12 +63,13 @@ object AppMenu {
   class Backend($: BackendScope[Props, State]) {
     def unauthenticated(p: Props) = {
       <.ul.apply(
-        ^.`class` := "nav navbar-nav navbar-right",
+        ^.`class` := "navbar-nav ml-auto",
         unauthenticatedMenu.toTagMod { item =>
           <.li(
+            ^.`class` := "nav-item",
             ^.key := item.name,
             Style.menuItem(item.route.getClass == p.selectedPage.getClass),
-            <.a(^.`class` := "navbar-brand", p.ctrl setOnClick item.route)(item.name)
+            <.a(^.`class` := "nav-link", p.ctrl setOnClick item.route)(item.name)
           )
         }
       )
@@ -76,12 +77,13 @@ object AppMenu {
 
     def authenticated(userProfile: UserProfile, p: Props) = {
       <.ul.apply(
-        ^.`class` := "nav navbar-nav navbar",
+        ^.`class` := "navbar-nav mr-auto",
         authenticatedMenu.toTagMod { item =>
           <.li(
+            ^.`class` := "nav-item",
             ^.key := item.name,
             Style.menuItem(item.route.getClass == p.selectedPage.getClass),
-            <.a(^.`class` := "navbar-brand", p.ctrl setOnClick item.route)(item.name)
+            <.a(^.`class` := "nav-link", p.ctrl setOnClick item.route)(item.name)
           )
         }
       )
@@ -89,14 +91,12 @@ object AppMenu {
 
     def render(p: Props, s: State) = {
       <.header(
-        <.nav(bootstrapStyles.navbar,
-          <.div(^.`class` := "container-fluid",
-            <.div(^.`class` := "navbar-header",
-              <.a(^.`class` := "navbar-brand", p.ctrl setOnClick HomePageRt)("Pet Store")
-            ),
-            p.userProfile().render { up => authenticated(up,p)},
-            p.userProfile().renderEmpty { unauthenticated(p)},
-          )
+        <.nav(
+          //bootstrapStyles.navbar,
+          ^.`class` := "navbar navbar-expand-lg navbar-dark bg-dark fixed-top",
+          <.a(^.`class` := "navbar-brand", p.ctrl setOnClick HomePageRt)("Pet Store"),
+          p.userProfile().render { up => authenticated(up,p)},
+          p.userProfile().renderEmpty { unauthenticated(p)}
         )
       )
     }

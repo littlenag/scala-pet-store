@@ -1,8 +1,11 @@
 package io.github.pauljamescleary.petstore.frontend
 
+import com.karasiq.bootstrap.jquery.BootstrapJQueryContext
 import css.AppCSS
 import org.scalajs.dom
-import scala.scalajs.js.annotation.JSExportTopLevel
+
+import scala.scalajs.js
+import scala.scalajs.js.annotation.{JSExportTopLevel, JSImport}
 
 /**
  * Tuturial WebApp entry point
@@ -10,8 +13,15 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 @JSExportTopLevel("PetstoreApp")
 object PetstoreApp {
 
+  @native
+  @JSImport("bootstrap/dist/css/bootstrap.css", JSImport.Namespace)
+  object BootstrapCss extends js.Object
+
   def main(args: Array[String]): Unit = {
     println("Hello from the Petstore!")
+
+    BootstrapJQueryContext.useNpmImports()
+    BootstrapCss
 
     // create stylesheet
     AppCSS.load

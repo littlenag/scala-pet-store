@@ -62,7 +62,7 @@ object Pets {
   }
 
   // create the React component for To Do management
-  val component = ScalaComponent.builder[Props]("TODO")
+  val component = ScalaComponent.builder[Props]("Pets")
     .initialState(State()) // initial state from TodoStore
     .renderBackend[Backend]
     .componentDidMount(scope => scope.backend.mounted(scope.props))

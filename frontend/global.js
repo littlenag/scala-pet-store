@@ -5,6 +5,11 @@
 //window.moment = require("moment");
 //window.numeral = require("numeral");
 
+require("bootstrap");
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.css';
+//import 'bootstrap/dist/js/bootstrap.js';
+
 window['React'] = require('react');
 window['PropTypes'] = require('prop-types');
 window.React.PropTypes = window.PropTypes;

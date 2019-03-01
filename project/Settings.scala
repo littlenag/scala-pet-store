@@ -103,6 +103,8 @@ object Settings {
     val bootstrapNpm = "3.3.6"
     //val fontAwesome = "4.3.0-1"
 
+    val bootstrapFacade = "2.3.5"
+
     val scalajsReactComponents = "1.0.0-M2"
   }
 
@@ -193,6 +195,7 @@ object Settings {
     "com.payalabs"                      %%% "scalajs-react-bridge"      % versions.scalajsReactBridge,
 
     // Facades of other JavaScript libraries
+    "com.github.karasiq"                %%% "scalajs-bootstrap-v4"      % versions.bootstrapFacade,
     "org.querki"                        %%% "jquery-facade"             % versions.jQueryFacade
   ))
 

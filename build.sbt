@@ -115,9 +115,11 @@ lazy val frontend = (project in file("frontend"))
       //"material-ui-pickers" ->  "1.0.0-rc.9",
       //"moment" ->  "2.22.1",
 
+      "webpack-merge" -> "4.1.0",
+
       "react-bootstrap" -> "1.0.0-beta.5",
-      "bootstrap" -> "4.2.1",
-      "jquery" -> "3.3.1",
+      "bootstrap" -> "4.1.1",
+      "jquery" -> "3.2.1",
       "popper.js" -> "1.14.6",
 
       //"npm" ->  "6.0.0",
@@ -143,9 +145,22 @@ lazy val frontend = (project in file("frontend"))
       //"numeral" -> "~2.0.6"
     ),
 
+    npmDevDependencies in Compile ++= Seq(
+      // Bootstrap's CSS
+      "css-loader" -> "0.28.9",
+      "postcss-loader" -> "^2.1.1",
+      "precss" -> "^3.1.2",
+      "extract-text-webpack-plugin" -> "3.0.2",
+      "file-loader" -> "1.1.6",
+      "node-sass" -> "4.9.2",
+      "sass-loader" -> "6.0.7",
+      "style-loader" -> "0.20.0",
+      "url-loader" -> "0.6.2"
+    ),
+
     // Use a custom config file to export the JS dependencies to the global namespace,
     // as expected by the scalajs-react facade
-    //webpackConfigFile := Some(baseDirectory.value / "webpack.config.js"),
+    webpackConfigFile := Some(baseDirectory.value / "webpack.config.js"),
 
     // https://github.com/scalacenter/scalajs-bundler/issues/111
     version in webpack := "4.28.1",
