@@ -109,11 +109,9 @@ object Settings {
   }
 
   /**
-    * Dependencies only used by the Backend project. Includes:
-    *   - scala and java deps
-    *   - webjars
+    * Dependencies only used by the Server.
     */
-  val backendDependencies = Def.setting(Seq(
+  val serverDependencies = Def.setting(Seq(
     "org.typelevel"         %% "cats-core"            % CatsVersion,
     "io.circe"              %% "circe-generic"        % CirceVersion,
     "io.circe"              %% "circe-literal"        % CirceVersion,
@@ -171,8 +169,8 @@ object Settings {
     "com.payalabs"  %%% "scalajs-react-bridge"  % versions.scalajsReactBridge
   ))
 
-  /** Dependencies only used by the ScalaJS project (note the use of %%% instead of %%) */
-  val frontendDependencies = Def.setting(Seq(
+  /** Dependencies only used by the ScalaJS client (note the use of %%% instead of %%) */
+  val clientDependencies = Def.setting(Seq(
     "com.github.pheymann"               %%% "typedapi-js-client"        % versions.typedApi,
     "com.github.japgolly.scalajs-react" %%% "core"                      % versions.scalajsReact, // withSources (),
     "com.github.japgolly.scalajs-react" %%% "extra"                     % versions.scalajsReact,

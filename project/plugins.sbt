@@ -28,7 +28,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-less" % "1.1.2")
 // Bundle everything using webpack
 addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.14.0")
 
-// Auto copy the compiled frontend to the backend's resources directory
+// Auto copy the compiled client to the server's resources directory
 addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.0.8-0.6")
 
 //addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.3")

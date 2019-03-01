@@ -17,7 +17,7 @@ micrositeDescription := "An example application using FP techniques in Scala"
 
 micrositeBaseUrl := Settings.name
 
-// Settings for backend, frontend, and shared code
+// Settings for server, client, and shared code
 
 // Filter out compiler flags to make the repl experience functional...
 val badConsoleFlags = Seq("-Xfatal-warnings", "-Ywarn-unused:imports")
@@ -31,28 +31,28 @@ lazy val commonSettings = Def.settings(
   resolvers += Resolver.sonatypeRepo("snapshots")
 )
 
-lazy val backend = (project in file("backend"))
+lazy val server = (project in file("server"))
   .settings(
     name := Settings.name
   )
   .settings(commonSettings: _*)
   .settings(
-    scalaJSProjects := Seq(frontend,sharedJs),
+    scalaJSProjects := Seq(client,sharedJs),
     pipelineStages in Assets := Seq(scalaJSPipeline),
 
     // https://github.com/sbt/sbt-web#packaging-and-publishing
     //WebKeys.packagePrefix in Assets := "public/",
 
-    libraryDependencies ++= Settings.backendDependencies.value,
+    libraryDependencies ++= Settings.serverDependencies.value,
 
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
 
     // do a fastOptJS on reStart
-    reStart := (reStart dependsOn ((fastOptJS / webpack) in (frontend, Compile))).evaluated,
+    reStart := (reStart dependsOn ((fastOptJS / webpack) in (client, Compile))).evaluated,
 
     // This settings makes reStart to rebuild if a scala.js file changes on the client
-    watchSources ++= (watchSources in frontend).value,
+    watchSources ++= (watchSources in client).value,
 
     // Support stopping the running server
     mainClass in reStart := Some("io.github.pauljamescleary.petstore.Server"),
@@ -71,8 +71,8 @@ lazy val backend = (project in file("backend"))
 // https://github.com/scalacenter/scalajs-bundler/issues/111
 lazy val npmDevOverrides = Seq( "source-map-loader" -> "git+https://github.com/shishkin/source-map-loader#fetch-http-maps" )
 
-lazy val frontend = (project in file("frontend"))
-  //.settings(name := Settings.name + "-frontend")
+lazy val client = (project in file("client"))
+  //.settings(name := Settings.name + "-client")
   .settings(commonSettings:_*)
   .settings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
@@ -80,7 +80,7 @@ lazy val frontend = (project in file("frontend"))
     testFrameworks += new TestFramework("utest.runner.Framework"),
 
     // use Scala.js provided launcher code to start the client app
-    mainClass in Compile := Some("io.github.pauljamescleary.petstore.frontend.PetstoreApp"),
+    mainClass in Compile := Some("io.github.pauljamescleary.petstore.client.PetstoreApp"),
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer in Test := false,
     scalaJSLinkerConfig := {
@@ -93,7 +93,7 @@ lazy val frontend = (project in file("frontend"))
     },
     scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) },
 
-    libraryDependencies ++= Settings.frontendDependencies.value,
+    libraryDependencies ++= Settings.clientDependencies.value,
 
     npmDependencies in Compile ++= Settings.npmDeps,
     npmDevDependencies in Compile ++= Settings.npmDevDeps,
