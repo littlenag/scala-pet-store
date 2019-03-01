@@ -1,9 +1,10 @@
 package io.github.pauljamescleary.petstore.infrastructure.endpoint
 
+import io.github.pauljamescleary.BuildInfo
 import cats.data.{NonEmptyList, OptionT}
 import cats.effect.{ContextShift, Effect}
 import org.http4s.CacheDirective.`no-cache`
-import org.http4s._
+import org.http4s.{HttpRoutes, _}
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.{`Cache-Control`, `Content-Type`}
 import org.log4s.getLogger
@@ -24,7 +25,7 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
 
   val F = implicitly[Effect[F]]
 
-  val supportedStaticExtensions = List(".html", ".js", ".map", ".css", ".png", ".ico")
+  val supportedStaticExtensions = List(".html", ".js", ".css", ".map", ".ttf", ".woff", ".woff2", ".eot", ".svg", ".png", ".ico")
 
   val ec = ExecutionContext.Implicits.global
 
@@ -32,8 +33,7 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
 
   // only allow js/font/image assets
   def isPublicAsset(asset: WebjarAsset): Boolean = {
-    val extensions = Seq(".js", ".css", ".map", ".ttf", ".woff", ".woff2", ".eot", ".svg", ".png")
-    extensions.exists(ext => asset.asset.endsWith(ext))
+    supportedStaticExtensions.exists(ext => asset.asset.endsWith(ext))
   }
 
   def allowAsset(asset: WebjarAsset) = true
@@ -50,8 +50,8 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
       body(
         // This div is where our SPA is rendered.
         div(`class` := "app-container", id := "root"),
-        script(`type`:= "text/javascript", src := "/webjars/scala-pet-store/0.0.1-SNAPSHOT/shared-bundle.js"),
-        script(`type`:= "text/javascript", src := "/webjars/scala-pet-store/0.0.1-SNAPSHOT/app-bundle.js")
+        script(`type`:= "text/javascript", src := s"/webjars/${BuildInfo.name}/${BuildInfo.version}/shared-bundle.js"),
+        script(`type`:= "text/javascript", src := s"/webjars/${BuildInfo.name}/${BuildInfo.version}/app-bundle.js")
       )
     )
   }
@@ -77,8 +77,7 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
     HttpRoutes.of[F] {
       case req @ GET -> "fonts" /: path =>
         logger.info(s"font: $path")
-        logger.info(s"webjar path: ${"/scala-pet-store/0.0.1-SNAPSHOT/fonts" + path.toString}")
-        webjars(req.withPathInfo("/scala-pet-store/0.0.1-SNAPSHOT/fonts" + path.toString))
+        webjars(req.withPathInfo(s"/${BuildInfo.name}/${BuildInfo.version}/fonts" + path.toString))
           .fold(NotFound())(F.pure)
           .flatten
 

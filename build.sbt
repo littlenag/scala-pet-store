@@ -40,6 +40,9 @@ lazy val backend = (project in file("backend"))
     scalaJSProjects := Seq(frontend,sharedJs),
     pipelineStages in Assets := Seq(scalaJSPipeline),
 
+    // https://github.com/sbt/sbt-web#packaging-and-publishing
+    //WebKeys.packagePrefix in Assets := "public/",
+
     libraryDependencies ++= Settings.backendDependencies.value,
 
     // triggers scalaJSPipeline when using compile or continuous compilation
@@ -55,9 +58,13 @@ lazy val backend = (project in file("backend"))
     mainClass in reStart := Some("io.github.pauljamescleary.petstore.Server"),
 
     fork in run := true,
+
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "io.github.pauljamescleary",
   )
   .dependsOn(sharedJvm)
   .enablePlugins(SbtWeb, WebScalaJSBundlerPlugin)
+  .enablePlugins(BuildInfoPlugin)
 
 ///
 
@@ -111,7 +118,7 @@ lazy val frontend = (project in file("frontend"))
     //artifactPath in(Compile, packageMinifiedJSDependencies) := ((crossTarget in(Compile, fullOptJS)).value / "deps.min.js"),
     //artifactPath in(Test, packageMinifiedJSDependencies) := ((crossTarget in(Test, fullOptJS)).value / "deps.min.test.js")
   )
-  .enablePlugins(ScalaJSBundlerPlugin,ScalaJSWeb)
+  .enablePlugins(ScalaJSBundlerPlugin,ScalaJSWeb,SbtWeb)
   .dependsOn(sharedJs)
 
 lazy val shared =
