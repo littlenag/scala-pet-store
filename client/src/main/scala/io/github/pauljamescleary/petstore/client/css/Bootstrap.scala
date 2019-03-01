@@ -11,8 +11,6 @@ import scalacss.ScalaCssReact._
 
 import io.github.pauljamescleary.petstore.client.logger._
 
-import CssSettings._
-
 /**
  * Common Bootstrap components for scalajs-react
  */
@@ -28,19 +26,7 @@ object Bootstrap {
     val default, primary, success, info, warning, danger = Value
   }
 
-  object Button {
-
-    case class Props(onClick: Callback, style: CommonStyle.Value = CommonStyle.default, addStyles: Seq[StyleA] = Seq())
-
-    val component = ScalaComponent.builder[Props]("Button")
-      .renderPC((_, p, c) =>
-        <.button(bss.buttonOpt(p.style), p.addStyles.toTagMod, ^.tpe := "button", ^.onClick --> p.onClick, c)
-      ).build
-
-    def apply(props: Props, children: VdomNode*) = component(props)(children: _*)
-    def apply() = component
-  }
-
+  // Replaced by Cards
   object Panel {
 
     case class Props(heading: String, style: CommonStyle.Value = CommonStyle.default)

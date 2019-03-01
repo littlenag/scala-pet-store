@@ -8,10 +8,10 @@ import io.github.pauljamescleary.petstore.client
 import domain.pets.Pet
 import domain.pets.PetStatus.{Adopted, Available, Pending}
 import client.logger._
-import client.css.Bootstrap.{Modal, Panel}
-import client.css.{FontAwesomeCss, FontAwesomeTags, GlobalStyles}
+import client.css.Bootstrap.Modal
+import client.css.{FontAwesomeTags, GlobalStyles}
 import client.services.{DeletePet, PetsData, RefreshPets, UpsertPet}
-import io.github.pauljamescleary.petstore.client.bootstrap.Button
+import io.github.pauljamescleary.petstore.client.bootstrap.{Button, Card, CardBody, CardHeader}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import scalacss.ScalaCssReact._
@@ -44,24 +44,27 @@ object Pets {
     }
 
     def render(p: Props, s: State) =
-      Panel(Panel.Props("Pets in the Kennel"),
-        <.div(
-          p.proxy().renderFailed(ex => "Error loading"),
-          p.proxy().renderPending(_ > 500, _ => "Loading..."),
-          p.proxy().render(pd =>
-            PetList(
-              pd.pets,
-              item => p.proxy.dispatchCB(UpsertPet(item)),
-              item => editPet(Some(item)),
-              item => p.proxy.dispatchCB(DeletePet(item))
-            )
-          ),
-          Button(onClick = editPet(None).toJsCallback)(FontAwesomeTags.plusSquare, " New"),
-          // if the dialog is open, add it to the panel
-          if (s.showPetForm)
-            PetForm(PetForm.Props(s.selectedItem, petEdited))
-          else // otherwise add an empty placeholder
-            VdomArray.empty()
+      Card()(
+        CardHeader()("Pets in the Kennel"),
+        CardBody()(
+          <.div(
+            p.proxy().renderFailed(ex => "Error loading"),
+            p.proxy().renderPending(_ > 500, _ => "Loading..."),
+            p.proxy().render(pd =>
+              PetList(
+                pd.pets,
+                item => p.proxy.dispatchCB(UpsertPet(item)),
+                item => editPet(Some(item)),
+                item => p.proxy.dispatchCB(DeletePet(item))
+              )
+            ),
+            Button(onClick = editPet(None).toJsCallback)(FontAwesomeTags.plusSquare, " New"),
+            // if the dialog is open, add it to the panel
+            if (s.showPetForm)
+              PetForm(PetForm.Props(s.selectedItem, petEdited))
+            else // otherwise add an empty placeholder
+              VdomArray.empty()
+          )
         )
       )
   }

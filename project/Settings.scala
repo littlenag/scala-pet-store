@@ -186,7 +186,6 @@ object Settings {
     "org.scala-js"                      %%% "scalajs-dom"               % versions.scalaDom,
 
     "com.lihaoyi"                       %%% "utest"                     % versions.uTest % Test,
-    //"com.lihaoyi"                       %%% "scalatags"                 % versions.scalaTags,
 
     // Facades of other JavaScript libraries
     "com.github.karasiq"                %%% "scalajs-bootstrap-v4"      % versions.bootstrapFacade,

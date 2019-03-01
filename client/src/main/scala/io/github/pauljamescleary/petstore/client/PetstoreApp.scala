@@ -14,19 +14,19 @@ import scala.scalajs.js.annotation.{JSExportTopLevel, JSImport}
 @JSExportTopLevel("PetstoreApp")
 object PetstoreApp {
 
-  @native
+  @js.native
   @JSImport("bootstrap/dist/css/bootstrap.css", JSImport.Namespace)
   object BootstrapCss extends js.Object
 
   def main(args: Array[String]): Unit = {
     println("Hello from the Petstore!")
 
+    FontAwesomeCss
+
     BootstrapJQueryContext.useNpmImports()
     BootstrapCss
 
-    js.Dynamic.global.ReactBootstrap = ReactBootstrap
-
-    FontAwesomeCss
+    ReactBootstrap
 
     // create stylesheet
     AppCSS.load

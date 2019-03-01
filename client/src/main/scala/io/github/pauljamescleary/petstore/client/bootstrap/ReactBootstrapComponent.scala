@@ -9,10 +9,14 @@ import scala.scalajs.js.annotation.JSImport
   * Common class for all [ReactBootstrap](http://react-bootstrap.github.io/)'s components
   */
 abstract class ReactBootstrapComponent extends ReactBridgeComponent {
-  // ReactBootstrap = require("react-bootstrap");
   override lazy val componentNamespace: String = "ReactBootstrap"
 }
 
-@native
+@js.native
 @JSImport("react-bootstrap", JSImport.Namespace)
-object ReactBootstrap extends js.Object
+private object ReactBootstrapGlobal extends js.Object
+
+object ReactBootstrap {
+  // In order for ReactBootstrapComponent to work, the object needs to be in global scope.
+  js.Dynamic.global.ReactBootstrap = ReactBootstrapGlobal
+}

@@ -6,7 +6,7 @@ import org.scalajs.dom.{Element, Node}
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
 
-@native
+@js.native
 @JSImport("@fortawesome/fontawesome-free/css/all.css", JSImport.Namespace)
 object FontAwesomeCss extends js.Object
 

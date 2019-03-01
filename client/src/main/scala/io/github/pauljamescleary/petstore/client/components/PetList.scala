@@ -1,8 +1,9 @@
 package io.github.pauljamescleary.petstore.client.components
 
+import io.github.pauljamescleary.petstore.client.bootstrap.Button
 import io.github.pauljamescleary.petstore.domain.pets.Pet
 import io.github.pauljamescleary.petstore.domain.pets.PetStatus.{Adopted, Available, Pending}
-import io.github.pauljamescleary.petstore.client.css.Bootstrap.{Button, CommonStyle}
+import io.github.pauljamescleary.petstore.client.css.Bootstrap.CommonStyle
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -62,8 +63,8 @@ object PetList {
             case Adopted | Pending => <.s(pet.status.toString)
             case Available => <.span(pet.status.toString)
           },
-          Button(Button.Props(p.editItem(pet), addStyles = Seq(bss.pullRight, bss.buttonXS)), "Edit"),
-          Button(Button.Props(p.deleteItem(pet), addStyles = Seq(bss.pullRight, bss.buttonXS)), "Delete")
+          <.div(bss.floatRight, Button(onClick = p.editItem(pet).toJsCallback)("Edit")),
+          <.div(bss.floatRight, Button(onClick = p.deleteItem(pet).toJsCallback)("Delete"))
         )
       }
       <.ul(style.listGroup)(p.pets toTagMod renderItem)
