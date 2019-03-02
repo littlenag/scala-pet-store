@@ -98,9 +98,9 @@ object Settings {
     val uTest = "0.6.4"
     val typedApi = "0.2.0"
 
-    val jQueryFacade = "1.2"
-    val jQueryNpm = "2.2.1"
-    val bootstrapNpm = "3.3.6"
+    //val jQueryFacade = "1.2"
+    //val jQueryNpm = "2.2.1"
+    //val bootstrapNpm = "3.3.6"
     //val fontAwesome = "4.3.0-1"
 
     val bootstrapFacade = "2.3.5"
@@ -188,8 +188,7 @@ object Settings {
     "com.lihaoyi"                       %%% "utest"                     % versions.uTest % Test,
 
     // Facades of other JavaScript libraries
-    "com.github.karasiq"                %%% "scalajs-bootstrap-v4"      % versions.bootstrapFacade,
-    "org.querki"                        %%% "jquery-facade"             % versions.jQueryFacade      // TODO remove me
+    "com.github.karasiq"                %%% "scalajs-bootstrap-v4"      % versions.bootstrapFacade
   ))
 
   val npmDeps = Seq(

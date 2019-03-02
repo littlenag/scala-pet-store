@@ -8,10 +8,9 @@ import io.github.pauljamescleary.petstore.client
 import domain.pets.Pet
 import domain.pets.PetStatus.{Adopted, Available, Pending}
 import client.logger._
-import client.css.Bootstrap.Modal
 import client.css.{FontAwesomeTags, GlobalStyles}
 import client.services.{DeletePet, PetsData, RefreshPets, UpsertPet}
-import io.github.pauljamescleary.petstore.client.bootstrap.{Button, Card, CardBody, CardHeader}
+import io.github.pauljamescleary.petstore.client.bootstrap._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import scalacss.ScalaCssReact._
@@ -117,24 +116,27 @@ object PetForm {
     def render(p: Props, s: State) = {
       log.debug(s"User is ${if (s.pet.id.isEmpty) "adding" else "editing"} a pet or two")
       val headerText = if (s.pet.id.isEmpty) "Add new pet" else "Edit pet"
-      Modal(Modal.Props(
-        // header contains a cancel button (X)
-        header = hide => <.span(<.button(^.tpe := "button", bss.close, ^.onClick --> hide, FontAwesomeTags.close), <.h4(headerText)),
-        // footer has the OK button that submits the form before hiding it
-        footer = hide => <.span(Button(onClick = (submitForm() >> hide).toJsCallback)("OK")),
-        // this is called after the modal has been hidden (animation is completed)
-        closed = formClosed(s, p)),
-        <.div(bss.formGroup,
-          <.label(^.`for` := "bio", "Biography"),
-          <.input.text(bss.formControl, ^.id := "bio", ^.value := s.pet.bio,
-            ^.placeholder := "write biography", ^.onChange ==> updateBio)),
-        <.div(bss.formGroup,
-          <.label(^.`for` := "status", "Status"),
-          // using defaultValue = "Normal" instead of option/selected due to React
-          <.select(bss.formControl, ^.id := "status", ^.value := s.pet.status.toString, ^.onChange ==> updateStatus,
-            <.option(^.value := Available.toString, "Available"),
-            <.option(^.value := Pending.toString, "Pending"),
-            <.option(^.value := Adopted.toString, "Adopted")
+      ModalDialog()(
+        ModalHeader()(
+          ModalTitle()(headerText)
+        ),
+        ModalFooter()(
+          Button(varient = "secondary", onClick = formClosed(s, p).toJsCallback)("Close"),
+          Button(varient = "primary", onClick = submitForm().toJsCallback)("Save Changes")
+        ),
+        ModalBody()(
+          <.div(bss.formGroup,
+            <.label(^.`for` := "bio", "Biography"),
+            <.input.text(bss.formControl, ^.id := "bio", ^.value := s.pet.bio,
+              ^.placeholder := "write biography", ^.onChange ==> updateBio)),
+          <.div(bss.formGroup,
+            <.label(^.`for` := "status", "Status"),
+            // using defaultValue = "Normal" instead of option/selected due to React
+            <.select(bss.formControl, ^.id := "status", ^.value := s.pet.status.toString, ^.onChange ==> updateStatus,
+              <.option(^.value := Available.toString, "Available"),
+              <.option(^.value := Pending.toString, "Pending"),
+              <.option(^.value := Adopted.toString, "Adopted")
+            )
           )
         )
       )

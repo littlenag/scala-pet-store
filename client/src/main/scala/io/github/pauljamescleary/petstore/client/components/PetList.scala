@@ -3,7 +3,7 @@ package io.github.pauljamescleary.petstore.client.components
 import io.github.pauljamescleary.petstore.client.bootstrap.Button
 import io.github.pauljamescleary.petstore.domain.pets.Pet
 import io.github.pauljamescleary.petstore.domain.pets.PetStatus.{Adopted, Available, Pending}
-import io.github.pauljamescleary.petstore.client.css.Bootstrap.CommonStyle
+import io.github.pauljamescleary.petstore.client.css.CommonStyle
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._

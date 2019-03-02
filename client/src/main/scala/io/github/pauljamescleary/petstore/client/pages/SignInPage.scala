@@ -9,7 +9,7 @@ import japgolly.scalajs.react.vdom.html_<^.{^, _}
 import io.github.pauljamescleary.petstore.client._
 import AppRouter.{AppPage, HomePageRt, SignUpRt}
 import diode.data.PotState.PotEmpty
-import io.github.pauljamescleary.petstore.client.css.Bootstrap.Panel
+import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import io.github.pauljamescleary.petstore.client.services.SignIn
 import io.github.pauljamescleary.petstore.client.services.UserProfile
@@ -103,7 +103,10 @@ object SignInPage {
         p.userProfile().renderFailed { ex =>
           <.div(Style.outerDiv,
             <.div(Style.innerDiv,
-              Panel(Panel.Props("Sign In -- Failed!"), signInForm(p,s))
+              Card()(
+                CardHeader()("Sign In -- Failed!"),
+                CardBody()(signInForm(p,s))
+              )
             )
           )
         },
@@ -111,7 +114,10 @@ object SignInPage {
         if (p.userProfile().state == PotEmpty) {
           <.div(Style.outerDiv,
             <.div(Style.innerDiv,
-              Panel(Panel.Props("Sign In"), signInForm(p,s))
+              Card()(
+                CardHeader()("Sign In"),
+                CardBody()(signInForm(p,s))
+              )
             )
           )
         } else EmptyVdom

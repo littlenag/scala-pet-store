@@ -1,15 +1,20 @@
 package io.github.pauljamescleary.petstore.client.css
 
-import io.github.pauljamescleary.petstore.client.css.Bootstrap.CommonStyle
-import io.github.pauljamescleary.petstore.client.css.Bootstrap.CommonStyle._
 import japgolly.univeq.UnivEq
 import scalacss.internal.mutable
 
 import CssSettings._
 
-class BootstrapStyles(implicit r: mutable.Register) extends StyleSheet.Inline()(r) {
+// Common Bootstrap contextual styles
+object CommonStyle extends Enumeration {
+  val default, primary, success, info, warning, danger = Value
+}
+
+class BootstrapCss(implicit r: mutable.Register) extends StyleSheet.Inline()(r) {
 
   import dsl._
+
+  import CommonStyle._
 
   implicit val styleUnivEq: UnivEq[CommonStyle.Value] = new UnivEq[CommonStyle.Value] {}
 

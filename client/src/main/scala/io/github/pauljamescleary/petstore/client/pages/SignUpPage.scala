@@ -6,7 +6,7 @@ import diode.data.PotState.PotEmpty
 import diode.react._
 import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, HomePageRt, SignInRt}
 import io.github.pauljamescleary.petstore.client._
-import io.github.pauljamescleary.petstore.client.css.Bootstrap.Panel
+import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import io.github.pauljamescleary.petstore.client.services.{SignUp, UserProfile}
 import japgolly.scalajs.react._
@@ -122,7 +122,10 @@ object SignUpPage {
         p.userProfile().renderFailed { ex =>
           <.div(Style.outerDiv,
             <.div(Style.innerDiv,
-              Panel(Panel.Props(s"Sign Up -- There was an error: ${ex.getMessage}"),signUpForm($,p,s))
+              Card()(
+                CardHeader()(s"Sign Up -- There was an error: ${ex.getMessage}"),
+                CardBody()(signUpForm($,p,s))
+              )
             )
           )
         },
@@ -130,7 +133,10 @@ object SignUpPage {
         if (p.userProfile().state == PotEmpty) {
           <.div(Style.outerDiv,
             <.div(Style.innerDiv,
-              Panel(Panel.Props("Sign Up"),signUpForm($,p,s))
+              Card()(
+                CardHeader()(s"Sign Up"),
+                CardBody()(signUpForm($,p,s))
+              )
             )
           )
         }

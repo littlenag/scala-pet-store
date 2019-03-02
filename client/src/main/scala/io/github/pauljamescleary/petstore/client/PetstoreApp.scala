@@ -18,10 +18,16 @@ object PetstoreApp {
   @JSImport("bootstrap/dist/css/bootstrap.css", JSImport.Namespace)
   object BootstrapCss extends js.Object
 
+  @js.native
+  @JSImport("log4javascript", JSImport.Namespace)
+  object Log4Javascript extends js.Object
+
   def main(args: Array[String]): Unit = {
     println("Hello from the Petstore!")
 
     FontAwesomeCss
+
+    js.Dynamic.global.log4javascript = Log4Javascript
 
     BootstrapJQueryContext.useNpmImports()
     BootstrapCss
