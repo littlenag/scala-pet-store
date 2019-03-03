@@ -8,6 +8,7 @@ import diode.react.ReactPot._
 import diode.react._
 import diode.data.Pot
 import diode.react.ModelProxy
+import io.github.pauljamescleary.petstore.client.bootstrap.{Nav, NavLink, Navbar, NavbarBrand}
 import io.github.pauljamescleary.petstore.client.services.UserProfile
 import scalacss.ScalaCssReact._
 import japgolly.scalajs.react._
@@ -62,38 +63,23 @@ object AppMenu {
 
   class Backend($: BackendScope[Props, State]) {
     def unauthenticated(p: Props) = {
-      <.ul.apply(
-        ^.`class` := "navbar-nav ml-auto",
-        unauthenticatedMenu.toTagMod { item =>
-          <.li(
-            ^.`class` := "nav-item",
-            ^.key := item.name,
-            Style.menuItem(item.route.getClass == p.selectedPage.getClass),
-            <.a(^.`class` := "nav-link", p.ctrl setOnClick item.route)(item.name)
-          )
-        }
+      Nav()(
+        ^.`class` := "mr-auto",
+        NavLink(href = p.ctrl.pathFor(SignInRt).value)("Sign In"),
+        NavLink(href = p.ctrl.pathFor(SignUpRt).value)("Sign Out"),
       )
     }
 
     def authenticated(userProfile: UserProfile, p: Props) = {
-      <.ul.apply(
-        ^.`class` := "navbar-nav mr-auto",
-        authenticatedMenu.toTagMod { item =>
-          <.li(
-            ^.`class` := "nav-item",
-            ^.key := item.name,
-            Style.menuItem(item.route.getClass == p.selectedPage.getClass),
-            <.a(^.`class` := "nav-link", p.ctrl setOnClick item.route)(item.name)
-          )
-        }
+      Nav()(
+        ^.`class` := "mr-auto"
       )
     }
 
     def render(p: Props, s: State) = {
       <.header(
-        <.nav(
-          ^.`class` := "navbar navbar-expand-lg navbar-dark bg-dark fixed-top",
-          <.a(^.`class` := "navbar-brand", p.ctrl setOnClick HomePageRt)("Pet Store"),
+        Navbar(bg = "light", expand = "lg", fixed = "top")(
+          NavbarBrand(href = p.ctrl.pathFor(HomePageRt).value)("Pet Store"),
           p.userProfile().render { up => authenticated(up,p)},
           p.userProfile().renderEmpty { unauthenticated(p)}
         )
@@ -105,7 +91,6 @@ object AppMenu {
   val component = ScalaComponent.builder[Props]("AppMenu")
     .initialState(State())
     .renderBackend[Backend]
-    //.configure(Reusability.shouldComponentUpdate)
     .build
 
   def apply(proxy: ModelProxy[Pot[UserProfile]],
