@@ -8,9 +8,10 @@ import io.github.pauljamescleary.petstore.client
 import domain.pets.Pet
 import domain.pets.PetStatus.{Adopted, Available, Pending}
 import client.logger._
-import client.css.{FontAwesomeTags, GlobalStyles}
+import client.css.GlobalStyles
 import client.services.{DeletePet, PetsData, RefreshPets, UpsertPet}
 import io.github.pauljamescleary.petstore.client.bootstrap._
+import io.github.pauljamescleary.petstore.client.img.FontAwesomeTags
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import scalacss.ScalaCssReact._
@@ -85,22 +86,26 @@ object PetForm {
 
   case class Props(item: Option[Pet], submitHandler: (Pet, Boolean) => Callback)
 
-  case class State(pet: Pet, cancelled: Boolean = true)
+  case class State(pet: Pet, cancelled: Boolean = true, show: Boolean = true)
 
-  class Backend(t: BackendScope[Props, State]) {
-    def submitForm(): Callback = {
-      // mark it as NOT cancelled (which is the default)
-      t.modState(s => s.copy(cancelled = false))
+  class Backend($: BackendScope[Props, State]) {
+
+    def cancel(): Callback = {
+      $.modState(s => s.copy(cancelled = true, show = false))
     }
 
-    def formClosed(state: State, props: Props): Callback =
-      // call parent handler with the new item and whether form was OK or cancelled
+    def save(): Callback = {
+      $.modState(s => s.copy(cancelled = false, show = false))
+    }
+
+    def onExit(state: State, props: Props): Callback = {
       props.submitHandler(state.pet, state.cancelled)
+    }
 
     def updateBio(e: ReactEventFromInput) = {
       val text = e.target.value
       // update TodoItem content
-      t.modState(s => s.copy(pet = s.pet.copy(bio = text)))
+      $.modState(s => s.copy(pet = s.pet.copy(bio = text)))
     }
 
     def updateStatus(e: ReactEventFromInput) = {
@@ -110,19 +115,23 @@ object PetForm {
         case p if p == Pending.toString => Pending
         case p if p == Adopted.toString => Adopted
       }
-      t.modState(s => s.copy(pet = s.pet.copy(status = newStatus)))
+      $.modState(s => s.copy(pet = s.pet.copy(status = newStatus)))
     }
 
     def render(p: Props, s: State) = {
       log.debug(s"User is ${if (s.pet.id.isEmpty) "adding" else "editing"} a pet or two")
       val headerText = if (s.pet.id.isEmpty) "Add new pet" else "Edit pet"
-      ModalDialog()(
+      Modal(
+        show = s.show,
+        onExit = onExit(s,p).toJsCallback,
+        onHide = onExit(s,p).toJsCallback      // to handle clicking outside the modal
+      )(
         ModalHeader()(
           ModalTitle()(headerText)
         ),
         ModalFooter()(
-          Button(varient = "secondary", onClick = formClosed(s, p).toJsCallback)("Close"),
-          Button(varient = "primary", onClick = submitForm().toJsCallback)("Save Changes")
+          Button(varient = "secondary", onClick = cancel().toJsCallback)("Close"),
+          Button(varient = "primary", onClick = save().toJsCallback)("Save Changes")
         ),
         ModalBody()(
           <.div(bss.formGroup,

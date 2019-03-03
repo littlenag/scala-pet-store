@@ -84,28 +84,22 @@ object Settings {
     val scalaTags = "0.6.7"
     val scalaDom = "0.9.6"
 
-    val scalajsReact = "1.3.1"
-    val reactNpm = "16.5.2"
-    val jsTokensNpm = "3.0.2"
+    val scalajsReactFacade = "1.3.1"
+    //val reactNpm = "16.5.2"
+    //val jsTokensNpm = "3.0.2"
     val diode = "1.1.4"
     val diodeReact = "1.1.4.131"
 
     val scalajsReactBridge = "0.7.0"
+    val scalajsReactComponents = "1.0.0-M2"
 
     val scalaCSS = "0.5.5"
 
-    val log4js = "1.4.10"
-    val uTest = "0.6.4"
     val typedApi = "0.2.0"
-
-    //val jQueryFacade = "1.2"
-    //val jQueryNpm = "2.2.1"
-    //val bootstrapNpm = "3.3.6"
-    //val fontAwesome = "4.3.0-1"
 
     val bootstrapFacade = "2.3.5"
 
-    val scalajsReactComponents = "1.0.0-M2"
+    val uTest = "0.6.4"
   }
 
   /**
@@ -172,8 +166,8 @@ object Settings {
   /** Dependencies only used by the ScalaJS client (note the use of %%% instead of %%) */
   val clientDependencies = Def.setting(Seq(
     "com.github.pheymann"               %%% "typedapi-js-client"        % versions.typedApi,
-    "com.github.japgolly.scalajs-react" %%% "core"                      % versions.scalajsReact, // withSources (),
-    "com.github.japgolly.scalajs-react" %%% "extra"                     % versions.scalajsReact,
+    "com.github.japgolly.scalajs-react" %%% "core"                      % versions.scalajsReactFacade, // withSources (),
+    "com.github.japgolly.scalajs-react" %%% "extra"                     % versions.scalajsReactFacade,
     "com.olvind"                        %%% "scalajs-react-components"  % versions.scalajsReactComponents,
     "com.payalabs"                      %%% "scalajs-react-bridge"      % versions.scalajsReactBridge,
 
@@ -209,8 +203,6 @@ object Settings {
     //"material-ui-pickers" ->  "1.0.0-rc.9",
     //"moment" ->  "2.22.1",
 
-    "webpack-merge" -> "4.1.0",
-
     "@fortawesome/fontawesome-free" -> "5.7.2",
 
     "react-bootstrap" -> "1.0.0-beta.5",
@@ -240,10 +232,10 @@ object Settings {
 
   val npmDevDeps = Seq(
     // Webpack Loaders for CSS and more
+    "webpack-merge" -> "4.1.0",
     "css-loader" -> "0.28.9",
     "postcss-loader" -> "^2.1.1",
     "precss" -> "^3.1.2",
-    //"extract-text-webpack-plugin" -> "3.0.2",
     "file-loader" -> "1.1.6",
     "node-sass" -> "4.9.2",
     "sass-loader" -> "6.0.7",

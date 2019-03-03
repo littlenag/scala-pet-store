@@ -13,8 +13,14 @@ object Modal extends ReactBootstrapComponent {
   def apply(animation: js.UndefOr[Boolean] = true,
             keyboard: js.UndefOr[Boolean] = true,
             show: js.UndefOr[Boolean] = false,
+            size : js.UndefOr[String] = js.undefined,
             onHide: js.UndefOr[js.Function0[Unit]] = js.undefined,
-            onEntered: js.UndefOr[js.Function0[Unit]] = js.undefined): WithProps = auto
+            onExit: js.UndefOr[js.Function0[Unit]] = js.undefined,
+            onExited: js.UndefOr[js.Function0[Unit]] = js.undefined,
+            onExiting: js.UndefOr[js.Function0[Unit]] = js.undefined,
+            onEnter: js.UndefOr[js.Function0[Unit]] = js.undefined,
+            onEntered: js.UndefOr[js.Function0[Unit]] = js.undefined,
+            onEntering: js.UndefOr[js.Function0[Unit]] = js.undefined): WithProps = auto
 }
 
 @js.native

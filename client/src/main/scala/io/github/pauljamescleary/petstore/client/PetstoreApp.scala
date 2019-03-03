@@ -1,8 +1,9 @@
 package io.github.pauljamescleary.petstore.client
 
 import com.karasiq.bootstrap.jquery.BootstrapJQueryContext
-import css.{AppCSS, FontAwesomeCss}
+import css.AppCSS
 import io.github.pauljamescleary.petstore.client.bootstrap.ReactBootstrap
+import io.github.pauljamescleary.petstore.client.img.FontAwesomeCss
 import org.scalajs.dom
 
 import scala.scalajs.js

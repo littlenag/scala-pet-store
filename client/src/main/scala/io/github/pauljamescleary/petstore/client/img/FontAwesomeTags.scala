@@ -1,14 +1,6 @@
-package io.github.pauljamescleary.petstore.client.css
+package io.github.pauljamescleary.petstore.client.img
 
 import japgolly.scalajs.react.vdom.html_<^._
-import org.scalajs.dom.{Element, Node}
-
-import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport
-
-@js.native
-@JSImport("@fortawesome/fontawesome-free/css/all.css", JSImport.Namespace)
-object FontAwesomeCss extends js.Object
 
 /**
  * Provides type-safe access to Font Awesome icons
