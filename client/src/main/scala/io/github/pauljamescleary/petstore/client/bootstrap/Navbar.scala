@@ -13,7 +13,7 @@ import scala.scalajs.js.|
 object Navbar extends ReactBootstrapComponent {
   def apply(bg: js.UndefOr[String] = js.undefined,
             fixed: js.UndefOr[String] = js.undefined,
-            varient: js.UndefOr[String] = js.undefined,
+            variant: js.UndefOr[String] = js.undefined,
             sticky : js.UndefOr[String] = js.undefined,
             expand : js.UndefOr[String | Boolean] = js.undefined,
             expanded : js.UndefOr[Boolean] = js.undefined,
@@ -24,7 +24,6 @@ object Navbar extends ReactBootstrapComponent {
 @js.native
 @JSImport("react-bootstrap/Navbar", JSImport.Namespace)
 private object NavbarObj extends js.Object {
-  //def Brand: js.Any = js.native
   def Toggle: js.Any = js.native
   def Collapse: js.Any = js.native
   def Text: js.Any = js.native

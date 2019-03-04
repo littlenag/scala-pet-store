@@ -8,7 +8,7 @@ import org.scalajs.dom.html
 import scala.scalajs.js
 
 /**
-  * Bridge to [ReactBootstrap](http://react-bootstrap.github.io/)'s Input component
+  * Bridge to [ReactBootstrap](http://react-bootstrap.github.io/)'s FormControl component
   */
 object FormControl extends ReactBootstrapComponent {
   def apply(`type`: js.UndefOr[String] = js.undefined,
@@ -20,8 +20,8 @@ object FormControl extends ReactBootstrapComponent {
             groupClassName: js.UndefOr[String] = js.undefined,
             wrapperClassName: js.UndefOr[String] = js.undefined,
             labelClassName: js.UndefOr[String] = js.undefined,
-            onChange: js.UndefOr[(SyntheticEvent[html.Input]) => Unit] = js.undefined,
-            onKeyDown: js.UndefOr[(ReactKeyboardEvent) => Unit] = js.undefined,
+            onChange: js.UndefOr[SyntheticEvent[html.Input] => Unit] = js.undefined,
+            onKeyDown: js.UndefOr[ReactKeyboardEvent => Unit] = js.undefined,
             value: js.UndefOr[String] = js.undefined,
             defaultValue: js.UndefOr[String] = js.undefined,
             multiple: js.UndefOr[Boolean] = js.undefined,

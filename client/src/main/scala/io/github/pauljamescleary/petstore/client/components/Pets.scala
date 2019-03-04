@@ -45,9 +45,13 @@ object Pets {
 
     def render(p: Props, s: State) =
       Card()(
-        CardHeader()("Pets in the Kennel"),
+        CardHeader()("Pets in the Store"),
         CardBody()(
           <.div(
+            Button(onClick = editPet(None).toJsCallback)(
+              GlobalStyles.bootstrapStyles.floatRight,
+              FontAwesomeTags.plusSquare, " New"
+            ),
             p.proxy().renderFailed(ex => "Error loading"),
             p.proxy().renderPending(_ > 500, _ => "Loading..."),
             p.proxy().render(pd =>
@@ -58,7 +62,6 @@ object Pets {
                 item => p.proxy.dispatchCB(DeletePet(item))
               )
             ),
-            Button(onClick = editPet(None).toJsCallback)(FontAwesomeTags.plusSquare, " New"),
             // if the dialog is open, add it to the panel
             if (s.showPetForm)
               PetForm(PetForm.Props(s.selectedItem, petEdited))
@@ -130,8 +133,8 @@ object PetForm {
           ModalTitle()(headerText)
         ),
         ModalFooter()(
-          Button(varient = "secondary", onClick = cancel().toJsCallback)("Close"),
-          Button(varient = "primary", onClick = save().toJsCallback)("Save Changes")
+          Button(variant = "secondary", onClick = cancel().toJsCallback)("Close"),
+          Button(variant = "primary", onClick = save().toJsCallback)("Save Changes")
         ),
         ModalBody()(
           <.div(bss.formGroup,

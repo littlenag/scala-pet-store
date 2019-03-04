@@ -1,18 +1,16 @@
 package io.github.pauljamescleary.petstore.client.components
 
-import io.github.pauljamescleary.petstore.client.bootstrap.Button
+import io.github.pauljamescleary.petstore.client.bootstrap.{Button, Table}
+import io.github.pauljamescleary.petstore.client.css.GlobalStyles
+import io.github.pauljamescleary.petstore.client.img.FontAwesomeTags
 import io.github.pauljamescleary.petstore.domain.pets.Pet
 import io.github.pauljamescleary.petstore.domain.pets.PetStatus.{Adopted, Available, Pending}
-import io.github.pauljamescleary.petstore.client.css.CommonStyle
-import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import scalacss.ScalaCssReact._
 
 object PetList {
   // shorthand for styles
-  @inline private def bss = GlobalStyles.bootstrapStyles
-
   case class PetListProps(
                            pets: Seq[Pet],
                            stateChange: Pet => Callback,
@@ -22,52 +20,40 @@ object PetList {
 
   private val PetList = ScalaComponent.builder[PetListProps]("PetList")
     .render_P(p => {
-      val style = bss.listGroup
-      def renderItem(pet: Pet) = {
-        // convert priority into Bootstrap style
-        val itemStyle = pet.status match {
-          case Available => style.itemOpt(CommonStyle.info)
-          case Pending => style.item
-          case Adopted => style.itemOpt(CommonStyle.danger)
-        }
-        <.li(itemStyle,
-          <.label(
-            <.input.radio(
-              ^.value := pet.status.toString,
-              ^.checked := pet.status == Adopted,
-              ^.onChange --> p.stateChange(pet.copy(status = Adopted))
-            ),
-            "Adopted"
+      val head = <.thead(
+        <.tr(
+          <.th("#"),
+          <.th("Status"),
+          <.th("Type"),
+          <.th("Bio"),
+          <.th("Actions")
+        )
+      )
+
+      def renderPet(pet: Pet) = {
+        val id = pet.id.getOrElse(-1l)
+        <.tr(
+          <.td(id),
+          <.td(
+            pet.status match {
+              case Adopted | Pending => <.s(pet.status.toString)
+              case Available => <.span(pet.status.toString)
+            }
           ),
-          <.label(
-            <.input.radio(
-              ^.value := pet.status.toString,
-              ^.checked := pet.status == Pending,
-              ^.onChange --> p.stateChange(pet.copy(status = Pending))
-            ),
-            "Pending"
-          ),
-          <.label(
-            <.input.radio(
-              ^.value := pet.status.toString,
-              ^.checked := pet.status == Available,
-              ^.onChange --> p.stateChange(pet.copy(status = Available))
-            ),
-            "Available"
-          ),
-          <.span(" "),
-          <.span("TYPE: " + pet.category),<.span(" "),
-          <.span("BIO: " + pet.bio),<.span(" "),
-          //<.span("ID: " + pet.id),<.span(" "),
-          pet.status match {
-            case Adopted | Pending => <.s(pet.status.toString)
-            case Available => <.span(pet.status.toString)
-          },
-          <.div(bss.floatRight, Button(onClick = p.editItem(pet).toJsCallback)("Edit")),
-          <.div(bss.floatRight, Button(onClick = p.deleteItem(pet).toJsCallback)("Delete"))
+          <.td(pet.category),
+          <.td(pet.bio),
+          <.td(
+            GlobalStyles.bootstrapStyles.floatRight,
+            Button(variant = "secondary", onClick = p.deleteItem(pet).toJsCallback)(FontAwesomeTags.trash, " Delete"),
+            <.span(),
+            Button(variant = "primary", onClick = p.editItem(pet).toJsCallback)(FontAwesomeTags.edit, " Edit")
+          )
         )
       }
-      <.ul(style.listGroup)(p.pets toTagMod renderItem)
+
+      val body = <.tbody(p.pets toTagMod renderPet)
+
+      Table(striped = true, bordered = true, hover = true, size = "sm")(head,body)
     })
     .build
 

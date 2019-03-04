@@ -9,8 +9,7 @@ object Footer {
       .static("Footer")(
         <.footer(
           ^.textAlign.center,
-          <.div(^.borderBottom := "1px solid grey", ^.padding := "0px"),
-          <.p(^.paddingTop := "5px", "Footer")
+          <.div(^.borderBottom := "1px solid grey", ^.padding := "0px")
         )
       )
       .build

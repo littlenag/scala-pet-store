@@ -35,7 +35,6 @@ object HomePage {
       //.initialStateFromProps(props => State(props.proxy))
       .renderP { (_, props) =>
         <.div(Style.content,
-          <.h3("Pets My Bootstrap"),
           Pets(props.rootModel.zoom(_.pets)),
         )
       }

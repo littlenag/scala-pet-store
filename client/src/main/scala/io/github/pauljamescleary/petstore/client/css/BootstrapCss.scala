@@ -26,7 +26,7 @@ class BootstrapCss(implicit r: mutable.Register) extends StyleSheet.Inline()(r) 
     styleS(addClassNames(base, s"$base-$opt"))
   )
 
-  def styleWrap(classNames: String*) = style(addClassNames(classNames: _*))
+  def styleWrap(classNames: String*): StyleA = style(addClassNames(classNames: _*))
 
   val buttonOpt = commonStyle(csDomain, "btn")
 
@@ -59,13 +59,12 @@ class BootstrapCss(implicit r: mutable.Register) extends StyleSheet.Inline()(r) 
 
   val _modal = modal
 
-  object listGroup {
-    val listGroup = styleWrap("list-group")
-    val item = styleWrap("list-group-item")
-    val itemOpt = commonStyle(contextDomain, "list-group-item")
+  object equalWidth {
+    val container = styleWrap("container")
+    val row = styleWrap("row")
+    val col = styleWrap("col")
   }
 
-  val _listGroup = listGroup
   val floatRight = styleWrap("float-right")
   val floatLeft = styleWrap("float-left")
   val buttonXS = styleWrap("btn-xs")

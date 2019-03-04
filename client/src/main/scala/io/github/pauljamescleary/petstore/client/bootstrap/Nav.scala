@@ -17,7 +17,7 @@ object Nav extends ReactBootstrapComponent {
             justify: js.UndefOr[Boolean] = js.undefined,
             navbar: js.UndefOr[Boolean] = js.undefined,
             role: js.UndefOr[String] = js.undefined,
-            varient: js.UndefOr[String] = js.undefined,
+            variant: js.UndefOr[String] = js.undefined,
             onSelect: js.UndefOr[js.Function0[Unit]] = js.undefined,
             bsPrefix: js.UndefOr[String] = js.undefined): WithProps = auto
 }
