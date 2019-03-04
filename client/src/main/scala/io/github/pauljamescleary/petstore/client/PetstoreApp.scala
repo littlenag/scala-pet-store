@@ -4,14 +4,14 @@ import com.karasiq.bootstrap.jquery.BootstrapJQueryContext
 import css.AppCSS
 import io.github.pauljamescleary.petstore.client.bootstrap.ReactBootstrap
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeCss
-import io.github.pauljamescleary.petstore.client.logger.Log4JavaScript
+import io.github.pauljamescleary.petstore.client.logger._
 import org.scalajs.dom
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExportTopLevel, JSImport}
 
 /**
- * Tuturial WebApp entry point
+ * Pet Store entry point
  */
 @JSExportTopLevel("PetstoreApp")
 object PetstoreApp {
@@ -20,22 +20,26 @@ object PetstoreApp {
   @JSImport("bootstrap/dist/css/bootstrap.css", JSImport.Namespace)
   object BootstrapCss extends js.Object
 
-  @js.native
-  @JSImport("log4javascript", JSImport.Namespace)
-  object log4javascript extends Log4JavaScript
-
   def main(args: Array[String]): Unit = {
-    println("Hello from the Petstore!")
-
-    FontAwesomeCss
-
-    //js.Dynamic.global.log4javascript = log4javascript
+    // Ensure we have logging
     log4javascript
 
+    // Load FontAwesome (nice fonts!)
+    FontAwesomeCss
+
+    // Load jQuery, then init both the bootstrap javascript and css
     BootstrapJQueryContext.useNpmImports()
     BootstrapCss
 
+    // Load React and React-Bootstrap
     ReactBootstrap
+
+    ///
+    /// At this point all our app deps have been loaded and we good to start initializing
+    /// our application itself.
+    ///
+
+    log.debug("Welcome to the Scala Pet Store!")
 
     // create stylesheet
     AppCSS.load

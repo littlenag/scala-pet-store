@@ -1,16 +1,43 @@
 package io.github.pauljamescleary.petstore.client.logger
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSGlobal, JSImport}
+import scala.scalajs.js.annotation.JSImport
 
 /**
   * Facade for functions in log4javascript that we need
   */
 @js.native
-private[logger] trait Log4JavaScript extends js.Object {
+@JSImport("log4javascript", JSImport.Namespace)
+object log4javascript extends js.Object {
   def getLogger(name:js.UndefOr[String]):JSLogger = js.native
   def setEnabled(enabled:Boolean):Unit = js.native
   def isEnabled:Boolean = js.native
+
+  @js.native
+  private[logger] trait Layout extends js.Object
+
+  @js.native
+  private[logger] class JsonLayout(readable:Boolean = false, combineMessages:Boolean = true) extends Layout
+
+  @js.native
+  private[logger] class XmlLayout(combineMessages:Boolean = true) extends Layout
+
+  @js.native
+  trait Appender extends js.Object {
+    def setLayout(layout:Layout):Unit = js.native
+    def setThreshold(level:Level):Unit = js.native
+  }
+
+  @js.native
+  private[logger] class PopUpAppender extends Appender
+
+  @js.native
+  private[logger] class BrowserConsoleAppender extends Appender
+
+  @js.native
+  private[logger] class AjaxAppender(url:String) extends Appender {
+    def addHeader(header:String, value:String):Unit = js.native
+  }
 }
 
 @js.native
@@ -26,9 +53,9 @@ private[logger] trait Level extends js.Object {
 
 @js.native
 private[logger] trait JSLogger extends js.Object {
-  def addAppender(appender:Appender):Unit = js.native
-  def removeAppender(appender:Appender):Unit = js.native
-  def removeAllAppenders(appender:Appender):Unit = js.native
+  def addAppender(appender:log4javascript.Appender):Unit = js.native
+  def removeAppender(appender:log4javascript.Appender):Unit = js.native
+  def removeAllAppenders(appender:log4javascript.Appender):Unit = js.native
   def setLevel(level:Level):Unit = js.native
   def getLevel:Level = js.native
   def trace(msg:String, error:js.UndefOr[js.Error]):Unit = js.native
@@ -45,47 +72,9 @@ private[logger] trait JSLogger extends js.Object {
   def fatal(msg:String):Unit = js.native
 }
 
-@js.native
-private[logger] trait Layout extends js.Object
-
-@js.native
-@JSGlobal("log4javascript.JsonLayout")
-private[logger] class JsonLayout extends Layout
-
-@js.native
-private[logger] trait Appender extends js.Object {
-  def setLayout(layout:Layout):Unit = js.native
-  def setThreshold(level:Level):Unit = js.native
-}
-
-@js.native
-@JSGlobal("log4javascript.BrowserConsoleAppender")
-private[logger] class BrowserConsoleAppender extends Appender
-
-@js.native
-@JSGlobal("log4javascript.PopUpAppender")
-private[logger] class PopUpAppender extends Appender
-
-private[logger] class AjaxAppender(url:String) extends Appender {
-  def addHeader(header:String, value:String):Unit = js.native
-}
-
-//@js.native
-//@js.annotation.JSGlobalScope
-//private[logger] object Log4JavaScript extends js.Object {
-//  val log4javascript:Log4JavaScript = js.native
-//}
-
-@js.native
-@JSImport("log4javascript", JSImport.Namespace)
-object Log4JavaScript extends Log4JavaScript {
-  val log4javascript:Log4JavaScript = this
-  val AjaxAppender: AjaxAppender = js.native
-}
-
 class L4JSLogger(jsLogger:JSLogger) extends Logger {
 
-  private var ajaxAppender:AjaxAppender = null
+  private var ajaxAppender:log4javascript.AjaxAppender = null
 
   private def undefOrError(e:Exception):js.UndefOr[js.Error] = {
     if(e == null)
@@ -109,9 +98,9 @@ class L4JSLogger(jsLogger:JSLogger) extends Logger {
 
   override def enableServerLogging(url: String): Unit = {
     if(ajaxAppender == null) {
-      ajaxAppender = new AjaxAppender(url)
+      ajaxAppender = new log4javascript.AjaxAppender(url)
       ajaxAppender.addHeader("Content-Type", "application/json")
-      ajaxAppender.setLayout(new JsonLayout)
+      ajaxAppender.setLayout(new log4javascript.JsonLayout())
       jsLogger.addAppender(ajaxAppender)
 
     }

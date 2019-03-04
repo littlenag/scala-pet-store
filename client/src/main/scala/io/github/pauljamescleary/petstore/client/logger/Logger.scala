@@ -30,16 +30,15 @@ trait Logger {
 }
 
 object LoggerFactory {
-  private[logger] def createLogger(name: String) = {}
 
-  lazy val consoleAppender = new BrowserConsoleAppender
-  lazy val popupAppender = new PopUpAppender
+  lazy val consoleAppender: log4javascript.Appender = new log4javascript.BrowserConsoleAppender
+  lazy val popupAppender: log4javascript.Appender = new log4javascript.PopUpAppender
 
   /**
     * Create a logger that outputs to browser console
     */
   def getLogger(name: String): Logger = {
-    val nativeLogger = Log4JavaScript.log4javascript.getLogger(name)
+    val nativeLogger = log4javascript.getLogger(name)
     nativeLogger.addAppender(consoleAppender)
     new L4JSLogger(nativeLogger)
   }
@@ -48,7 +47,7 @@ object LoggerFactory {
     * Create a logger that outputs to a separate popup window
     */
   def getPopUpLogger(name: String): Logger = {
-    val nativeLogger = Log4JavaScript.log4javascript.getLogger(name)
+    val nativeLogger = log4javascript.getLogger(name)
     nativeLogger.addAppender(popupAppender)
     new L4JSLogger(nativeLogger)
   }
