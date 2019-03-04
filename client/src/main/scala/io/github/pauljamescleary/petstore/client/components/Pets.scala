@@ -89,7 +89,7 @@ object PetForm {
 
   case class Props(item: Option[Pet], submitHandler: (Pet, Boolean) => Callback)
 
-  case class State(pet: Pet, cancelled: Boolean = true, show: Boolean = true)
+  case class State(pet: Pet, tagText: String, cancelled: Boolean = true, show: Boolean = true)
 
   class Backend($: BackendScope[Props, State]) {
 
@@ -102,13 +102,27 @@ object PetForm {
     }
 
     def onExit(state: State, props: Props): Callback = {
-      props.submitHandler(state.pet, state.cancelled)
+      props.submitHandler(state.pet.copy(tags = state.tagText.split(",").map(_.trim).toSet), state.cancelled)
     }
 
     def updateBio(e: ReactEventFromInput) = {
       val text = e.target.value
-      // update TodoItem content
       $.modState(s => s.copy(pet = s.pet.copy(bio = text)))
+    }
+
+    def updateName(e: ReactEventFromInput) = {
+      val text = e.target.value
+      $.modState(s => s.copy(pet = s.pet.copy(name = text)))
+    }
+
+    def updateCategory(e: ReactEventFromInput) = {
+      val text = e.target.value
+      $.modState(s => s.copy(pet = s.pet.copy(category = text)))
+    }
+
+    def updateTags(e: ReactEventFromInput) = {
+      val text = e.target.value
+      $.modState(s => s.copy(tagText = text))
     }
 
     def updateStatus(e: ReactEventFromInput) = {
@@ -124,6 +138,7 @@ object PetForm {
     def render(p: Props, s: State) = {
       log.debug(s"User is ${if (s.pet.id.isEmpty) "adding" else "editing"} a pet or two")
       val headerText = if (s.pet.id.isEmpty) "Add new pet" else "Edit pet"
+
       Modal(
         show = s.show,
         onExit = onExit(s,p).toJsCallback,
@@ -132,15 +147,18 @@ object PetForm {
         ModalHeader()(
           ModalTitle()(headerText)
         ),
-        ModalFooter()(
-          Button(variant = "secondary", onClick = cancel().toJsCallback)("Close"),
-          Button(variant = "primary", onClick = save().toJsCallback)("Save Changes")
-        ),
+
+        /**
+          * <.th("#"),
+          * <.th("Status"),
+          * <.th("Name"),
+          * <.th("Category"),
+          * <.th("Bio"),
+          * <.th("Tags"),
+          * //<.th("Photos"),
+          * <.th("Actions")
+          */
         ModalBody()(
-          <.div(bss.formGroup,
-            <.label(^.`for` := "bio", "Biography"),
-            <.input.text(bss.formControl, ^.id := "bio", ^.value := s.pet.bio,
-              ^.placeholder := "write biography", ^.onChange ==> updateBio)),
           <.div(bss.formGroup,
             <.label(^.`for` := "status", "Status"),
             // using defaultValue = "Normal" instead of option/selected due to React
@@ -149,14 +167,41 @@ object PetForm {
               <.option(^.value := Pending.toString, "Pending"),
               <.option(^.value := Adopted.toString, "Adopted")
             )
+          ),
+          <.div(bss.formGroup,
+            <.label(^.`for` := "name", "Name"),
+            <.input.text(bss.formControl, ^.id := "name", ^.value := s.pet.name,
+              ^.placeholder := "Name", ^.onChange ==> updateName)
+          ),
+          <.div(bss.formGroup,
+            <.label(^.`for` := "category", "Category"),
+            <.input.text(bss.formControl, ^.id := "category", ^.value := s.pet.category,
+              ^.placeholder := "Category", ^.onChange ==> updateCategory)
+          ),
+          <.div(bss.formGroup,
+            <.label(^.`for` := "bio", "Biography"),
+            <.input.text(bss.formControl, ^.id := "bio", ^.value := s.pet.bio,
+              ^.placeholder := "Biography", ^.onChange ==> updateBio)
+          ),
+          <.div(bss.formGroup,
+            <.label(^.`for` := "tags", "Tags"),
+            <.input.text(bss.formControl, ^.id := "tags", ^.value := s.tagText,
+              ^.placeholder := "Tags (comma separated)", ^.onChange ==> updateTags)
           )
+        ),
+        ModalFooter()(
+          Button(variant = "secondary", onClick = cancel().toJsCallback)("Close"),
+          Button(variant = "primary", onClick = save().toJsCallback)("Save Changes")
         )
       )
     }
   }
 
   val component = ScalaComponent.builder[Props]("PetForm")
-    .initialStateFromProps(p => State(p.item.getOrElse(Pet("", "", ""))))
+    .initialStateFromProps { p =>
+      val pet = p.item.getOrElse(Pet("", "", ""))
+      State(pet, pet.tags.mkString(", "))
+    }
     .renderBackend[Backend]
     .build
 

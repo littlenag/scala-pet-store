@@ -1,6 +1,6 @@
 package io.github.pauljamescleary.petstore.client.components
 
-import io.github.pauljamescleary.petstore.client.bootstrap.{Button, Table}
+import io.github.pauljamescleary.petstore.client.bootstrap.{Badge, Button, Table}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeTags
 import io.github.pauljamescleary.petstore.domain.pets.Pet
@@ -24,8 +24,11 @@ object PetList {
         <.tr(
           <.th("#"),
           <.th("Status"),
-          <.th("Type"),
+          <.th("Name"),
+          <.th("Category"),
           <.th("Bio"),
+          <.th("Tags"),
+          //<.th("Photos"),
           <.th("Actions")
         )
       )
@@ -33,15 +36,20 @@ object PetList {
       def renderPet(pet: Pet) = {
         val id = pet.id.getOrElse(-1l)
         <.tr(
+          // # / id
           <.td(id),
+          // status
           <.td(
             pet.status match {
               case Adopted | Pending => <.s(pet.status.toString)
               case Available => <.span(pet.status.toString)
             }
           ),
+          <.td(pet.name),
           <.td(pet.category),
           <.td(pet.bio),
+          <.td(pet.tags toTagMod {t => Badge(variant = "light")(t)}),
+          //<.td(pet.photoUrls toTagMod {t => Badge(variant = "light")(t)}),
           <.td(
             GlobalStyles.bootstrapStyles.floatRight,
             Button(variant = "secondary", onClick = p.deleteItem(pet).toJsCallback)(FontAwesomeTags.trash, " Delete"),
