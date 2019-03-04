@@ -1,7 +1,7 @@
 package io.github.pauljamescleary.petstore.client.logger
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
+import scala.scalajs.js.annotation.{JSGlobal, JSImport}
 
 /**
   * Facade for functions in log4javascript that we need
@@ -66,16 +66,21 @@ private[logger] class BrowserConsoleAppender extends Appender
 @JSGlobal("log4javascript.PopUpAppender")
 private[logger] class PopUpAppender extends Appender
 
-@js.native
-@JSGlobal("log4javascript.AjaxAppender")
 private[logger] class AjaxAppender(url:String) extends Appender {
   def addHeader(header:String, value:String):Unit = js.native
 }
 
+//@js.native
+//@js.annotation.JSGlobalScope
+//private[logger] object Log4JavaScript extends js.Object {
+//  val log4javascript:Log4JavaScript = js.native
+//}
+
 @js.native
-@js.annotation.JSGlobalScope
-private[logger] object Log4JavaScript extends js.Object {
-  val log4javascript:Log4JavaScript = js.native
+@JSImport("log4javascript", JSImport.Namespace)
+object Log4JavaScript extends Log4JavaScript {
+  val log4javascript:Log4JavaScript = this
+  val AjaxAppender: AjaxAppender = js.native
 }
 
 class L4JSLogger(jsLogger:JSLogger) extends Logger {

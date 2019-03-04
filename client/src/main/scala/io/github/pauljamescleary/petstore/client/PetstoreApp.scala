@@ -4,6 +4,7 @@ import com.karasiq.bootstrap.jquery.BootstrapJQueryContext
 import css.AppCSS
 import io.github.pauljamescleary.petstore.client.bootstrap.ReactBootstrap
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeCss
+import io.github.pauljamescleary.petstore.client.logger.Log4JavaScript
 import org.scalajs.dom
 
 import scala.scalajs.js
@@ -21,14 +22,15 @@ object PetstoreApp {
 
   @js.native
   @JSImport("log4javascript", JSImport.Namespace)
-  object Log4Javascript extends js.Object
+  object log4javascript extends Log4JavaScript
 
   def main(args: Array[String]): Unit = {
     println("Hello from the Petstore!")
 
     FontAwesomeCss
 
-    js.Dynamic.global.log4javascript = Log4Javascript
+    //js.Dynamic.global.log4javascript = log4javascript
+    log4javascript
 
     BootstrapJQueryContext.useNpmImports()
     BootstrapCss

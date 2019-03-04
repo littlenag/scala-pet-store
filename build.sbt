@@ -71,13 +71,21 @@ lazy val server = (project in file("server"))
 // https://github.com/scalacenter/scalajs-bundler/issues/111
 lazy val npmDevOverrides = Seq( "source-map-loader" -> "git+https://github.com/shishkin/source-map-loader#fetch-http-maps" )
 
+// use eliding to drop some debug code in the production build
+lazy val elideOptions = settingKey[Seq[String]]("Set limit for elidable functions")
+
 lazy val client = (project in file("client"))
   //.settings(name := Settings.name + "-client")
   .settings(commonSettings:_*)
   .settings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
 
+    // TODO change to scalatest
     testFrameworks += new TestFramework("utest.runner.Framework"),
+
+    elideOptions := Seq("-Xelide-below", "MINIMUM"),
+
+    scalacOptions ++= elideOptions.value,
 
     // use Scala.js provided launcher code to start the client app
     mainClass in Compile := Some("io.github.pauljamescleary.petstore.client.PetstoreApp"),
