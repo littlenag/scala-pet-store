@@ -85,8 +85,6 @@ object Settings {
     val scalaDom = "0.9.6"
 
     val scalajsReactFacade = "1.3.1"
-    //val reactNpm = "16.5.2"
-    //val jsTokensNpm = "3.0.2"
     val diode = "1.1.4"
     val diodeReact = "1.1.4.131"
 
@@ -98,8 +96,6 @@ object Settings {
     val typedApi = "0.2.0"
 
     val bootstrapFacade = "2.3.5"
-
-    val uTest = "0.6.4"
   }
 
   /**
@@ -147,20 +143,25 @@ object Settings {
     * the special %%% function selects the correct version for each project
     */
   val sharedDependencies = Def.setting(Seq(
-    "com.github.pheymann"   %%% "typedapi-shared"      % versions.typedApi,
-    "com.github.pheymann"   %%% "typedapi-client"      % versions.typedApi,
+    "com.github.pheymann" %%% "typedapi-shared"      % versions.typedApi,
+    "com.github.pheymann" %%% "typedapi-client"      % versions.typedApi,
 
-    "com.lihaoyi"   %%% "scalatags"             % versions.scalaTags,
-    //"com.beachape"  %%% "enumeratum"           % EnumeratumVersion,
-    "com.beachape"  %%% "enumeratum-circe"      % EnumeratumCirceVersion,
-    "io.circe"      %%% "circe-generic"         % CirceVersion,
-    "io.circe"      %%% "circe-literal"         % CirceVersion,
-    "io.circe"      %%% "circe-generic-extras"  % CirceVersion,
-    "io.circe"      %%% "circe-parser"          % CirceVersion,
-    "io.circe"      %%% "circe-java8"           % CirceVersion,
+    "com.lihaoyi"         %%% "scalatags"             % versions.scalaTags,
+    //"com.beachape"        %%% "enumeratum"           % EnumeratumVersion,
+    "com.beachape"        %%% "enumeratum-circe"      % EnumeratumCirceVersion,
+    "io.circe"            %%% "circe-generic"         % CirceVersion,
+    "io.circe"            %%% "circe-literal"         % CirceVersion,
+    "io.circe"            %%% "circe-generic-extras"  % CirceVersion,
+    "io.circe"            %%% "circe-parser"          % CirceVersion,
+    "io.circe"            %%% "circe-java8"           % CirceVersion,
 
     // Shared so that the JSWriter macro can be compiled separately
-    "com.payalabs"  %%% "scalajs-react-bridge"  % versions.scalajsReactBridge
+    "com.payalabs"  %%% "scalajs-react-bridge"  % versions.scalajsReactBridge,
+
+    "org.scalacheck"        %% "scalacheck"           % ScalaCheckVersion % Test,
+    "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % Test,
+
+
   ))
 
   /** Dependencies only used by the ScalaJS client (note the use of %%% instead of %%) */
@@ -179,10 +180,11 @@ object Settings {
 
     "org.scala-js"                      %%% "scalajs-dom"               % versions.scalaDom,
 
-    "com.lihaoyi"                       %%% "utest"                     % versions.uTest % Test,
-
     // Facades of other JavaScript libraries
-    "com.github.karasiq"                %%% "scalajs-bootstrap-v4"      % versions.bootstrapFacade
+    "com.github.karasiq"                %%% "scalajs-bootstrap-v4"      % versions.bootstrapFacade,
+
+    "org.scalacheck"                    %%% "scalacheck"                % ScalaCheckVersion % Test,
+    "org.scalatest"                     %%% "scalatest"                 % ScalaTestVersion  % Test
   ))
 
   val npmDeps = Seq(

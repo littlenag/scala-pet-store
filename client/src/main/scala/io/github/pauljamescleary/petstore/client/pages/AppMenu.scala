@@ -64,15 +64,16 @@ object AppMenu {
   class Backend($: BackendScope[Props, State]) {
     def unauthenticated(p: Props) = {
       Nav()(
-        ^.`class` := "mr-auto",
+        ^.`class` := "ml-auto",
         NavLink(href = p.ctrl.pathFor(SignInRt).value)("Sign In"),
-        NavLink(href = p.ctrl.pathFor(SignUpRt).value)("Sign Out"),
+        NavLink(href = p.ctrl.pathFor(SignUpRt).value)("Sign Up"),
       )
     }
 
     def authenticated(userProfile: UserProfile, p: Props) = {
       Nav()(
-        ^.`class` := "mr-auto"
+        ^.`class` := "mr-auto",
+        NavLink(href = p.ctrl.pathFor(LogOutRt).value)("Sign Out"),
       )
     }
 
