@@ -2,7 +2,7 @@ package io.github.pauljamescleary.petstore
 
 import java.time.Instant
 
-import io.github.pauljamescleary.petstore.domain.authentication.SignupRequest
+import io.github.pauljamescleary.petstore.domain.authentication.RegistrationRequest
 import org.scalacheck._
 import org.scalacheck.Arbitrary.arbitrary
 import io.github.pauljamescleary.petstore.domain.orders._
@@ -71,7 +71,7 @@ trait PetStoreArbitraries {
     } yield User(userName, firstName, lastName, email, password, phone, id)
   }
 
-  implicit val userSignup = Arbitrary[SignupRequest] {
+  implicit val userSignup = Arbitrary[RegistrationRequest] {
     for {
       userName <- userNameGen
       firstName <- arbitrary[String]
@@ -79,7 +79,7 @@ trait PetStoreArbitraries {
       email <- arbitrary[String]
       password <- arbitrary[String]
       phone <- arbitrary[String]
-    } yield SignupRequest(userName, firstName, lastName, email, password, phone)
+    } yield RegistrationRequest(userName, firstName, lastName, email, password, phone)
   }
 }
 

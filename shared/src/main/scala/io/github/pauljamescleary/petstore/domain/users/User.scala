@@ -9,6 +9,8 @@ case class User(
     email: String,
     hash: String,
     phone: String,
+    // activation status
+    // password recovery token?
     id: Option[Long] = None
 )
 

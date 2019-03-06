@@ -8,14 +8,14 @@ import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, HomePageRt,
 import io.github.pauljamescleary.petstore.client._
 import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
-import io.github.pauljamescleary.petstore.client.services.{SignUp, UserProfile}
+import io.github.pauljamescleary.petstore.client.services.{Register, UserProfile}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^.{^, _}
 
 import scala.language.existentials
 
-object SignUpPage {
+object RegistrationPage {
 
   // shorthand for styles
   @inline private def bss = GlobalStyles.bootstrapStyles
@@ -54,7 +54,7 @@ object SignUpPage {
   }
 
   def signUpForm($: BackendScope[Props, State], p: Props, s: State) = {
-    <.form(^.onSubmit ==> {ev => p.userProfile.dispatchCB(SignUp(s.username, s.email, s.password1))},
+    <.form(^.onSubmit ==> {ev => p.userProfile.dispatchCB(Register(s.username, s.email, s.password1))},
       <.div(bss.formGroup,
         <.label(^.`for` := "description", "Username"),
         <.input.text(bss.formControl,

@@ -5,7 +5,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import io.github.pauljamescleary.petstore.client._
-import AppRouter.AppPage
+import AppRouter.{AppPage, SignInRt}
 import io.github.pauljamescleary.petstore.client.components.Pets
 import io.github.pauljamescleary.petstore.client.services.RootModel
 
@@ -15,28 +15,28 @@ object HomePage {
 
   case class Props(router: RouterCtl[AppPage], rootModel: ModelProxy[RootModel])
 
-  //case class State()
-
   import css.CssSettings._
   import scalacss.ScalaCssReact._
 
   object Style extends StyleSheet.Inline {
     import dsl._
 
-    val content = style(textAlign.center,
-      //fontSize(30.px),
-      minHeight(450.px),
-      paddingTop(80.px))
+    // Padding to push context below the navbar
+    val innerDiv = style(
+      paddingTop(40.px)
+    )
   }
 
-  // create the React component for Dashboard
+  // create the React component for Home page
   private val component = ScalaComponent.builder[Props]("Home Page")
-      // create and store the connect proxy in state for later use
-      //.initialStateFromProps(props => State(props.proxy))
       .renderP { (_, props) =>
-        <.div(Style.content,
-          Pets(props.rootModel.zoom(_.pets)),
-        )
+        // If the user hasn't authenticated re-direct to the sign-in page
+        if (props.rootModel.zoom(_.userProfile).value.isEmpty) {
+          props.router.set(SignInRt).async.runNow()
+          <.div()
+        } else {
+          <.div(Style.innerDiv, Pets(props.rootModel.zoom(_.pets)))
+        }
       }
       .build
 

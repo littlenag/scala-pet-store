@@ -8,7 +8,7 @@ import diode._
 import diode.data._
 import diode.util._
 import diode.react.ReactConnector
-import io.github.pauljamescleary.petstore.domain.authentication.{LoginRequest, SignupRequest}
+import io.github.pauljamescleary.petstore.domain.authentication.{SignInRequest, RegistrationRequest}
 import io.github.pauljamescleary.petstore.domain.users.User
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -31,9 +31,11 @@ case class SignIn(username:String, password:String) extends Action
 case class Authenticated(user:User) extends Action
 case class SignInError(ex:Throwable) extends Action
 
-case class SignUp(username:String, email:String, password:String) extends Action
-case class UserCreated(user:User) extends Action
-case class SignUpError(ex:Throwable) extends Action
+case object SignOut extends Action
+
+case class Register(username:String, email:String, password:String) extends Action
+case class AccountCreated(user:User) extends Action
+case class RegistrationError(ex:Throwable) extends Action
 
 // The base model of our application
 case class RootModel(userProfile:Pot[UserProfile], pets: Pot[PetsData])
@@ -55,7 +57,7 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
       log.debug("Tried to sign in")
       updated(Pending(),
         Effect(
-          PetStoreClient.login(LoginRequest(username,password))
+          PetStoreClient.signIn(SignInRequest(username,password))
               .map[Action] { user => Authenticated(user) }
               .recover { case x => SignInError(x) }
         )
@@ -68,22 +70,26 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
       log.debug("Sign in failed")
       updated(Failed(ex))
 
-    case SignUp(username, email, password) =>
-      log.debug("Tried to sign up")
+    case SignOut =>
+      log.debug("Signing out")
+      updated(Empty)
+
+    case Register(username, email, password) =>
+      log.debug("Tried to register account")
       updated(Pending(),
         Effect(
-          PetStoreClient.signup(
-            SignupRequest(username,"", "", email, password, ""))
-              .map[Action] { user => UserCreated(user) }
-              .recover { case x => SignUpError(x) }
+          PetStoreClient.registerAccount(
+            RegistrationRequest(username,"", "", email, password, ""))
+              .map[Action] { user => AccountCreated(user) }
+              .recover { case x => RegistrationError(x) }
         )
       )
-    case UserCreated(user) =>
-      log.debug("Sign up accepted")
+    case AccountCreated(user) =>
+      log.debug("Registration accepted")
       updated(Ready(UserProfile(user)))
 
-    case SignUpError(ex) =>
-      log.debug("Sign up failed")
+    case RegistrationError(ex) =>
+      log.debug("Registration failed")
       updated(Failed(ex))
   }
 }

@@ -1,6 +1,6 @@
 package io.github.pauljamescleary.petstore.client.services
 
-import io.github.pauljamescleary.petstore.domain.authentication.{LoginRequest, SignupRequest}
+import io.github.pauljamescleary.petstore.domain.authentication._
 import io.github.pauljamescleary.petstore.domain.pets.Pet
 import io.github.pauljamescleary.petstore.domain.users.User
 import org.scalajs.dom
@@ -40,13 +40,22 @@ object PetStoreClient {
     }
   }
 
+  type JwtToken = String
+
   private val cm = ClientManager(Ajax, getOrigin)
 
-  private val (loginEP, signupT) = deriveAll(PetstoreApi.UsersApi)
+  private val (signInEP, signOutEP, registerEP, activationEmailEP, activateEP, recoveryEmailEP, validateResetTokenEP, resetPasswordEP) = deriveAll(PetstoreApi.AuthApi)
 
-  def login(req: LoginRequest): Future[User] = loginEP(req).run[Future](cm)
-  def signup(req: SignupRequest): Future[User] = signupT(req).run[Future](cm)
+  def signIn(req: SignInRequest): Future[User] = signInEP(req).run[Future](cm)
+  def signOut(authToken: AuthToken): Future[Unit] = signOutEP(authToken.value).run[Future](cm)
 
+  def registerAccount(req: RegistrationRequest): Future[User] = registerEP(req).run[Future](cm)
+  def activationEmail(): Future[Unit] = activationEmailEP(()).run[Future](cm)
+  def activateAccount(token: String): Future[User] = activateEP(token).run[Future](cm)
+
+  def recoveryEmail(): Future[Unit] = recoveryEmailEP(()).run[Future](cm)
+  def validateResetToken(token:String): Future[Unit] = validateResetTokenEP(token).run[Future](cm)
+  def resetPassword(req: PasswordResetRequest): Future[User] = resetPasswordEP(req.token, req).run[Future](cm)
 
   private val (listPetsEP, createPetEP, updatePetEP, deletePetEP) = deriveAll(PetstoreApi.PetsApi)
 

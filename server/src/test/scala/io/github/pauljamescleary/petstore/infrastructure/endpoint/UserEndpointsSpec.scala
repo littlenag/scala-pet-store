@@ -27,8 +27,8 @@ class UserEndpointsSpec
 
   implicit val userEnc : EntityEncoder[IO, User] = jsonEncoderOf
   implicit val userDec : EntityDecoder[IO, User] = jsonOf
-  implicit val signupRequestEnc : EntityEncoder[IO, SignupRequest] = jsonEncoderOf
-  implicit val signupRequestDec : EntityDecoder[IO, SignupRequest] = jsonOf
+  implicit val signupRequestEnc : EntityEncoder[IO, RegistrationRequest] = jsonEncoderOf
+  implicit val signupRequestDec : EntityDecoder[IO, RegistrationRequest] = jsonOf
 
   test("create user") {
     val userRepo = UserRepositoryInMemoryInterpreter[IO]()
@@ -36,7 +36,7 @@ class UserEndpointsSpec
     val userService = UserService[IO](userRepo, userValidation)
     val userHttpService = UserEndpoints.endpoints(userService, BCrypt.syncPasswordHasher[IO]).orNotFound
 
-    forAll { userSignup: SignupRequest =>
+    forAll { userSignup: RegistrationRequest =>
       (for {
         request <- POST(userSignup, Uri.uri("/users"))
         response <- userHttpService.run(request)
@@ -52,7 +52,7 @@ class UserEndpointsSpec
     val userService = UserService[IO](userRepo, userValidation)
     val userHttpService = UserEndpoints.endpoints(userService, BCrypt.syncPasswordHasher[IO]).orNotFound
 
-    forAll { userSignup: SignupRequest =>
+    forAll { userSignup: RegistrationRequest =>
       (for {
         createRequest <- POST(userSignup, Uri.uri("/users"))
         createResponse <- userHttpService.run(createRequest)
@@ -75,7 +75,7 @@ class UserEndpointsSpec
     val userService = UserService[IO](userRepo, userValidation)
     val userHttpService = UserEndpoints.endpoints(userService, BCrypt.syncPasswordHasher[IO]).orNotFound
 
-    forAll { userSignup: SignupRequest =>
+    forAll { userSignup: RegistrationRequest =>
       (for {
         createRequest <- POST(userSignup, Uri.uri("/users"))
         createResponse <- userHttpService.run(createRequest)
@@ -97,7 +97,7 @@ class UserEndpointsSpec
     val userService = UserService[IO](userRepo, userValidation)
     val userHttpService = UserEndpoints.endpoints(userService, BCrypt.syncPasswordHasher[IO]).orNotFound
 
-    forAll { userSignup: SignupRequest =>
+    forAll { userSignup: RegistrationRequest =>
       (for {
         createRequest <- POST(userSignup, Uri.uri("/users"))
         createResponse <- userHttpService.run(createRequest)

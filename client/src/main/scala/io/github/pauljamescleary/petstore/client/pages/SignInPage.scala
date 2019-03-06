@@ -7,7 +7,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^.{^, _}
 import io.github.pauljamescleary.petstore.client._
-import AppRouter.{AppPage, HomePageRt, SignUpRt}
+import AppRouter.{AppPage, HomePageRt, RegisterRt}
 import diode.data.PotState.PotEmpty
 import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
@@ -79,7 +79,7 @@ object SignInPage {
         <.button("Submit"),
         <.div(
           Style.links,
-          <.span(p.router.link(SignUpRt)("Create an account."))
+          <.span(p.router.link(RegisterRt)("Create an account."))
         )
       )
     }

@@ -45,8 +45,8 @@ object Pets {
 
     def render(p: Props, s: State) =
       Card()(
-        CardHeader()("Pets in the Store"),
         CardBody()(
+          CardTitle()("Pets in the Store"),
           <.div(
             Button(onClick = editPet(None).toJsCallback)(
               GlobalStyles.bootstrapStyles.floatRight,

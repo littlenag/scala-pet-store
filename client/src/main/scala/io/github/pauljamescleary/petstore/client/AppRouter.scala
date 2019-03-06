@@ -1,7 +1,7 @@
 package io.github.pauljamescleary.petstore.client
 
 import io.github.pauljamescleary.petstore.client.components.Footer
-import io.github.pauljamescleary.petstore.client.pages.{AppMenu, HomePage, SignInPage, SignUpPage}
+import io.github.pauljamescleary.petstore.client.pages._
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import services._
@@ -14,8 +14,8 @@ object AppRouter {
   sealed trait AppPage
   case object HomePageRt extends AppPage
   case object SignInRt extends AppPage
-  case object SignUpRt extends AppPage
-  case object LogOutRt extends AppPage
+  case object SignOutRt extends AppPage
+  case object RegisterRt extends AppPage
 
   val userProfileWrapper = AppCircuit.connect(_.userProfile)
 
@@ -36,11 +36,12 @@ object AppRouter {
 
     // wrap/connect components to the circuit
     (staticRoute("#/home", HomePageRt) ~> renderR(ctl => rootModelWrapper(HomePage(ctl,_)))
-        | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => userProfileWrapper(SignInPage(ctl,_)))
-        | staticRoute("#/sign-up", SignUpRt) ~> renderR(ctl => userProfileWrapper(SignUpPage(ctl,_)))
-        | emptyRule
-        ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
-        .renderWith(layout)
+      | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => userProfileWrapper(SignInPage(ctl,_)))
+      | staticRoute("#/sign-out", SignOutRt) ~> renderR(ctl => userProfileWrapper(SignOutPage(ctl,_)))
+      | staticRoute("#/register", RegisterRt) ~> renderR(ctl => userProfileWrapper(RegistrationPage(ctl,_)))
+      | emptyRule
+      ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
+      .renderWith(layout)
   }
 
   // create the router

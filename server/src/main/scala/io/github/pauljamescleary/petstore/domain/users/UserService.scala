@@ -4,23 +4,29 @@ import cats._
 import cats.data._
 import cats.effect.Sync
 import cats.syntax.functor._
-import io.github.pauljamescleary.petstore.domain.authentication.LoginRequest
+import io.github.pauljamescleary.petstore.domain.authentication.{SignInRequest, SignOutRequest}
 import io.github.pauljamescleary.petstore.domain.crypt.CryptService
-import io.github.pauljamescleary.petstore.domain.{UserAlreadyExistsError, UserAuthenticationFailedError, UserNotFoundError}
+import io.github.pauljamescleary.petstore.domain._
 import tsec.common.Verified
 
 class UserService[F[_]: Monad: Sync](userRepo: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F], cryptService: CryptService[F]) {
 
-  def login(login:LoginRequest): EitherT[F, UserAuthenticationFailedError, User] = {
-    val name = login.userName
+  def signIn(signIn:SignInRequest): EitherT[F, UserAuthenticationFailedError, User] = {
+    val name = signIn.userName
 
     for {
       user <- getUserByName(name).leftMap(_ => UserAuthenticationFailedError(name))
-      checkResult <- EitherT.liftF(cryptService.checkpw(login.password, cryptService.lift(user.hash)))
+      checkResult <- EitherT.liftF(cryptService.checkpw(signIn.password, cryptService.lift(user.hash)))
       resp <-
           if(checkResult == Verified) EitherT.rightT[F, UserAuthenticationFailedError](user)
           else EitherT.leftT[F, User](UserAuthenticationFailedError(name))
     } yield resp
+  }
+
+  def signOut(signOut:SignOutRequest): EitherT[F, UserTokenNotFoundError.type, Unit] = {
+    //val name = signOut.userName
+    // Hit the backing cache/store and remove the token
+    EitherT.rightT[F, UserTokenNotFoundError.type](())
   }
 
   def createUser(user: User): EitherT[F, UserAlreadyExistsError, User] =

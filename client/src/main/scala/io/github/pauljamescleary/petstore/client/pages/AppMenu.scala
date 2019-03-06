@@ -45,7 +45,7 @@ object AppMenu {
 
   val unauthenticatedMenu = Vector(
     Menu("Sign In", SignInRt),
-    Menu("Sign Up", SignUpRt)
+    Menu("Sign Up", RegisterRt)
   )
 
   val authenticatedMenu = Vector(
@@ -66,14 +66,14 @@ object AppMenu {
       Nav()(
         ^.`class` := "ml-auto",
         NavLink(href = p.ctrl.pathFor(SignInRt).value)("Sign In"),
-        NavLink(href = p.ctrl.pathFor(SignUpRt).value)("Sign Up"),
+        NavLink(href = p.ctrl.pathFor(RegisterRt).value)("Sign Up"),
       )
     }
 
     def authenticated(userProfile: UserProfile, p: Props) = {
       Nav()(
         ^.`class` := "mr-auto",
-        NavLink(href = p.ctrl.pathFor(LogOutRt).value)("Sign Out"),
+        NavLink(href = p.ctrl.pathFor(SignOutRt).value)("Sign Out")
       )
     }
 
