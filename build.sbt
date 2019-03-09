@@ -28,7 +28,10 @@ lazy val commonSettings = Def.settings(
   version      := Settings.version,
   scalacOptions ++= Settings.scalacOptions,
   scalacOptions in (Compile, console) ~= (_.filterNot(badConsoleFlags.contains(_))),
-  resolvers += Resolver.sonatypeRepo("snapshots")
+  resolvers += Resolver.sonatypeRepo("snapshots"),
+
+  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9"),
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
 )
 
 lazy val server = (project in file("server"))

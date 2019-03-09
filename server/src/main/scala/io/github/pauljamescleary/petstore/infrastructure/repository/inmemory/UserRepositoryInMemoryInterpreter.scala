@@ -3,12 +3,12 @@ package io.github.pauljamescleary.petstore.infrastructure.repository.inmemory
 import java.util.Random
 
 import cats.implicits._
-import cats.Applicative
+import cats.{Applicative, MonadError}
 import io.github.pauljamescleary.petstore.domain.users.{User, UserRepositoryAlgebra}
 
 import scala.collection.concurrent.TrieMap
 
-class UserRepositoryInMemoryInterpreter[F[_]: Applicative] extends UserRepositoryAlgebra[F] {
+class UserRepositoryInMemoryInterpreter[F[_]](implicit ev: MonadError[F, Throwable]) extends UserRepositoryAlgebra[F] {
 
   private val cache = new TrieMap[Long, User]
 
@@ -43,8 +43,10 @@ class UserRepositoryInMemoryInterpreter[F[_]: Applicative] extends UserRepositor
     } yield removed
     deleted.pure[F]
   }
+
+  override def F: MonadError[F, Throwable] = ev
 }
 
 object UserRepositoryInMemoryInterpreter {
-  def apply[F[_]: Applicative]() = new UserRepositoryInMemoryInterpreter[F]
+  def apply[F[_]: Applicative]()(implicit ev: MonadError[F, Throwable]) = new UserRepositoryInMemoryInterpreter[F]
 }

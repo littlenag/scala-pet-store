@@ -42,7 +42,7 @@ private object UserSQL {
   """.query
 }
 
-class DoobieUserRepositoryInterpreter[F[_]: Monad](val xa: Transactor[F])
+class DoobieUserRepositoryInterpreter[F[_]](val xa: Transactor[F])(implicit ev: MonadError[F, Throwable])
   extends UserRepositoryAlgebra[F] {
 
   import UserSQL._
@@ -67,10 +67,12 @@ class DoobieUserRepositoryInterpreter[F[_]: Monad](val xa: Transactor[F])
 
   def list(pageSize: Int, offset: Int): F[List[User]] =
     paginate(pageSize, offset)(selectAll).to[List].transact(xa)
+
+  override def F: MonadError[F, Throwable] = ev
 }
 
 object DoobieUserRepositoryInterpreter {
-  def apply[F[_]: Monad](xa: Transactor[F]): DoobieUserRepositoryInterpreter[F] =
+  def apply[F[_]](xa: Transactor[F])(implicit ev: MonadError[F, Throwable]): DoobieUserRepositoryInterpreter[F] =
     new DoobieUserRepositoryInterpreter(xa)
 }
 

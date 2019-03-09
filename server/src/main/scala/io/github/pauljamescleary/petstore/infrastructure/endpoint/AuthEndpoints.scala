@@ -14,12 +14,12 @@ import scala.language.higherKinds
 import domain._
 import domain.users.{User, _}
 import domain.authentication._
-import io.github.pauljamescleary.petstore.domain.crypt.CryptService
+import io.github.pauljamescleary.petstore.domain.crypt.AuthHelpers
+import io.github.pauljamescleary.petstore.domain.crypt.AuthService.UserAuthService
 import tsec.common.Verified
 import tsec.passwordhashers.PasswordHash
 
-class AuthEndpoints[F[_]: Effect] extends Http4sDsl[F] {
-  import Pagination._
+class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: UserAuthService[F]) extends Http4sDsl[F] {
 
   implicit class RichSignUp(signupRequest: RegistrationRequest) {
     import signupRequest._
@@ -31,7 +31,8 @@ class AuthEndpoints[F[_]: Effect] extends Http4sDsl[F] {
       lastName,
       email,
       hashedPassword.toString,
-      phone
+      phone,
+      AuthHelpers.Role.User.roleRepr
     )
   }
 
@@ -59,14 +60,14 @@ class AuthEndpoints[F[_]: Effect] extends Http4sDsl[F] {
   implicit val logoutReqDecoder: EntityDecoder[F, SignOutRequest] = jsonOf
   implicit val signupReqDecoder: EntityDecoder[F, RegistrationRequest] = jsonOf
 
-  private def signInEndpoint(userService: UserService[F], cryptService: CryptService[F]): HttpRoutes[F] =
+  private def signInEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "auth" / "sign-in" =>
         val action: EitherT[F, UserAuthenticationFailedError, User] = for {
           login <- EitherT.liftF(req.as[SignInRequest])
           name = login.userName
           user <- userService.getUserByName(name).leftMap(_ => UserAuthenticationFailedError(name))
-          checkResult <- EitherT.liftF(cryptService.checkpw(login.password, cryptService.lift(user.hash)))
+          checkResult <- EitherT.liftF(authService.checkpw(login.password, authService.lift(user.hash)))
           resp <-
             if(checkResult == Verified) EitherT.rightT[F, UserAuthenticationFailedError](user)
             else EitherT.leftT[F, User](UserAuthenticationFailedError(name))
@@ -78,7 +79,7 @@ class AuthEndpoints[F[_]: Effect] extends Http4sDsl[F] {
         }
     }
 
-  private def signOutEndpoint(userService: UserService[F]): HttpRoutes[F] =
+  private def signOutEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "auth" / "sign-out" =>
         val action = for {
@@ -93,12 +94,12 @@ class AuthEndpoints[F[_]: Effect] extends Http4sDsl[F] {
         }
     }
 
-  private def registerEndpoint(userService: UserService[F], cryptService: CryptService[F]): HttpRoutes[F] =
+  private def registerEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "auth" / "register" =>
         val action = for {
           signup <- req.as[RegistrationRequest]
-          hash <- cryptService.hashpw(signup.password)
+          hash <- authService.hashpw(signup.password)
           user <- signup.asUser(hash).pure[F]
           result <- userService.createUser(user).value
         } yield result
@@ -110,17 +111,14 @@ class AuthEndpoints[F[_]: Effect] extends Http4sDsl[F] {
         }
     }
 
-  def endpoints(userService: UserService[F], cryptService: CryptService[F]): HttpRoutes[F] =
-    signInEndpoint(userService,cryptService) <+>
-      signOutEndpoint(userService,cryptService) <+>
-      registerEndpoint(userService) <+>
+  def endpoints: HttpRoutes[F] =
+    signInEndpoint <+>
+      signOutEndpoint <+>
+      registerEndpoint
 
 }
 
 object AuthEndpoints {
-  def endpoints[F[_]: Effect](
-                               userService: UserService[F],
-                               cryptService: CryptService[F]
-                             ): HttpRoutes[F] =
-    new AuthEndpoints[F].endpoints(userService,cryptService)
+  def endpoints[F[_]: Effect](userService: UserService[F], authService: UserAuthService[F]): HttpRoutes[F] =
+    new AuthEndpoints[F](userService,authService).endpoints
 }

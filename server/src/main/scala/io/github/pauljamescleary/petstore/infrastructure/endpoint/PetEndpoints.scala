@@ -4,17 +4,20 @@ import cats.data.Validated.Valid
 import cats.data._
 import cats.effect.Effect
 import cats.implicits._
-import io.circe.generic.auto._
+import io.github.pauljamescleary.petstore.domain.crypt.AuthService.UserAuthService
+//import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, HttpRoutes, QueryParamDecoder}
+import tsec.authentication._
+import tsec.authorization._
 
 import scala.language.higherKinds
 import io.github.pauljamescleary.petstore.domain.{PetAlreadyExistsError, PetNotFoundError}
 import io.github.pauljamescleary.petstore.domain.pets.{Pet, PetService, PetStatus}
 
-class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
+class PetEndpoints[F[_]: Effect](petService: PetService[F], authService: UserAuthService[F]) extends Http4sDsl[F] {
 
   import Pagination._
 
@@ -30,11 +33,11 @@ class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
 
   implicit val petDecoder: EntityDecoder[F, Pet] = jsonOf[F, Pet]
 
-  private def createPetEndpoint(petService: PetService[F]): HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case req @ POST -> Root / "pets" =>
+  private def createPetEndpoint: HttpRoutes[F] =
+    authService.forRoute {
+      case req @ POST -> Root / "pets" asAuthed _ =>
         val action = for {
-          pet <- req.as[Pet]
+          pet <- req.request.as[Pet]
           result <- petService.create(pet).value
         } yield result
 
@@ -46,11 +49,11 @@ class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
         }
     }
 
-  private def updatePetEndpoint(petService: PetService[F]): HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case req @ PUT -> Root / "pets" / LongVar(petId) =>
+  private def updatePetEndpoint: HttpRoutes[F] =
+    authService.forRoute {
+      case req @ PUT -> Root / "pets" / LongVar(petId) asAuthed user =>
         val action = for {
-          pet <- req.as[Pet]
+          pet <- req.request.as[Pet]
           updated = pet.copy(id = Some(petId))
           result <- petService.update(pet).value
         } yield result
@@ -61,40 +64,40 @@ class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
         }
     }
 
-  private def getPetEndpoint(petService: PetService[F]): HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case GET -> Root / "pets" / LongVar(id) =>
+  private def getPetEndpoint: HttpRoutes[F] =
+    authService.forRoute {
+      case GET -> Root / "pets" / LongVar(id) asAuthed user =>
         petService.get(id).value.flatMap {
           case Right(found) => Ok(found.asJson)
           case Left(PetNotFoundError) => NotFound("The pet was not found")
         }
     }
 
-  private def deletePetEndpoint(petService: PetService[F]): HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case DELETE -> Root / "pets" / LongVar(id) =>
+  private def deletePetEndpoint: HttpRoutes[F] =
+    authService.forRoute {
+      case DELETE -> Root / "pets" / LongVar(id) asAuthed user =>
         for {
           _ <- petService.delete(id)
           resp <- Ok()
         } yield resp
     }
 
-  private def listPetsEndpoint(petService: PetService[F]): HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case GET -> Root / "pets" :? OptionalPageSizeMatcher(pageSize) :? OptionalOffsetMatcher(offset) =>
+  private def listPetsEndpoint: HttpRoutes[F] =
+    authService.forRoute {
+      case GET -> Root / "pets" :? OptionalPageSizeMatcher(pageSize) :? OptionalOffsetMatcher(offset) asAuthed user =>
         for {
           retrieved <- petService.list(pageSize.getOrElse(10), offset.getOrElse(0))
           resp <- Ok(retrieved.asJson)
         } yield resp
     }
 
-  private def findPetsByStatusEndpoint(petService: PetService[F]): HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case GET -> Root / "pets" / "findByStatus" :? StatusMatcher(Valid(Nil)) =>
+  private def findPetsByStatusEndpoint: HttpRoutes[F] =
+    authService.forRoute {
+      case GET -> Root / "pets" / "findByStatus" :? StatusMatcher(Valid(Nil)) asAuthed user =>
         // User did not specify any statuses
         BadRequest("status parameter not specified")
 
-      case GET -> Root / "pets" / "findByStatus" :? StatusMatcher(Valid(statuses)) =>
+      case GET -> Root / "pets" / "findByStatus" :? StatusMatcher(Valid(statuses)) asAuthed user =>
         // We have a list of valid statuses, find them and return
         for {
           retrieved <- petService.findByStatus(NonEmptyList.fromListUnsafe(statuses))
@@ -102,30 +105,29 @@ class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
         } yield resp
     }
 
-  private def findPetsByTagEndpoint(petService: PetService[F]): HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case GET -> Root / "pets" / "findByTags" :? TagMatcher(Valid(Nil)) =>
+  private def findPetsByTagEndpoint: HttpRoutes[F] =
+    authService.forRoute {
+      case GET -> Root / "pets" / "findByTags" :? TagMatcher(Valid(Nil)) asAuthed user =>
         BadRequest("tag parameter not specified")
 
-      case GET -> Root / "pets" / "findByTags" :? TagMatcher(Valid(tags)) =>
+      case GET -> Root / "pets" / "findByTags" :? TagMatcher(Valid(tags)) asAuthed user =>
         for {
           retrieved <- petService.findByTag(NonEmptyList.fromListUnsafe(tags))
           resp <- Ok(retrieved.asJson)
         } yield resp
-
     }
 
-  def endpoints(petService: PetService[F]): HttpRoutes[F] =
-    createPetEndpoint(petService) <+>
-      getPetEndpoint(petService) <+>
-      deletePetEndpoint(petService) <+>
-      listPetsEndpoint(petService) <+>
-      findPetsByStatusEndpoint(petService) <+>
-      updatePetEndpoint(petService) <+>
-      findPetsByTagEndpoint(petService)
+  def endpoints: HttpRoutes[F] =
+    createPetEndpoint <+>
+      getPetEndpoint <+>
+      deletePetEndpoint <+>
+      listPetsEndpoint <+>
+      findPetsByStatusEndpoint <+>
+      updatePetEndpoint <+>
+      findPetsByTagEndpoint
 }
 
 object PetEndpoints {
-  def endpoints[F[_]: Effect](petService: PetService[F]): HttpRoutes[F] =
-    new PetEndpoints[F].endpoints(petService)
+  def endpoints[F[_]: Effect](petService: PetService[F], authService: UserAuthService[F]): HttpRoutes[F] =
+    new PetEndpoints[F](petService,authService).endpoints
 }

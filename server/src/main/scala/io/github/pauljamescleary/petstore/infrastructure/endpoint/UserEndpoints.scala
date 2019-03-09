@@ -13,7 +13,7 @@ import org.http4s.{EntityDecoder, HttpRoutes}
 import scala.language.higherKinds
 import domain._
 import domain.users.{User, _}
-import io.github.pauljamescleary.petstore.domain.crypt.CryptService
+import io.github.pauljamescleary.petstore.domain.crypt.AuthService
 
 class UserEndpoints[F[_]: Effect] extends Http4sDsl[F] {
   import Pagination._

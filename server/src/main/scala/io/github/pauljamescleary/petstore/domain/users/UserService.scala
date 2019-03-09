@@ -5,18 +5,18 @@ import cats.data._
 import cats.effect.Sync
 import cats.syntax.functor._
 import io.github.pauljamescleary.petstore.domain.authentication.{SignInRequest, SignOutRequest}
-import io.github.pauljamescleary.petstore.domain.crypt.CryptService
 import io.github.pauljamescleary.petstore.domain._
+import io.github.pauljamescleary.petstore.domain.crypt.AuthService.UserAuthService
 import tsec.common.Verified
 
-class UserService[F[_]: Monad: Sync](userRepo: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F], cryptService: CryptService[F]) {
+class UserService[F[_]: Monad: Sync](userRepo: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F], authService: UserAuthService[F]) {
 
   def signIn(signIn:SignInRequest): EitherT[F, UserAuthenticationFailedError, User] = {
     val name = signIn.userName
 
     for {
       user <- getUserByName(name).leftMap(_ => UserAuthenticationFailedError(name))
-      checkResult <- EitherT.liftF(cryptService.checkpw(signIn.password, cryptService.lift(user.hash)))
+      checkResult <- EitherT.liftF(authService.checkpw(signIn.password, authService.lift(user.hash)))
       resp <-
           if(checkResult == Verified) EitherT.rightT[F, UserAuthenticationFailedError](user)
           else EitherT.leftT[F, User](UserAuthenticationFailedError(name))
@@ -57,6 +57,6 @@ class UserService[F[_]: Monad: Sync](userRepo: UserRepositoryAlgebra[F], validat
 }
 
 object UserService {
-  def apply[F[_]: Monad: Sync](repository: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F], cryptService: CryptService[F]): UserService[F] =
-    new UserService[F](repository, validation, cryptService)
+  def apply[F[_]: Monad: Sync](repository: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F], authService: UserAuthService[F]): UserService[F] =
+    new UserService[F](repository, validation, authService)
 }
