@@ -2,9 +2,9 @@ package io.github.pauljamescleary.petstore.domain.crypt
 
 import scala.language.higherKinds
 import io.github.pauljamescleary.petstore.domain.crypt.AuthService.UserAuthService
-import io.github.pauljamescleary.petstore.domain.users.{User, UserRepositoryAlgebra, UserService}
+import io.github.pauljamescleary.petstore.domain.users.{User, UserRepositoryAlgebra}
 import org.http4s.Response
-import tsec.common.VerificationStatus
+import tsec.common.{SecureRandomId, VerificationStatus}
 import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 import tsec.passwordhashers.jca.{BCrypt, JCAPasswordPlatform}
 import cats._
@@ -12,7 +12,6 @@ import cats.data.OptionT
 import cats.effect.Sync
 import tsec.authentication.{TSecAuthService, _}
 import tsec.authorization._
-import tsec.common.SecureRandomId
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -21,16 +20,12 @@ abstract class AuthService[F[_],AuthInfo] {
   // Emphemeral type that let's us re-use different password hashers
   type PW
 
-  def middleware: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]]
+  def securedRequestHandler: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]]
 
-//  def forRoute2(pf: PartialFunction[AuthedRequest[F, AuthInfo], F[Response[F]]])(implicit F: Applicative[F]) = {
-//    val x:AuthedService[AuthInfo, F] = Kleisli(req => pf.andThen(OptionT.liftF(_)).applyOrElse(req, Function.const(OptionT.none)))
-//    middleware(x)
-//  }
+  def bearerTokenStore: BackingStore[F, SecureRandomId, TSecBearerToken[Long]]
 
   def forRoute(pf: PartialFunction[SecuredRequest[F, User, TSecBearerToken[Long]], F[Response[F]]])(implicit F: Monad[F]) = {
-    val x: TSecAuthService[User, TSecBearerToken[Long], F] = TSecAuthService.apply(pf)
-    middleware.liftService(x)
+    securedRequestHandler.liftService(TSecAuthService(pf))
   }
 
   def lift(h:String): PasswordHash[PW] = PasswordHash[PW](h)
@@ -41,16 +36,14 @@ abstract class AuthService[F[_],AuthInfo] {
 
 
 class AuthServiceImpl[F[_]: Sync,A](jcaPasswordPlatform: JCAPasswordPlatform[A], userRepo: UserRepositoryAlgebra[F]) extends UserAuthService[F] {
-  import org.http4s.headers.Authorization
 
   type PW = A
 
-  import AuthHelpers._ // import dummyBackingStore factory
+  import AuthHelpers._
 
-  val bearerTokenStore: BackingStore[F, SecureRandomId, TSecBearerToken[Long]] = dummyBackingStore[F, SecureRandomId, TSecBearerToken[Long]](s => SecureRandomId.coerce(s.id))
+  val bearerTokenStore: BackingStore[F, SecureRandomId, TSecBearerToken[Long]] = inMemBackingStore[F, SecureRandomId, TSecBearerToken[Long]](_.id)
 
-  //We create a way to store our users. You can attach this to say, your doobie accessor
-  //val userStore: BackingStore[F, Int, User] = backingStore[F, Int, User](_.id)
+  val userStore: BackingStore[F, Long, User] = userRepo.userSecurityStore
 
   val settings: TSecTokenSettings = TSecTokenSettings(
     expiryDuration = 30.minutes, //Absolute expiration time
@@ -60,27 +53,11 @@ class AuthServiceImpl[F[_]: Sync,A](jcaPasswordPlatform: JCAPasswordPlatform[A],
   val bearerTokenAuth: BearerTokenAuthenticator[F, Long, User] =
     BearerTokenAuthenticator(
       bearerTokenStore,
-      userRepo.userSecurityStore,
+      userStore,
       settings
     )
 
-  val middleware: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]] = SecuredRequestHandler(bearerTokenAuth)
-
-  /*
-  val authUser: Kleisli[OptionT[F, ?], Request[F], User] = Kleisli({ request =>
-    val message = for {
-      header <- OptionT.fromOption(request.headers.get(Authorization))
-      token <- crypto.validateSignedToken(header.value).toRight("Invalid token")
-      message <- Either.catchOnly[NumberFormatException](token.toLong).leftMap(_.toString)
-    } yield message
-    message.traverse(retrieveUser.run)
-  })
-
-
-  override val middleware: AuthMiddleware[F, User] = AuthMiddleware(authUser)
-  */
-
-  //import jcaPasswordPlatform._
+  val securedRequestHandler: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]] = SecuredRequestHandler(bearerTokenAuth)
 
   private implicit val hasher: PasswordHasher[F,PW] = jcaPasswordPlatform.syncPasswordHasher[F]
 
@@ -112,13 +89,13 @@ object AuthHelpers {
     * @tparam V   User
     * @return
     */
-  def dummyBackingStore[F[_], I, V](getId: V => I)(implicit F: Sync[F]) = new BackingStore[F, I, V] {
+  def inMemBackingStore[F[_], I, V](getId: V => I)(implicit F: Sync[F]) = new BackingStore[F, I, V] {
     private val storageMap = mutable.HashMap.empty[I, V]
 
-    def put(elem: V): F[V] = {
-      val map = storageMap.put(getId(elem), elem)
+    def put(v: V): F[V] = {
+      val map = storageMap.put(getId(v), v)
       if (map.isEmpty)
-        F.pure(elem)
+        F.pure(v)
       else
         F.raiseError(new IllegalArgumentException)
     }

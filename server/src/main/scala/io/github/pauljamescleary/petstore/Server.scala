@@ -1,6 +1,5 @@
 package io.github.pauljamescleary.petstore
 
-import cats.data.{Kleisli, OptionT}
 import config._
 import domain.users._
 import domain.orders._
@@ -9,14 +8,13 @@ import infrastructure.endpoint._
 import infrastructure.repository.doobie.{DoobieOrderRepositoryInterpreter, DoobiePetRepositoryInterpreter, DoobieUserRepositoryInterpreter}
 import cats.effect._
 import cats.implicits._
-import org.http4s.server.{AuthMiddleware, Router, Server => H4Server}
+import org.http4s.server.{Router, Server => H4Server}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.circe.config.parser
 import io.github.pauljamescleary.petstore.domain.crypt.AuthService
-import org.http4s.Request
 
 object Server extends IOApp {
 
