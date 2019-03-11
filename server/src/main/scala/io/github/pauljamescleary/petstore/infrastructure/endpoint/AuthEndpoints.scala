@@ -78,7 +78,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: User
           // Update the auth token
           secureRandomId = SecureRandomId.Strong.generate
           bearerToken = TSecBearerToken(secureRandomId, user.id.get, Instant.now().plusSeconds(60 * 30), Option(Instant.now()))
-          _ <- authService.bearerTokenStore.update(bearerToken)
+          _ <- EitherT.liftF(authService.bearerTokenStore.update(bearerToken))
         } yield {
           user
         }
@@ -107,7 +107,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: User
   private def registerEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "auth" / "register" =>
-        val action = for {
+        val action: EitherT[F, UserAlreadyExistsError, User] = for {
           signup <- EitherT.liftF(req.as[RegistrationRequest])
           hash <- EitherT.liftF(authService.hashpw(signup.password))
           userSpec = signup.asUser(hash)
