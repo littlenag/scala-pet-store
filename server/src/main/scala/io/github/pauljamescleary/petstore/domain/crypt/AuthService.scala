@@ -1,14 +1,13 @@
 package io.github.pauljamescleary.petstore.domain.crypt
 
 import scala.language.higherKinds
-import io.github.pauljamescleary.petstore.domain.crypt.AuthService.UserAuthService
 import io.github.pauljamescleary.petstore.domain.users.{User, UserRepositoryAlgebra}
-import org.http4s.Response
+import org.http4s.{HttpRoutes, Request, Response, Status}
 import tsec.common.{SecureRandomId, VerificationStatus}
 import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 import tsec.passwordhashers.jca.{BCrypt, JCAPasswordPlatform}
 import cats._
-import cats.data.OptionT
+import cats.data.{Kleisli, OptionT}
 import cats.effect.Sync
 import tsec.authentication.{TSecAuthService, _}
 import tsec.authorization._
@@ -16,26 +15,66 @@ import tsec.authorization._
 import scala.collection.mutable
 import scala.concurrent.duration._
 
-abstract class AuthService[F[_],AuthInfo] {
+abstract class AuthService[F[_]](implicit F: Sync[F]) {
   // Emphemeral type that let's us re-use different password hashers
   type PW
+
+  import org.log4s.getLogger
+  def logger = getLogger
 
   def securedRequestHandler: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]]
 
   def bearerTokenStore: BackingStore[F, SecureRandomId, TSecBearerToken[Long]]
 
-  def forRoute(pf: PartialFunction[SecuredRequest[F, User, TSecBearerToken[Long]], F[Response[F]]])(implicit F: Monad[F]) = {
-    securedRequestHandler.liftService(TSecAuthService(pf))
+  private[this] val cachedUnauthorized: Response[F]                       = Response[F](Status.Unauthorized)
+  private[this] val defaultNotAuthenticated: Request[F] => F[Response[F]] = _ => F.pure(cachedUnauthorized)
+
+  def withFallthrough[F[_]: Monad, I, Auth](
+                                             authedStuff: Kleisli[OptionT[F, ?], Request[F], SecuredRequest[F, I, Auth]],
+                                             onNotAuthenticated: Request[F] => F[Response[F]]
+                                           ): TSecMiddleware[F, I, Auth] =
+    service => {
+      Kleisli { r: Request[F] =>
+        authedStuff
+          .run(r)
+          .flatMap(service.run)
+      }
+    }
+
+  def liftWithFallthrough(
+                           service: TSecAuthService[User, TSecBearerToken[Long], F],
+                           onNotAuthenticated: Request[F] => F[Response[F]] = defaultNotAuthenticated
+                         )(implicit ME: MonadError[Kleisli[OptionT[F, ?], Request[F], ?], Throwable]): HttpRoutes[F] = {
+
+    //val middleware: TSecMiddleware[F, User, TSecBearerToken[Long]] = TSecMiddleware.withFallthrough(Kleisli(securedRequestHandler.authenticator.extractAndValidate), onNotAuthenticated)
+    val middleware: TSecMiddleware[F, User, TSecBearerToken[Long]] = withFallthrough(Kleisli(securedRequestHandler.authenticator.extractAndValidate), onNotAuthenticated)
+
+    ME.handleErrorWith(middleware(service)) { e: Throwable =>
+      logger.error(e)("Caught unhandled exception in authenticated service")
+      Kleisli.liftF(OptionT.none)
+    }
   }
 
-  def lift(h:String): PasswordHash[PW] = PasswordHash[PW](h)
+  def forRoute(pf: PartialFunction[SecuredRequest[F, User, TSecBearerToken[Long]], F[Response[F]]])(implicit /*F: Monad[F],*/ ME: MonadError[Kleisli[OptionT[F, ?], Request[F], ?], Throwable]): HttpRoutes[F] = {
+    //securedRequestHandler.liftWithFallthrough(TSecAuthService.withAuthorization(UserRequired)(pf))
+    //securedRequestHandler.liftWithFallthrough(TSecAuthService(pf))
+    liftWithFallthrough(TSecAuthService(pf))
+  }
 
-  def checkpw(password:String, hash: PasswordHash[PW]): F[VerificationStatus]
-  def hashpw(password:String): F[PasswordHash[PW]]
+  def coerceToPasswordHash(raw:String): PasswordHash[PW] = PasswordHash[PW](raw)
+
+  def checkPassword(password:String, hash: PasswordHash[PW]): F[VerificationStatus]
+  def hashPassword(password:String): F[PasswordHash[PW]]
+
+  import AuthHelpers._
+
+  //final val anyAuth: BasicRBAC[F, Role, User, Long] = BasicRBAC.all
+  final val AdminRequired: BasicRBAC[F, Role, User, TSecBearerToken[Long]] = BasicRBAC(AuthHelpers.Role.Administrator)
+  final val UserRequired: BasicRBAC[F, Role, User, TSecBearerToken[Long]] = BasicRBAC(AuthHelpers.Role.Administrator, AuthHelpers.Role.User)
 }
 
 
-class AuthServiceImpl[F[_]: Sync,A](jcaPasswordPlatform: JCAPasswordPlatform[A], userRepo: UserRepositoryAlgebra[F]) extends UserAuthService[F] {
+class AuthServiceImpl[F[_]: Sync,A](jcaPasswordPlatform: JCAPasswordPlatform[A], userRepo: UserRepositoryAlgebra[F]) extends AuthService[F] {
 
   type PW = A
 
@@ -61,20 +100,18 @@ class AuthServiceImpl[F[_]: Sync,A](jcaPasswordPlatform: JCAPasswordPlatform[A],
 
   private implicit val hasher: PasswordHasher[F,PW] = jcaPasswordPlatform.syncPasswordHasher[F]
 
-  def checkpw(password:String, hash:PasswordHash[PW]): F[VerificationStatus] = {
-    //implicit val localFunctor: Functor[F] = ev
+  override def checkPassword(password:String, hash:PasswordHash[PW]): F[VerificationStatus] = {
     jcaPasswordPlatform.checkpw[F](password, hash)
   }
 
-  def hashpw(password:String): F[PasswordHash[PW]]  = {
+  override def hashPassword(password:String): F[PasswordHash[PW]]  = {
     jcaPasswordPlatform.hashpw(password)
   }
 }
 
 object AuthService {
-  type UserAuthService[F[_]] = AuthService[F,User]
 
-  def bcrypt[F[_]: Sync](userRepo: UserRepositoryAlgebra[F]): UserAuthService[F] =
+  def bcrypt[F[_]: Sync](userRepo: UserRepositoryAlgebra[F]): AuthService[F] =
     new AuthServiceImpl(BCrypt,userRepo)
 }
 
@@ -124,8 +161,8 @@ object AuthHelpers {
 
   object Role extends SimpleAuthEnum[Role, String] {
 
-    val Administrator: Role = Role("Administrator")
-    val User: Role          = Role("User")
+    val Administrator = Role("Administrator")
+    val User          = Role("User")
 
     implicit val E: Eq[Role] = Eq.fromUniversalEquals[Role]
 
