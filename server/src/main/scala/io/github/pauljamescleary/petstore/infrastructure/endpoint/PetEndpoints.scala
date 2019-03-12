@@ -31,8 +31,8 @@ class PetEndpoints[F[_]: Effect](petService: PetService[F], authService: AuthSer
 
   implicit val petDecoder: EntityDecoder[F, Pet] = jsonOf[F, Pet]
 
-  private def createPetEndpoint: HttpRoutes[F] =
-    authService.forRoute {
+  private val createPetEndpoint: HttpRoutes[F] =
+    authService.liftRoute {
       case req @ POST -> Root / "pets" asAuthed _ =>
         val action = for {
           pet <- req.request.as[Pet]
@@ -47,8 +47,8 @@ class PetEndpoints[F[_]: Effect](petService: PetService[F], authService: AuthSer
         }
     }
 
-  private def updatePetEndpoint: HttpRoutes[F] =
-    authService.forRoute {
+  private val updatePetEndpoint: HttpRoutes[F] =
+    authService.liftRoute {
       case req @ PUT -> Root / "pets" / LongVar(petId) asAuthed user =>
         val action = for {
           pet <- req.request.as[Pet]
@@ -62,8 +62,8 @@ class PetEndpoints[F[_]: Effect](petService: PetService[F], authService: AuthSer
         }
     }
 
-  private def getPetEndpoint: HttpRoutes[F] =
-    authService.forRoute {
+  private val getPetEndpoint: HttpRoutes[F] =
+    authService.liftRoute {
       case GET -> Root / "pets" / LongVar(id) asAuthed user =>
         petService.get(id).value.flatMap {
           case Right(found) => Ok(found.asJson)
@@ -71,8 +71,8 @@ class PetEndpoints[F[_]: Effect](petService: PetService[F], authService: AuthSer
         }
     }
 
-  private def deletePetEndpoint: HttpRoutes[F] =
-    authService.forRoute {
+  private val deletePetEndpoint: HttpRoutes[F] =
+    authService.liftRoute {
       case DELETE -> Root / "pets" / LongVar(id) asAuthed user =>
         for {
           _ <- petService.delete(id)
@@ -80,8 +80,8 @@ class PetEndpoints[F[_]: Effect](petService: PetService[F], authService: AuthSer
         } yield resp
     }
 
-  private def listPetsEndpoint: HttpRoutes[F] =
-    authService.forRoute {
+  private val listPetsEndpoint: HttpRoutes[F] =
+    authService.liftRoute {
       case GET -> Root / "pets" :? OptionalPageSizeMatcher(pageSize) :? OptionalOffsetMatcher(offset) asAuthed user =>
         for {
           retrieved <- petService.list(pageSize.getOrElse(10), offset.getOrElse(0))
@@ -89,8 +89,8 @@ class PetEndpoints[F[_]: Effect](petService: PetService[F], authService: AuthSer
         } yield resp
     }
 
-  private def findPetsByStatusEndpoint: HttpRoutes[F] =
-    authService.forRoute {
+  private val findPetsByStatusEndpoint: HttpRoutes[F] =
+    authService.liftRoute {
       case GET -> Root / "pets" / "findByStatus" :? StatusMatcher(Valid(Nil)) asAuthed user =>
         // User did not specify any statuses
         BadRequest("status parameter not specified")
@@ -103,8 +103,8 @@ class PetEndpoints[F[_]: Effect](petService: PetService[F], authService: AuthSer
         } yield resp
     }
 
-  private def findPetsByTagEndpoint: HttpRoutes[F] =
-    authService.forRoute {
+  private val findPetsByTagEndpoint: HttpRoutes[F] =
+    authService.liftRoute {
       case GET -> Root / "pets" / "findByTags" :? TagMatcher(Valid(Nil)) asAuthed user =>
         BadRequest("tag parameter not specified")
 

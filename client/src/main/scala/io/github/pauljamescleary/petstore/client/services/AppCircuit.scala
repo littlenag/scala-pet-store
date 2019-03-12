@@ -58,7 +58,7 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
       updated(Pending(),
         Effect(
           PetStoreClient.signIn(SignInRequest(username,password))
-              .map[Action] { user => Authenticated(user) }
+              .map[Action] { resp => Authenticated(resp.user) }
               .recover { case x => SignInError(x) }
         )
       )

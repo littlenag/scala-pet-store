@@ -66,7 +66,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
   private def signInEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "auth" / "sign-in" =>
-        val action: EitherT[F, UserAuthenticationFailedError, (User,TSecBearerToken[Long])] = for {
+        val action: EitherT[F, UserAuthenticationFailedError, (SignInResponse,TSecBearerToken[Long])] = for {
           login <- EitherT.liftF(req.as[SignInRequest])
           name = login.userName
           user <- userService.getUserByName(name).leftMap(_ => UserAuthenticationFailedError(name))
@@ -79,11 +79,11 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
           token <- EitherT.liftF(authService.securedRequestHandler.authenticator.create(user.id.get))
 
         } yield {
-          (user,token)
+          (SignInResponse(user,AuthToken(token.id)),token)
         }
 
         action.value.flatMap {
-          case Right((user,token)) => Ok(user.asJson).map(resp => authService.securedRequestHandler.authenticator.embed(resp,token))
+          case Right((resp,token)) => Ok(resp.asJson).map(r => authService.securedRequestHandler.authenticator.embed(r,token))
           case Left(UserAuthenticationFailedError(name)) => BadRequest(s"Authentication failed for user $name")
         }
     }

@@ -26,28 +26,16 @@ abstract class AuthService[F[_]](implicit F: Sync[F]) {
 
   def bearerTokenStore: BackingStore[F, SecureRandomId, TSecBearerToken[Long]]
 
-  private[this] val cachedUnauthorized: Response[F]                       = Response[F](Status.Unauthorized)
-  private[this] val defaultNotAuthenticated: Request[F] => F[Response[F]] = _ => F.pure(cachedUnauthorized)
+  private def liftWithFallthrough(service: TSecAuthService[User, TSecBearerToken[Long], F])
+                                 (implicit ME: MonadError[Kleisli[OptionT[F, ?], Request[F], ?], Throwable]): HttpRoutes[F] = {
 
-  def withFallthrough[F[_]: Monad, I, Auth](
-                                             authedStuff: Kleisli[OptionT[F, ?], Request[F], SecuredRequest[F, I, Auth]],
-                                             onNotAuthenticated: Request[F] => F[Response[F]]
-                                           ): TSecMiddleware[F, I, Auth] =
-    service => {
+    val middleware: TSecMiddleware[F, User, TSecBearerToken[Long]] = service => {
       Kleisli { r: Request[F] =>
-        authedStuff
+        Kleisli(securedRequestHandler.authenticator.extractAndValidate)
           .run(r)
           .flatMap(service.run)
       }
     }
-
-  def liftWithFallthrough(
-                           service: TSecAuthService[User, TSecBearerToken[Long], F],
-                           onNotAuthenticated: Request[F] => F[Response[F]] = defaultNotAuthenticated
-                         )(implicit ME: MonadError[Kleisli[OptionT[F, ?], Request[F], ?], Throwable]): HttpRoutes[F] = {
-
-    //val middleware: TSecMiddleware[F, User, TSecBearerToken[Long]] = TSecMiddleware.withFallthrough(Kleisli(securedRequestHandler.authenticator.extractAndValidate), onNotAuthenticated)
-    val middleware: TSecMiddleware[F, User, TSecBearerToken[Long]] = withFallthrough(Kleisli(securedRequestHandler.authenticator.extractAndValidate), onNotAuthenticated)
 
     ME.handleErrorWith(middleware(service)) { e: Throwable =>
       logger.error(e)("Caught unhandled exception in authenticated service")
@@ -55,9 +43,17 @@ abstract class AuthService[F[_]](implicit F: Sync[F]) {
     }
   }
 
-  def forRoute(pf: PartialFunction[SecuredRequest[F, User, TSecBearerToken[Long]], F[Response[F]]])(implicit /*F: Monad[F],*/ ME: MonadError[Kleisli[OptionT[F, ?], Request[F], ?], Throwable]): HttpRoutes[F] = {
-    //securedRequestHandler.liftWithFallthrough(TSecAuthService.withAuthorization(UserRequired)(pf))
-    //securedRequestHandler.liftWithFallthrough(TSecAuthService(pf))
+  /**
+    * Normal TSec helpers compose with an overly secure default. That is, they error out rather than trying subsequent routes. Thus we have to use our
+    * own lifting mechanics to get somewhat more friendly behavior.
+    *
+    * The standard lifting functions can be accessed with the [[securedRequestHandler]].
+    *
+    * @param pf   Route definition to lift.
+    * @param ME   MonadError context to interpret in.
+    * @return
+    */
+  def liftRoute(pf: PartialFunction[SecuredRequest[F, User, TSecBearerToken[Long]], F[Response[F]]])(implicit ME: MonadError[Kleisli[OptionT[F, ?], Request[F], ?], Throwable]): HttpRoutes[F] = {
     liftWithFallthrough(TSecAuthService(pf))
   }
 

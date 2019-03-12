@@ -3,6 +3,7 @@ package io.github.pauljamescleary.petstore.client.services
 import io.github.pauljamescleary.petstore.domain.authentication._
 import io.github.pauljamescleary.petstore.domain.pets.Pet
 import io.github.pauljamescleary.petstore.domain.users.User
+import io.github.pauljamescleary.petstore.client.logger._
 import org.scalajs.dom
 import typedapi.client._
 import typedapi.client.js._
@@ -40,14 +41,25 @@ object PetStoreClient {
     }
   }
 
-  type JwtToken = String
+  // Holder of the bearer token
+  var bearerToken: Option[AuthToken] = None
+
+  def authTokenHeader = bearerToken.map(it => "Bearer " + it.value).getOrElse("")
 
   private val cm = ClientManager(Ajax, getOrigin)
 
   private val (signInEP, signOutEP, registerEP, activationEmailEP, activateEP, recoveryEmailEP, validateResetTokenEP, resetPasswordEP) = deriveAll(PetstoreApi.AuthApi)
 
-  def signIn(req: SignInRequest): Future[User] = signInEP(req).run[Future](cm)
-  def signOut(authToken: AuthToken): Future[Unit] = signOutEP(authToken.value).run[Future](cm)
+  def signIn(req: SignInRequest): Future[SignInResponse] = {
+    signInEP(req).run[Future](cm).map { resp: SignInResponse =>
+      log.debug(s"Auth token: ${resp.auth}")
+      bearerToken = Some(resp.auth)
+      resp
+    }
+  }
+  def signOut(authToken: AuthToken): Future[Unit] = {
+    signOutEP(authToken.value).run[Future](cm)
+  }
 
   def registerAccount(req: RegistrationRequest): Future[User] = registerEP(req).run[Future](cm)
   def activationEmail(): Future[Unit] = activationEmailEP(()).run[Future](cm)
@@ -59,18 +71,18 @@ object PetStoreClient {
 
   private val (listPetsEP, createPetEP, updatePetEP, deletePetEP) = deriveAll(PetstoreApi.PetsApi)
 
-  def listPets(pageSize:Int = 10, offset:Int = 0): Future[List[Pet]] = listPetsEP(pageSize, offset).run[Future](cm)
+  def listPets(pageSize:Int = 10, offset:Int = 0): Future[List[Pet]] = listPetsEP(pageSize, offset, authTokenHeader).run[Future](cm)
   def createPet(req: Pet): Future[Either[PetAlreadyExistsError,Pet]] = {
     if (req.id.isDefined) Future.failed(new RuntimeException("Creation forbids an id."))
-    else createPetEP(req).run[Future](cm)
+    else createPetEP(authTokenHeader, req).run[Future](cm)
   }
   def updatePet(req: Pet): Future[Either[PetNotFoundError.type,Pet]] = {
     req.id match {
       case None => Future.failed(new RuntimeException("Updating requires an id."))
-      case Some(id) => updatePetEP(id,req).run[Future](cm)
+      case Some(id) => updatePetEP(id, authTokenHeader, req).run[Future](cm)
     }
   }
-  def deletePet(id: Long): Future[Unit] = deletePetEP(id).run[Future](cm)
+  def deletePet(id: Long): Future[Unit] = deletePetEP(id, authTokenHeader).run[Future](cm)
 
   def upsertPet(req:Pet): Future[Either[ValidationError, Pet]] = {
     if (req.id.isDefined) updatePet(req)

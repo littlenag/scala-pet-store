@@ -16,7 +16,7 @@ class OrderEndpoints[F[_]: Effect] extends Http4sDsl[F] {
   /* Need Instant Json Encoding */
   import io.circe.java8.time._
 
-  /* Needed for service composition via |+| */
+  /* Needed for service composition via <+> */
   import cats.implicits._
 
   /* Needed to decode entities */

@@ -1,5 +1,6 @@
 package io.github.pauljamescleary.petstore.domain.authentication
 
+import io.github.pauljamescleary.petstore.domain.users.User
 import io.github.pauljamescleary.petstore.shared.JsonSerializers._
 
 final case class SignInRequest(
@@ -8,18 +9,31 @@ final case class SignInRequest(
                              )
 
 object SignInRequest {
-  implicit val decodeLoginReq = deriveDecoder[SignInRequest]
-  implicit val encodeLoginReq = deriveEncoder[SignInRequest]
+  implicit val decodeSignInReq = deriveDecoder[SignInRequest]
+  implicit val encodeSignInReq = deriveEncoder[SignInRequest]
 }
 
-abstract class AuthToken(val value:String)
+final case class AuthToken(value:String)
 
-final case class AuthTokenOnly(override val value: String) extends AuthToken(value)
+object AuthToken {
+  implicit val decodeAuthToken = deriveDecoder[AuthToken]
+  implicit val encodeAuthToken = deriveEncoder[AuthToken]
+}
+
+final case class SignInResponse(
+                                 user: User,
+                                 auth: AuthToken
+                               )
+
+object SignInResponse {
+  implicit val decodeSignInRsp = deriveDecoder[SignInResponse]
+  implicit val encodeSignInRsp = deriveEncoder[SignInResponse]
+}
 
 final case class SignOutRequest(
-                                userName: String,
-                                jwtToken:String
-                              ) extends AuthToken(jwtToken)
+                                 userName: String,
+                                 authToken: AuthToken
+                               )
 
 object SignOutRequest {
   implicit val decodeLogoutReq = deriveDecoder[SignOutRequest]

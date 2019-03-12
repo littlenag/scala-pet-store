@@ -1,10 +1,9 @@
 package io.github.pauljamescleary.petstore
 package infrastructure.endpoint
 
-import cats.data.EitherT
 import cats.effect.Effect
 import cats.implicits._
-import io.circe.generic.auto._
+//import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -13,7 +12,6 @@ import org.http4s.{EntityDecoder, HttpRoutes}
 import scala.language.higherKinds
 import domain._
 import domain.users.{User, _}
-import io.github.pauljamescleary.petstore.domain.crypt.AuthService
 
 class UserEndpoints[F[_]: Effect] extends Http4sDsl[F] {
   import Pagination._

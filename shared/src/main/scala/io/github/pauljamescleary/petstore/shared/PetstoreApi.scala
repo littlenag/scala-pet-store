@@ -60,7 +60,7 @@ object PetstoreApi {
   private val authRts =
     // Sign In
     apiWithBody(
-      method = Post[Json, User],
+      method = Post[Json, SignInResponse],
       body = ReqBody[Json, SignInRequest],
       path = Root / "auth" / "sign-in",
       headers = baseHeaders) :|:   // server will include the Authorization header in the response
@@ -119,24 +119,24 @@ object PetstoreApi {
       method = Get[Json, List[Pet]],
       path = Root / "pets",
       queries = Queries.add[Int]('pageSize).add[Int]('offset),
-      headers = `allow-origin`
+      headers = securedEpHeaders
     ) :|:
     // POST {body:Pet} /pets => Pet (create)
     apiWithBody(
       method = Post[Json, Either[PetAlreadyExistsError,Pet]],
       body = ReqBody[Json, Pet],
       path = Root / "pets",
-      headers = `allow-origin`)  :|:
+      headers = securedEpHeaders)  :|:
     // PUT {body:Pet} /pets/{id:Long} => Pet (update)
     apiWithBody(
       method = Put[Json, Either[PetNotFoundError.type,Pet]],
       body = ReqBody[Json, Pet],
       path = Root / "pets" / Segment[Long]("id"),
-      headers = `allow-origin`) :|:
+      headers = securedEpHeaders) :|:
     // DELETE /pets/{id:Long} => () (delete)
     api(
       method = Delete[Json, Unit],
       path = Root / "pets" / Segment[Long]("id"),
-      headers = `allow-origin`)
+      headers = securedEpHeaders)
 }
 
