@@ -6,9 +6,6 @@ import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import services._
 
-/**
-  * @author Mark Kegel (mkegel@vast.com)
-  */
 object AppRouter {
   // Define the page routes used in the Petstore
   sealed trait AppPage

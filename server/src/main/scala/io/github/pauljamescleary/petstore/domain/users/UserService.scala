@@ -6,7 +6,7 @@ import cats.effect.Sync
 import cats.syntax.functor._
 import io.github.pauljamescleary.petstore.domain.authentication.{SignInRequest, SignOutRequest}
 import io.github.pauljamescleary.petstore.domain._
-import io.github.pauljamescleary.petstore.domain.crypt.AuthService
+import io.github.pauljamescleary.petstore.domain.auth.AuthService
 import tsec.common.Verified
 
 class UserService[F[_]: Monad: Sync](userRepo: UserRepositoryAlgebra[F], validation: UserValidationAlgebra[F], authService: AuthService[F]) {

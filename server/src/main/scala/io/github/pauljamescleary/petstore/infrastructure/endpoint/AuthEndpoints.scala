@@ -1,12 +1,14 @@
 package io.github.pauljamescleary.petstore
 package infrastructure.endpoint
 
+
 import java.time.Instant
+import java.time.temporal.{ChronoUnit, TemporalUnit}
+import java.util.concurrent.TimeUnit
 
 import cats.data.EitherT
 import cats.effect.Effect
 import cats.implicits._
-//import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -16,11 +18,12 @@ import scala.language.higherKinds
 import domain._
 import domain.users.{User, _}
 import domain.authentication._
-import io.github.pauljamescleary.petstore.domain.crypt.AuthHelpers
-import io.github.pauljamescleary.petstore.domain.crypt.AuthService
+import io.github.pauljamescleary.petstore.domain.auth.{AuthHelpers, AuthInfo, AuthService}
 import tsec.authentication.TSecBearerToken
-import tsec.common.{SecureRandomId, Verified}
+import tsec.common.Verified
 import tsec.passwordhashers.PasswordHash
+
+import scala.util.Random
 
 class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: AuthService[F]) extends Http4sDsl[F] {
 
@@ -35,15 +38,14 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
       email,
       hashedPassword.toString,
       phone,
-      AuthHelpers.Role.User.roleRepr
+      AuthHelpers.Role.User.roleRepr,
+      false                           // unactivated by default
     )
   }
 
   /*
-
   POST        /sign-in                    auth.controllers.SignInController.signIn
   GET         /sign-out                   auth.controllers.SignOutController.signOut
-
   POST        /register                   auth.controllers.RegistrationController.register
 
   POST        /account/activation         auth.controllers.AccountController.send
@@ -52,7 +54,6 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
   POST        /password/recovery          auth.controllers.PasswordController.recover                           // re-send recovery email
   GET         /password/recovery/:token   auth.controllers.PasswordController.validate(token: java.util.UUID)   // only validates the token
   POST        /password/recovery/:token   auth.controllers.PasswordController.reset(token: java.util.UUID)      // allows password reset
-
   */
 
   /* Jsonization of our User type */
@@ -111,13 +112,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
           hash <- EitherT.liftF(authService.hashPassword(signup.password))
           userSpec = signup.asUser(hash)
           user <- userService.createUser(userSpec)
-
-          // Create the auth token
-          //_ <- EitherT.liftF(authService.bearerTokenStore.delete())
-          secureRandomId = SecureRandomId.Strong.generate
-          bearerToken = TSecBearerToken(secureRandomId, user.id.get, Instant.now().plusSeconds(60 * 30), Option(Instant.now()))
-          _ <- EitherT.liftF(authService.bearerTokenStore.put(bearerToken))
-
+          _ <- EitherT.liftF(authService.createActivationInfo(user))
         } yield user
 
         action.value.flatMap {

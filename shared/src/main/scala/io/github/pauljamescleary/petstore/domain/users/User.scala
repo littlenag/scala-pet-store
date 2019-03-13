@@ -10,7 +10,7 @@ case class User(
     hash: String,
     phone: String,
     role: String,
-    // activation status
+    activated: Boolean,
     // password recovery token?
     id: Option[Long] = None
 )

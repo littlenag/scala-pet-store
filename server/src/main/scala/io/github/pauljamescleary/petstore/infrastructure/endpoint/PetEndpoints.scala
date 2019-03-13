@@ -4,7 +4,7 @@ import cats.data.Validated.Valid
 import cats.data._
 import cats.effect.Effect
 import cats.implicits._
-import io.github.pauljamescleary.petstore.domain.crypt.AuthService
+import io.github.pauljamescleary.petstore.domain.auth.AuthService
 import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl

@@ -6,7 +6,7 @@ import domain.users._
 import domain.orders._
 import domain.pets._
 import infrastructure.endpoint._
-import infrastructure.repository.doobie.{DoobieOrderRepositoryInterpreter, DoobiePetRepositoryInterpreter, DoobieUserRepositoryInterpreter}
+import infrastructure.repository.doobie._
 import cats.effect._
 import cats.implicits._
 import org.http4s.server.{Router, Server => H4Server}
@@ -15,8 +15,7 @@ import org.http4s.implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.circe.config.parser
-import io.github.pauljamescleary.petstore.domain.crypt.AuthService
-import org.http4s.{HttpRoutes, Request, Response}
+import io.github.pauljamescleary.petstore.domain.auth.AuthService
 import org.http4s.dsl.Http4sDsl
 
 object Server extends IOApp {
@@ -30,8 +29,9 @@ object Server extends IOApp {
       petRepo        =  DoobiePetRepositoryInterpreter[F](xa)
       orderRepo      =  DoobieOrderRepositoryInterpreter[F](xa)
       userRepo       =  DoobieUserRepositoryInterpreter[F](xa)
+      authInfoRepo   =  DoobieAuthInfoRepositoryInterpreter[F](xa)
       petValidation  =  PetValidationInterpreter[F](petRepo)
-      authService    =  AuthService.bcrypt[F](userRepo)
+      authService    =  AuthService[F](userRepo,authInfoRepo)
       petService     =  PetService[F](petRepo, petValidation)
       userValidation =  UserValidationInterpreter[F](userRepo)
       orderService   =  OrderService[F](orderRepo)
@@ -51,7 +51,7 @@ object Server extends IOApp {
       _ <- Resource.liftF(petService.create(Pet("Emmy", "cat", "meow")).value)
       _ <- Resource.liftF(petService.create(Pet("Carrie", "dog", "sleepy")).value)
       hashpw <- Resource.liftF(authService.hashPassword("test"))
-      _ <- Resource.liftF(userService.createUser(User("test", "test", "test", "test@test.com", hashpw.toString, "", "User")).value)
+      _ <- Resource.liftF(userService.createUser(User("test", "test", "test", "test@test.com", hashpw.toString, "", "User", true)).value)
       server <-
         BlazeServerBuilder[F]
         .bindHttp(conf.server.port, conf.server.host)

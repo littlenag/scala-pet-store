@@ -18,9 +18,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import io.github.pauljamescleary.petstore.shared.PetstoreApi
 
-/**
-  * @author Mark Kegel (mkegel@vast.com)
-  */
 object PetStoreClient {
 
   final case class DecodeException(msg: String) extends Exception
@@ -41,10 +38,21 @@ object PetStoreClient {
     }
   }
 
-  // Holder of the bearer token
-  var bearerToken: Option[AuthToken] = None
+  private var bearerToken: Option[AuthToken] = None
 
-  def authTokenHeader = bearerToken.map(it => "Bearer " + it.value).getOrElse("")
+  // If you don't want to use local storage because it's too insecure, then store in memory.
+  def setBearerToken(authToken: AuthToken) = bearerToken = Some(authToken)
+  def getBearerToken: Option[AuthToken] = bearerToken
+
+  val AUTH_TOKEN_KEY = "scala-pet-store-auth-token"
+
+  // If you are comfortable with local storage, then we use these.
+  def storeBearerToken(authToken: AuthToken) = dom.window.localStorage.setItem(AUTH_TOKEN_KEY, authToken.value)
+  def retrieveBearerToken: Option[AuthToken] = Option(dom.window.localStorage.getItem(AUTH_TOKEN_KEY)).map(AuthToken(_))
+
+  def authTokenHeader = {
+    retrieveBearerToken.map(token => "Bearer " + token.value).getOrElse("")
+  }
 
   private val cm = ClientManager(Ajax, getOrigin)
 
@@ -53,7 +61,7 @@ object PetStoreClient {
   def signIn(req: SignInRequest): Future[SignInResponse] = {
     signInEP(req).run[Future](cm).map { resp: SignInResponse =>
       log.debug(s"Auth token: ${resp.auth}")
-      bearerToken = Some(resp.auth)
+      storeBearerToken(resp.auth)
       resp
     }
   }
