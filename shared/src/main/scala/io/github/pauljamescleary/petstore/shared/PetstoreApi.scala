@@ -14,10 +14,13 @@ object PetstoreApi {
 
   import typedapi._
 
-  val `allow-origin` = Headers.serverSend("Access-Control-Allow-Origin", "*")
+  //val `allow-origin` = Headers.serverSend("Access-Control-Allow-Origin", "*")
 
   // JWT via Bearer schema
-  val `Authorization` = Headers.client[String]("Authorization")
+  //val `Authorization` = Headers.client[String]("Authorization")
+
+  // JWT via Bearer schema
+  val `Origin` = Headers.client[String]("Origin")
 
   // TODO Upstream should probably have this helper
   implicit class HeaderHelper[H1 <: shapeless.HList](hlb1: HeaderListBuilder[H1]) {
@@ -37,12 +40,11 @@ object PetstoreApi {
     }
   }
 
-
-  val baseHeaders = `allow-origin`
+  val baseHeaders = `Origin`
 
   val unsecuredEp = baseHeaders
 
-  val securedEpHeaders = baseHeaders :|: `Authorization`
+  val securedEpHeaders = baseHeaders
 
   /*
   POST        /sign-in                    auth.controllers.SignInController.signIn

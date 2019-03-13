@@ -1,12 +1,11 @@
 package io.github.pauljamescleary.petstore
 package infrastructure.endpoint
 
-import java.time.Instant
-
 import cats.data.EitherT
 import cats.effect.Effect
 import cats.implicits._
-//import io.circe.generic.auto._
+import tsec.authentication.AuthenticatedCookie
+import tsec.mac.jca.HMACSHA256
 import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -18,8 +17,7 @@ import domain.users.{User, _}
 import domain.authentication._
 import io.github.pauljamescleary.petstore.domain.crypt.AuthHelpers
 import io.github.pauljamescleary.petstore.domain.crypt.AuthService
-import tsec.authentication.TSecBearerToken
-import tsec.common.{SecureRandomId, Verified}
+import tsec.common.Verified
 import tsec.passwordhashers.PasswordHash
 
 class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: AuthService[F]) extends Http4sDsl[F] {
@@ -66,7 +64,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
   private def signInEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "auth" / "sign-in" =>
-        val action: EitherT[F, UserAuthenticationFailedError, (SignInResponse,TSecBearerToken[Long])] = for {
+        val action: EitherT[F, UserAuthenticationFailedError, (SignInResponse,AuthenticatedCookie[HMACSHA256, Long])] = for {
           login <- EitherT.liftF(req.as[SignInRequest])
           name = login.userName
           user <- userService.getUserByName(name).leftMap(_ => UserAuthenticationFailedError(name))
@@ -76,14 +74,14 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
             else EitherT.leftT[F, User](UserAuthenticationFailedError(name))
 
           // Update the auth token
-          token <- EitherT.liftF(authService.securedRequestHandler.authenticator.create(user.id.get))
+          token <- EitherT.liftF(authService.Auth.authenticator.create(user.id.get))
 
         } yield {
-          (SignInResponse(user,AuthToken(token.id)),token)
+          (SignInResponse(user),token)
         }
 
         action.value.flatMap {
-          case Right((resp,token)) => Ok(resp.asJson).map(r => authService.securedRequestHandler.authenticator.embed(r,token))
+          case Right((resp,token)) => Ok(resp.asJson).map(r => authService.Auth.authenticator.embed(r,token))
           case Left(UserAuthenticationFailedError(name)) => BadRequest(s"Authentication failed for user $name")
         }
     }
@@ -111,17 +109,10 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
           hash <- EitherT.liftF(authService.hashPassword(signup.password))
           userSpec = signup.asUser(hash)
           user <- userService.createUser(userSpec)
-
-          // Create the auth token
-          //_ <- EitherT.liftF(authService.bearerTokenStore.delete())
-          secureRandomId = SecureRandomId.Strong.generate
-          bearerToken = TSecBearerToken(secureRandomId, user.id.get, Instant.now().plusSeconds(60 * 30), Option(Instant.now()))
-          _ <- EitherT.liftF(authService.bearerTokenStore.put(bearerToken))
-
         } yield user
 
         action.value.flatMap {
-          case Right(user) => Ok(user.asJson) // add auth token header
+          case Right(user) => Ok(user.asJson)
           case Left(UserAlreadyExistsError(existing)) => Conflict(s"The user with user name ${existing.userName} already exists")
         }
     }

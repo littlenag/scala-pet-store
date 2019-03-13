@@ -18,6 +18,8 @@ import io.circe.config.parser
 import io.github.pauljamescleary.petstore.domain.crypt.AuthService
 import org.http4s.{HttpRoutes, Request, Response}
 import org.http4s.dsl.Http4sDsl
+import org.http4s.server.middleware.CORS
+import tsec.mac.jca.HMACSHA256
 
 object Server extends IOApp {
 
@@ -38,13 +40,15 @@ object Server extends IOApp {
       userService    =  UserService[F](userRepo,userValidation,authService)
       tp1 = new TestEndpoints1[F](authService)
       tp2 = new TestEndpoints2[F](authService)
-      services       =  //authService.securedRequestHandler.liftWithFallthrough(tp1.ep <+> tp2.ep) <+>
+      servicesRaw       =  //authService.securedRequestHandler.liftWithFallthrough(tp1.ep <+> tp2.ep) <+>
         PetEndpoints.endpoints[F](petService,authService) <+>
         OrderEndpoints.endpoints[F](orderService) <+>
         UserEndpoints.endpoints[F](userService) <+>
         AuthEndpoints.endpoints[F](userService,authService) <+>
         FrontendEndpoints.endpoints[F]()
-      httpApp = Router("/" -> services).orNotFound
+      corsServices = CORS(servicesRaw).orNotFound
+      //httpApp = Router("/" -> corsServices).orNotFound
+      httpApp = corsServices
       _ <- Resource.liftF(DatabaseConfig.initializeDb(conf.db))
       // Add some test data
       _ <- Resource.liftF(petService.create(Pet("Fred", "dog", "very friendly")).value)
@@ -67,7 +71,7 @@ class TestEndpoints1[F[_]: Sync](authService: AuthService[F]) extends Http4sDsl[
 
   import tsec.authentication._
 
-  val ep: TSecAuthService[User, TSecBearerToken[Long], F] =
+  val ep: TSecAuthService[User, AuthenticatedCookie[HMACSHA256, Long], F] =
     //TSecAuthService.withAuthorization(authService.UserRequired) {
     TSecAuthService {
       case req @ GET -> Root / "foo" asAuthed user =>
@@ -82,7 +86,7 @@ class TestEndpoints2[F[_]: Sync](authService: AuthService[F]) extends Http4sDsl[
 
   import tsec.authentication._
 
-  val ep: TSecAuthService[User, TSecBearerToken[Long], F] =
+  val ep: TSecAuthService[User, AuthenticatedCookie[HMACSHA256, Long], F] =
     //TSecAuthService.withAuthorization(authService.UserRequired) {
     TSecAuthService {
       case req @ GET -> Root / "bar" asAuthed user =>

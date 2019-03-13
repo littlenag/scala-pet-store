@@ -21,8 +21,8 @@ object AuthToken {
 }
 
 final case class SignInResponse(
-                                 user: User,
-                                 auth: AuthToken
+                                 user: User
+                               // cookie is returned normally and should be cached by the browser
                                )
 
 object SignInResponse {

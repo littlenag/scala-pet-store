@@ -1,8 +1,11 @@
 package io.github.pauljamescleary.petstore.domain.crypt
 
+import java.util.UUID
+
 import scala.language.higherKinds
 import io.github.pauljamescleary.petstore.domain.users.{User, UserRepositoryAlgebra}
-import org.http4s.{HttpRoutes, Request, Response, Status}
+import org.http4s.{Headers, HttpRoutes, Request, Response, Status}
+import org.http4s.headers
 import tsec.common.{SecureRandomId, VerificationStatus}
 import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 import tsec.passwordhashers.jca.{BCrypt, JCAPasswordPlatform}
@@ -11,6 +14,7 @@ import cats.data.{Kleisli, OptionT}
 import cats.effect.Sync
 import tsec.authentication.{TSecAuthService, _}
 import tsec.authorization._
+import tsec.mac.jca.{HMACSHA256, MacSigningKey}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -22,16 +26,16 @@ abstract class AuthService[F[_]](implicit F: Sync[F]) {
   import org.log4s.getLogger
   def logger = getLogger
 
-  def securedRequestHandler: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]]
+  def Auth: SecuredRequestHandler[F, Long, User, AuthenticatedCookie[HMACSHA256, Long]]
 
-  def bearerTokenStore: BackingStore[F, SecureRandomId, TSecBearerToken[Long]]
+  def tokenStore: BackingStore[F, UUID, AuthenticatedCookie[HMACSHA256, Long]]
 
-  private def liftWithFallthrough(service: TSecAuthService[User, TSecBearerToken[Long], F])
+  private def liftWithFallthrough(service: TSecAuthService[User, AuthenticatedCookie[HMACSHA256, Long], F])
                                  (implicit ME: MonadError[Kleisli[OptionT[F, ?], Request[F], ?], Throwable]): HttpRoutes[F] = {
 
-    val middleware: TSecMiddleware[F, User, TSecBearerToken[Long]] = service => {
+    val middleware: TSecMiddleware[F, User, AuthenticatedCookie[HMACSHA256, Long]] = service => {
       Kleisli { r: Request[F] =>
-        Kleisli(securedRequestHandler.authenticator.extractAndValidate)
+        Kleisli(Auth.authenticator.extractAndValidate)
           .run(r)
           .flatMap(service.run)
       }
@@ -47,13 +51,13 @@ abstract class AuthService[F[_]](implicit F: Sync[F]) {
     * Normal TSec helpers compose with an overly secure default. That is, they error out rather than trying subsequent routes. Thus we have to use our
     * own lifting mechanics to get somewhat more friendly behavior.
     *
-    * The standard lifting functions can be accessed with the [[securedRequestHandler]].
+    * The standard lifting functions can be accessed with the [[Auth]].
     *
     * @param pf   Route definition to lift.
     * @param ME   MonadError context to interpret in.
     * @return
     */
-  def liftRoute(pf: PartialFunction[SecuredRequest[F, User, TSecBearerToken[Long]], F[Response[F]]])(implicit ME: MonadError[Kleisli[OptionT[F, ?], Request[F], ?], Throwable]): HttpRoutes[F] = {
+  def liftRoute(pf: PartialFunction[SecuredRequest[F, User, AuthenticatedCookie[HMACSHA256, Long]], F[Response[F]]])(implicit ME: MonadError[Kleisli[OptionT[F, ?], Request[F], ?], Throwable]): HttpRoutes[F] = {
     liftWithFallthrough(TSecAuthService(pf))
   }
 
@@ -65,8 +69,8 @@ abstract class AuthService[F[_]](implicit F: Sync[F]) {
   import AuthHelpers._
 
   //final val anyAuth: BasicRBAC[F, Role, User, Long] = BasicRBAC.all
-  final val AdminRequired: BasicRBAC[F, Role, User, TSecBearerToken[Long]] = BasicRBAC(AuthHelpers.Role.Administrator)
-  final val UserRequired: BasicRBAC[F, Role, User, TSecBearerToken[Long]] = BasicRBAC(AuthHelpers.Role.Administrator, AuthHelpers.Role.User)
+  final val AdminRequired: BasicRBAC[F, Role, User, AuthenticatedCookie[HMACSHA256, Long]] = BasicRBAC(AuthHelpers.Role.Administrator)
+  final val UserRequired: BasicRBAC[F, Role, User, AuthenticatedCookie[HMACSHA256, Long]] = BasicRBAC(AuthHelpers.Role.Administrator, AuthHelpers.Role.User)
 }
 
 
@@ -76,23 +80,30 @@ class AuthServiceImpl[F[_]: Sync,A](jcaPasswordPlatform: JCAPasswordPlatform[A],
 
   import AuthHelpers._
 
-  val bearerTokenStore: BackingStore[F, SecureRandomId, TSecBearerToken[Long]] = inMemBackingStore[F, SecureRandomId, TSecBearerToken[Long]](_.id)
+  val tokenStore: BackingStore[F, UUID, AuthenticatedCookie[HMACSHA256, Long]] =
+    inMemBackingStore[F, UUID, AuthenticatedCookie[HMACSHA256, Long]](_.id)
 
   val userStore: BackingStore[F, Long, User] = userRepo.userSecurityStore
 
-  val settings: TSecTokenSettings = TSecTokenSettings(
-    expiryDuration = 30.minutes, //Absolute expiration time
-    maxIdle = None
+  val settings: TSecCookieSettings = TSecCookieSettings(
+    cookieName = "sps-auth-cookie",
+    secure = false,              // https://www.owasp.org/index.php/SecureFlag
+    httpOnly = true,
+    expiryDuration = 30.minutes, // Absolute expiration time.
+    maxIdle = None               // Rolling window expiration.
   )
 
-  val bearerTokenAuth: BearerTokenAuthenticator[F, Long, User] =
-    BearerTokenAuthenticator(
-      bearerTokenStore,
+  val key: MacSigningKey[HMACSHA256] = HMACSHA256.generateKey[Id]
+
+  val tokenAuth =
+    SignedCookieAuthenticator(
+      settings,
+      tokenStore,
       userStore,
-      settings
+      key
     )
 
-  val securedRequestHandler: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]] = SecuredRequestHandler(bearerTokenAuth)
+  val Auth: SecuredRequestHandler[F, Long, User, AuthenticatedCookie[HMACSHA256, Long]] = SecuredRequestHandler(tokenAuth)
 
   private implicit val hasher: PasswordHasher[F,PW] = jcaPasswordPlatform.syncPasswordHasher[F]
 
