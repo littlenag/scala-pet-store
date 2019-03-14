@@ -17,12 +17,10 @@ case object AuthInfoKind extends Enum[AuthInfoKind] with CirceEnum[AuthInfoKind]
   val values = findValues
 }
 
-
 /**
-  * Holds activation and authentication info.
+  * Holds multiple kinds of secure tokens. These tokens are used for route authentication, account activation, and password recovery.
   *
-  *
-  * @param id      Holds a SecureRandomId for authentication, UUID-like string for activation
+  * @param id      Holds a SecureRandomId for route authentication, UUID-like string for account activation, UUID string for password recovery
   * @param userId
   * @param expiry
   * @param lastTouched

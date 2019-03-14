@@ -1,11 +1,6 @@
 package io.github.pauljamescleary.petstore
 package infrastructure.endpoint
 
-
-import java.time.Instant
-import java.time.temporal.{ChronoUnit, TemporalUnit}
-import java.util.concurrent.TimeUnit
-
 import cats.data.EitherT
 import cats.effect.Effect
 import cats.implicits._
@@ -18,12 +13,10 @@ import scala.language.higherKinds
 import domain._
 import domain.users.{User, _}
 import domain.authentication._
-import io.github.pauljamescleary.petstore.domain.auth.{AuthHelpers, AuthInfo, AuthService}
+import io.github.pauljamescleary.petstore.domain.auth.{AuthHelpers, AuthService}
 import tsec.authentication.TSecBearerToken
 import tsec.common.Verified
 import tsec.passwordhashers.PasswordHash
-
-import scala.util.Random
 
 class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: AuthService[F]) extends Http4sDsl[F] {
 
@@ -63,8 +56,9 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
   implicit val loginReqDecoder: EntityDecoder[F, SignInRequest] = jsonOf
   implicit val logoutReqDecoder: EntityDecoder[F, SignOutRequest] = jsonOf
   implicit val signupReqDecoder: EntityDecoder[F, RegistrationRequest] = jsonOf
+  implicit val activationReqDecoder: EntityDecoder[F, ActivationEmailRequest] = jsonOf
 
-  private def signInEndpoint: HttpRoutes[F] =
+  private val signInEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "auth" / "sign-in" =>
         val action: EitherT[F, UserAuthenticationFailedError, (SignInResponse,TSecBearerToken[Long])] = for {
@@ -89,7 +83,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
         }
     }
 
-  private def signOutEndpoint: HttpRoutes[F] =
+  private val signOutEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "auth" / "sign-out" =>
         val action = for {
@@ -104,27 +98,49 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
         }
     }
 
-  private def registerEndpoint: HttpRoutes[F] =
+  private val registerEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
-      case req @ POST -> Root / "auth" / "register" =>
+      case req @ POST -> Root / "auth" / "account" / "register" =>
         val action: EitherT[F, UserAlreadyExistsError, User] = for {
           signup <- EitherT.liftF(req.as[RegistrationRequest])
           hash <- EitherT.liftF(authService.hashPassword(signup.password))
           userSpec = signup.asUser(hash)
           user <- userService.createUser(userSpec)
           _ <- EitherT.liftF(authService.createActivationInfo(user))
+          _ <- EitherT.liftF(authService.sendActivationEmail(user.email))
         } yield user
 
         action.value.flatMap {
           case Right(user) => Ok(user.asJson) // add auth token header
-          case Left(UserAlreadyExistsError(existing)) => Conflict(s"The user with user name ${existing.userName} already exists")
+          case Left(UserAlreadyExistsError(existing)) => Conflict(s"Account with userName '${existing.userName}' already exists")
         }
+    }
+
+  private val activationEmailEndpoint: HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case req @ POST -> Root / "auth" / "account" / "activation" =>
+        for {
+          activate <- req.as[ActivationEmailRequest]
+          _ <- authService.sendActivationEmail(activate.email)
+          resp <- Ok()
+        } yield resp
+    }
+
+  private val activateEndpoint: HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case req @ GET -> Root / "auth" / "account" / "activation" / token =>
+        for {
+          _ <- authService.processActivationToken(token)
+          resp <- Ok()
+        } yield resp
     }
 
   def endpoints: HttpRoutes[F] =
     signInEndpoint <+>
       signOutEndpoint <+>
-      registerEndpoint
+      registerEndpoint <+>
+      activationEmailEndpoint <+>
+      activateEndpoint
 
 }
 

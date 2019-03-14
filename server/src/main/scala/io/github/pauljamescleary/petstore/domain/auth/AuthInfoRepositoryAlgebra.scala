@@ -16,6 +16,12 @@ trait AuthInfoRepositoryAlgebra[F[_]] { outer =>
 
   def delete(id: String, kind: Option[AuthInfoKind] = None): F[Option[AuthInfo]]
 
+  //
+
+  def findByUserId(userId:Long): F[Option[AuthInfo]]
+
+  //
+
   def ME: MonadError[F,Throwable]
 
   val authInfoStore: BackingStore[F, SecureRandomId, TSecBearerToken[Long]] = new BackingStore[F, SecureRandomId, TSecBearerToken[Long]] {

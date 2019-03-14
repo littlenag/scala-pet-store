@@ -1,5 +1,7 @@
 package io.github.pauljamescleary.petstore.infrastructure.endpoint
 
+import java.net.URL
+
 import io.github.pauljamescleary.BuildInfo
 import cats.data.{NonEmptyList, OptionT}
 import cats.effect.{ContextShift, Effect}
@@ -17,7 +19,7 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
 
   private[this] val logger = getLogger
 
-  /* Needed for service composition via |+| */
+  /* Needed for service composition via <+> */
   import cats.implicits._
 
   import org.http4s.server.staticcontent.webjarService
@@ -25,18 +27,11 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
 
   val F = implicitly[Effect[F]]
 
-  val supportedStaticExtensions = List(".html", ".js", ".css", ".map", ".ttf", ".woff", ".woff2", ".eot", ".svg", ".png", ".ico")
+  val publicAssetExtensions = List(".html", ".js", ".css", ".map", ".ttf", ".woff", ".woff2", ".eot", ".svg", ".png", ".ico")
 
   val ec = ExecutionContext.Implicits.global
 
-  def getResource(pathInfo: String) = F.delay(getClass.getResource(pathInfo))
-
-  // only allow js/font/image assets
-  def isPublicAsset(asset: WebjarAsset): Boolean = {
-    supportedStaticExtensions.exists(ext => asset.asset.endsWith(ext))
-  }
-
-  def allowAsset(asset: WebjarAsset) = true
+  def getResource(pathInfo: String): F[URL] = F.delay(getClass.getResource(pathInfo))
 
   val indexHTML: TypedTag[String] = {
     import scalatags.Text.all._
@@ -56,25 +51,24 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
     )
   }
 
-  val indexHtmlEndpoint: HttpRoutes[F] =
+  val webjars: HttpRoutes[F] = webjarService[F](
+    Config(
+      // only allow js/font/image assets
+      filter = (asset: WebjarAsset) => publicAssetExtensions.exists(ext => asset.asset.endsWith(ext)),
+      blockingExecutionContext = ec
+    )
+  )
+
+  val endpoints: HttpRoutes[F] =
     HttpRoutes.of[F] {
+      // serves our index.html that starts our SPA
       case GET -> Root =>
         Ok(indexHTML().render)
           .map(
             _.withContentType(`Content-Type`(MediaType.text.html, Charset.`UTF-8`))
               .putHeaders(`Cache-Control`(NonEmptyList.of(`no-cache`())))
           )
-    }
 
-  val webjars: HttpRoutes[F] = webjarService(
-    Config(
-      filter = isPublicAsset,
-      blockingExecutionContext = ec
-    )
-  )
-
-  val resourcesEndpoint: HttpRoutes[F] =
-    HttpRoutes.of[F] {
       case req @ GET -> "fonts" /: path =>
         logger.info(s"font: $path")
         webjars(req.withPathInfo(s"/${BuildInfo.name}/${BuildInfo.version}/fonts" + path.toString))
@@ -87,15 +81,13 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
             .fold(NotFound())(F.pure)
             .flatten
 
-      case req @ GET -> "resources" /: path if supportedStaticExtensions.exists(req.pathInfo.endsWith) =>
+      case req @ GET -> "resources" /: path if publicAssetExtensions.exists(req.pathInfo.endsWith) =>
         StaticFile.fromResource[F](path.toString, ec, req.some)
             .orElse(OptionT.liftF(getResource(path.toString)).flatMap(StaticFile.fromURL[F](_, ec, req.some)))
             .map(_.putHeaders(`Cache-Control`(NonEmptyList.of(`no-cache`()))))
             .fold(NotFound())(F.pure)
             .flatten
     }
-
-  val endpoints: HttpRoutes[F] = resourcesEndpoint <+> indexHtmlEndpoint
 }
 
 object FrontendEndpoints {

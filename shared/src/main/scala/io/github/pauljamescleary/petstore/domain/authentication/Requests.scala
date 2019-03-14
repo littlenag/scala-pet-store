@@ -54,6 +54,13 @@ object RegistrationRequest {
   implicit val encodeSignupReq = deriveEncoder[RegistrationRequest]
 }
 
+final case class ActivationEmailRequest(email: String)
+
+object ActivationEmailRequest {
+  implicit val decodeSignupReq = deriveDecoder[ActivationEmailRequest]
+  implicit val encodeSignupReq = deriveEncoder[ActivationEmailRequest]
+}
+
 final case class PasswordRecoveryRequest(
                                           email: String
                                         )

@@ -32,6 +32,12 @@ private object UserSQL {
     WHERE USER_NAME = $userName
   """.query[User]
 
+  def byEmail(email: String): Query0[User] = sql"""
+    SELECT USER_NAME, FIRST_NAME, LAST_NAME, EMAIL, HASH, PHONE, USER_ROLE, ACTIVATED, ID
+    FROM USERS
+    WHERE EMAIL = $email
+  """.query[User]
+
   def delete(userId: Long): Update0 = sql"""
     DELETE FROM USERS WHERE ID = $userId
   """.update
@@ -57,6 +63,8 @@ class DoobieUserRepositoryInterpreter[F[_]](val xa: Transactor[F])(implicit ev: 
   def get(userId: Long): F[Option[User]] = select(userId).option.transact(xa)
 
   def findByUserName(userName: String): F[Option[User]] = byUserName(userName).option.transact(xa)
+
+  def findByEmail(email: String): F[Option[User]] = byEmail(email).option.transact(xa)
 
   def delete(userId: Long): F[Option[User]] = OptionT(get(userId)).semiflatMap(user =>
     UserSQL.delete(userId).run.transact(xa).as(user)

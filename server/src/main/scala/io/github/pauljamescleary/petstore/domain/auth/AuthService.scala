@@ -13,6 +13,7 @@ import cats._
 import cats.implicits._
 import cats.data.{Kleisli, OptionT}
 import cats.effect.Sync
+import io.github.pauljamescleary.petstore.domain.mailer.MailerService
 import tsec.authentication.{TSecAuthService, _}
 import tsec.authorization._
 import org.log4s.getLogger
@@ -20,7 +21,7 @@ import org.log4s.getLogger
 import scala.concurrent.duration._
 import scala.util.Random
 
-class AuthService[F[_]](userRepo: UserRepositoryAlgebra[F], authInfoRepo: AuthInfoRepositoryAlgebra[F])(implicit F: Sync[F]) {
+class AuthService[F[_]](mailerService: MailerService[F], userRepo: UserRepositoryAlgebra[F], authInfoRepo: AuthInfoRepositoryAlgebra[F])(implicit F: Sync[F]) {
 
   type JCA = BCrypt
   val jcaPasswordPlatform: JCAPasswordPlatform[JCA] = BCrypt
@@ -38,6 +39,62 @@ class AuthService[F[_]](userRepo: UserRepositoryAlgebra[F], authInfoRepo: AuthIn
         authInfo = AuthInfo(secureId, userId, Instant.now().plus(3, ChronoUnit.DAYS), Option(Instant.now()), AuthInfoKind.Activation)
         created <- authInfoRepo.create(authInfo)
       } yield created
+  }
+
+  /**
+    * Pre-conditions for the user:
+    *   - exists
+    *   - not yet active
+    *   - has an activation token
+    *
+    * @param email
+    * @return
+    */
+  def sendActivationEmail(email:String): F[Unit] = {
+    import courier._
+
+    val action: F[Unit] = for {
+      maybeUser <- userRepo.findByEmail(email)
+      user <- maybeUser match {
+        case Some(user) if !user.activated => user.pure[F]
+        case _ => F.raiseError[User](new IllegalArgumentException)
+      }
+      maybeAuthInfo <- authInfoRepo.findByUserId(user.id.get)
+      authInfo <- maybeAuthInfo match {
+        case Some(authInfo) if authInfo.kind == AuthInfoKind.Activation => authInfo.pure[F]
+        case Some(_) => F.raiseError[AuthInfo](new IllegalArgumentException("Invalid user account state."))  // This should be impossible.
+        case None => createActivationInfo(user)  // If the token was cleaned up, then just regen.
+      }
+
+      activationUrl = mailerService.mkResponseUrl("/auth/account/activation/" + authInfo.id)
+      _ <- mailerService.send(Envelope.from("scala-pet-store" at "example.com")
+        .to(user.email.addr)
+        .subject("Welcome to the Scala Pet Store")
+        .content(Text(s"""To activate your account visit <a href="$activationUrl">$activationUrl</a>""")))
+
+    } yield ()
+
+    action orElse ().pure[F]
+  }
+
+  def processActivationToken(token:String): F[Unit] = {
+    for {
+      maybeAuthInfo <- authInfoRepo.get(token, AuthInfoKind.Activation.some)
+      authInfo <- maybeAuthInfo match {
+        case Some(authInfo) => authInfo.pure[F]
+        case None => F.raiseError[AuthInfo](new IllegalArgumentException("Invalid token."))
+      }
+
+      maybeUser <- userRepo.get(authInfo.userId)
+      user <- maybeUser match {
+        case Some(user) if !user.activated => user.pure[F]
+        case Some(user) if user.activated => F.raiseError[User](new IllegalArgumentException("User already activated but had activation token !?!"))
+        case None => F.raiseError[User](new IllegalArgumentException("No user for valid activation token !?!"))
+      }
+
+      _ <- userRepo.update(user.copy(activated = true))
+
+    } yield ()
   }
 
   def generateRecoveryToken: F[String] = F.pure(java.util.UUID.randomUUID().toString)
@@ -119,12 +176,11 @@ class AuthService[F[_]](userRepo: UserRepositoryAlgebra[F], authInfoRepo: AuthIn
   //import AuthHelpers._
   //final val AdminRequired: BasicRBAC[F, Role, User, TSecBearerToken[Long]] = BasicRBAC(AuthHelpers.Role.Administrator)
   //final val UserRequired: BasicRBAC[F, Role, User, TSecBearerToken[Long]] = BasicRBAC(AuthHelpers.Role.Administrator, AuthHelpers.Role.User)
-
 }
 
 object AuthService {
-  def apply[F[_]: Sync](userRepo: UserRepositoryAlgebra[F], authInfoRepo: AuthInfoRepositoryAlgebra[F]): AuthService[F] =
-    new AuthService(userRepo,authInfoRepo)
+  def apply[F[_]: Sync](mailerService: MailerService[F], userRepo: UserRepositoryAlgebra[F], authInfoRepo: AuthInfoRepositoryAlgebra[F]): AuthService[F] =
+    new AuthService(mailerService,userRepo,authInfoRepo)
 }
 
 object AuthHelpers {
@@ -152,5 +208,6 @@ object AuthHelpers {
     new AuthorizationInfo[F, Role, User] {
       def fetchInfo(u: User): F[Role] = Role.fromReprF[F](u.role)
     }
-
 }
+
+

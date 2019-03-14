@@ -33,6 +33,9 @@ class UserRepositoryInMemoryInterpreter[F[_]](implicit ev: MonadError[F, Throwab
   def findByUserName(userName: String): F[Option[User]] =
     cache.values.find(u => u.userName == userName).pure[F]
 
+  def findByEmail(email: String): F[Option[User]] =
+    cache.values.find(u => u.email == email).pure[F]
+
   def list(pageSize: Int, offset: Int): F[List[User]] =
     cache.values.toList.sortBy(_.lastName).slice(offset, offset + pageSize).pure[F]
 

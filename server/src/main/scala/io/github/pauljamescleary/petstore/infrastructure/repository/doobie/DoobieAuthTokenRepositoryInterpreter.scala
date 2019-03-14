@@ -30,12 +30,6 @@ private object AuthInfoSQL {
     WHERE ID = ${authInfo.id}
   """.update
 
-  def select(id: String): Query0[AuthInfo] = sql"""
-    SELECT ID, USER_ID, EXPIRY, LAST_TOUCHED, KIND
-    FROM AUTH_INFO
-    WHERE ID = $id
-  """.query
-
   def select(id: String, kind: Option[AuthInfoKind]): Query0[AuthInfo] = {
     (sql"""
     SELECT ID, USER_ID, EXPIRY, LAST_TOUCHED, KIND
@@ -45,6 +39,12 @@ private object AuthInfoSQL {
   def delete(id: String, kind: Option[AuthInfoKind]): Update0 = {
     (sql"""DELETE FROM AUTH_INFO """ ++ Fragments.whereAndOpt(Some(fr"ID = $id"), kind.map(k => fr"KIND = $k"))).update
   }
+
+  def selectByUserId(userId: Long): Query0[AuthInfo] = sql"""
+    SELECT ID, USER_ID, EXPIRY, LAST_TOUCHED, KIND
+    FROM AUTH_INFO
+    WHERE USER_ID = $userId
+  """.query
 }
 
 class DoobieAuthInfoRepositoryInterpreter[F[_]](val xa: Transactor[F])(implicit ev: MonadError[F, Throwable])
@@ -57,11 +57,13 @@ class DoobieAuthInfoRepositoryInterpreter[F[_]](val xa: Transactor[F])(implicit 
 
   def update(authInfo: AuthInfo): F[AuthInfo] = AuthInfoSQL.update(authInfo).run.transact(xa).as(authInfo)
 
-  def get(id: String, kind: Option[AuthInfoKind] = None): F[Option[AuthInfo]] = select(id).option.transact(xa)
+  def get(id: String, kind: Option[AuthInfoKind] = None): F[Option[AuthInfo]] = select(id,kind).option.transact(xa)
 
   def delete(id: String, kind: Option[AuthInfoKind] = None): F[Option[AuthInfo]] = OptionT(get(id,kind)).semiflatMap(user =>
     AuthInfoSQL.delete(id,kind).run.transact(xa).as(user)
   ).value
+
+  def findByUserId(userId:Long): F[Option[AuthInfo]] = selectByUserId(userId).option.transact(xa)
 
   override def ME: MonadError[F, Throwable] = ev
 }

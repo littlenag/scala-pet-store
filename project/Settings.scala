@@ -77,6 +77,7 @@ object Settings {
   val ScalaTestVersion       = "3.0.5"
   val FlywayVersion          = "5.2.4"
   val TsecVersion            = "0.1.0-M3"
+  val CourierVersion                = "1.0.0"
 
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
@@ -127,6 +128,10 @@ object Settings {
     "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % Test,
 
     "com.github.pheymann"   %% "typedapi-server"      % versions.typedApi,
+
+    // For sending activation and recovery emails
+    "com.github.daddykotex" %% "courier"              % CourierVersion,
+    "org.jvnet.mock-javamail" % "mock-javamail"       % "1.9" % "test",
 
     // Authentication dependencies
     "io.github.jmcardon"    %% "tsec-common"          % TsecVersion,

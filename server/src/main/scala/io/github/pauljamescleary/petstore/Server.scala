@@ -1,6 +1,5 @@
 package io.github.pauljamescleary.petstore
 
-import cats.data.{Kleisli, OptionT}
 import config._
 import domain.users._
 import domain.orders._
@@ -16,6 +15,7 @@ import org.http4s.implicits._
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.circe.config.parser
 import io.github.pauljamescleary.petstore.domain.auth.AuthService
+import io.github.pauljamescleary.petstore.domain.mailer.MailerService
 import org.http4s.dsl.Http4sDsl
 
 object Server extends IOApp {
@@ -25,20 +25,26 @@ object Server extends IOApp {
   def createServer[F[_] : ContextShift : ConcurrentEffect : Timer]: Resource[F, H4Server[F]] = {
     for {
       conf           <- Resource.liftF(parser.decodePathF[F, PetStoreConfig]("petstore"))
+
       xa             <- DatabaseConfig.dbTransactor(conf.db, global, global)
       petRepo        =  DoobiePetRepositoryInterpreter[F](xa)
       orderRepo      =  DoobieOrderRepositoryInterpreter[F](xa)
       userRepo       =  DoobieUserRepositoryInterpreter[F](xa)
       authInfoRepo   =  DoobieAuthInfoRepositoryInterpreter[F](xa)
-      petValidation  =  PetValidationInterpreter[F](petRepo)
-      authService    =  AuthService[F](userRepo,authInfoRepo)
-      petService     =  PetService[F](petRepo, petValidation)
+
       userValidation =  UserValidationInterpreter[F](userRepo)
+      petValidation  =  PetValidationInterpreter[F](petRepo)
+
+      mailerService  =  MailerService[F](conf.mailer,conf.baseUrl)
+      authService    =  AuthService[F](mailerService,userRepo,authInfoRepo)
+      petService     =  PetService[F](petRepo, petValidation)
       orderService   =  OrderService[F](orderRepo)
       userService    =  UserService[F](userRepo,userValidation,authService)
+
       tp1 = new TestEndpoints1[F](authService)
       tp2 = new TestEndpoints2[F](authService)
-      services       =  //authService.securedRequestHandler.liftWithFallthrough(tp1.ep <+> tp2.ep) <+>
+
+      services       =
         PetEndpoints.endpoints[F](petService,authService) <+>
         OrderEndpoints.endpoints[F](orderService) <+>
         UserEndpoints.endpoints[F](userService) <+>
