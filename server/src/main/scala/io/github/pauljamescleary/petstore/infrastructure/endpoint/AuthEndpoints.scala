@@ -36,19 +36,6 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
     )
   }
 
-  /*
-  POST        /sign-in                    auth.controllers.SignInController.signIn
-  GET         /sign-out                   auth.controllers.SignOutController.signOut
-  POST        /register                   auth.controllers.RegistrationController.register
-
-  POST        /account/activation         auth.controllers.AccountController.send
-  GET         /account/activation/:token  auth.controllers.AccountController.activate(token: java.util.UUID)
-
-  POST        /password/recovery          auth.controllers.PasswordController.recover                           // re-send recovery email
-  GET         /password/recovery/:token   auth.controllers.PasswordController.validate(token: java.util.UUID)   // only validates the token
-  POST        /password/recovery/:token   auth.controllers.PasswordController.reset(token: java.util.UUID)      // allows password reset
-  */
-
   /* Jsonization of our User type */
 
   implicit val userDecoder: EntityDecoder[F, User] = jsonOf
@@ -57,6 +44,8 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
   implicit val logoutReqDecoder: EntityDecoder[F, SignOutRequest] = jsonOf
   implicit val signupReqDecoder: EntityDecoder[F, RegistrationRequest] = jsonOf
   implicit val activationReqDecoder: EntityDecoder[F, ActivationEmailRequest] = jsonOf
+  implicit val recoveryReqDecoder: EntityDecoder[F, PasswordRecoveryRequest] = jsonOf
+  implicit val resetReqDecoder: EntityDecoder[F, PasswordResetRequest] = jsonOf
 
   private val signInEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
@@ -135,13 +124,48 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
         } yield resp
     }
 
+  // re-send password recovery email
+  private val recoveryEmailEndpoint: HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case req @ POST -> Root / "auth" / "password" / "recovery" =>
+        for {
+          recover <- req.as[PasswordRecoveryRequest]
+          _ <- authService.sendRecoveryEmail(recover.email)
+          resp <- Ok()
+        } yield resp
+    }
+
+  // validate the password reset token (used by the SPA)
+  // should try to re-direct the spa if it can
+  private val validateRecoveryTokenEndpoint: HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case req @ GET -> Root / "auth" / "password" / "recovery" / token =>
+        for {
+          _ <- authService.checkRecoveryToken(token)
+          resp <- Ok()
+        } yield resp
+    }
+
+  // reset a password
+  private val resetPasswordEndpoint: HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case req @ POST -> Root / "auth" / "password" / "recovery" / token =>
+        for {
+          reset <- req.as[PasswordResetRequest]
+          _ <- authService.processPasswordReset(token,reset)
+          resp <- Ok()
+        } yield resp
+    }
+
   def endpoints: HttpRoutes[F] =
     signInEndpoint <+>
-      signOutEndpoint <+>
-      registerEndpoint <+>
-      activationEmailEndpoint <+>
-      activateEndpoint
-
+    signOutEndpoint <+>
+    registerEndpoint <+>
+    activationEmailEndpoint <+>
+    activateEndpoint <+>
+    recoveryEmailEndpoint <+>
+    validateRecoveryTokenEndpoint <+>
+    resetPasswordEndpoint
 }
 
 object AuthEndpoints {

@@ -1,5 +1,7 @@
 package io.github.pauljamescleary.petstore.client
 
+import java.util.UUID
+
 import io.github.pauljamescleary.petstore.client.components.Footer
 import io.github.pauljamescleary.petstore.client.pages._
 import japgolly.scalajs.react.extra.router._
@@ -13,6 +15,8 @@ object AppRouter {
   case object SignInRt extends AppPage
   case object SignOutRt extends AppPage
   case object RegisterRt extends AppPage
+  case object RecoveryRt extends AppPage
+  case class PasswordResetRt(token:UUID) extends AppPage
 
   val userProfileWrapper = AppCircuit.connect(_.userProfile)
 
@@ -27,15 +31,17 @@ object AppRouter {
   val routerConfig = RouterConfigDsl[AppPage].buildConfig { dsl =>
     import dsl._
 
-    //val petWrapper = AppCircuit.connect(_.pets)
-
     val rootModelWrapper = AppCircuit.connect(x => x)
+
+    val resetRoute: StaticDsl.RouteB[PasswordResetRt] = "#/password-reset" / uuid.caseClass[PasswordResetRt]
 
     // wrap/connect components to the circuit
     (staticRoute("#/home", HomePageRt) ~> renderR(ctl => rootModelWrapper(HomePage(ctl,_)))
       | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => userProfileWrapper(SignInPage(ctl,_)))
       | staticRoute("#/sign-out", SignOutRt) ~> renderR(ctl => userProfileWrapper(SignOutPage(ctl,_)))
       | staticRoute("#/register", RegisterRt) ~> renderR(ctl => userProfileWrapper(RegistrationPage(ctl,_)))
+      | staticRoute("#/recovery", RecoveryRt) ~> renderR(ctl => userProfileWrapper(RecoveryPage(ctl,_)))
+      | dynamicRouteCT(resetRoute) ~> dynRender((rt:PasswordResetRt) => renderR(ctl => PasswordResetPage(ctl,rt.token)))
       | emptyRule
       ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
       .renderWith(layout)

@@ -40,11 +40,10 @@ private object AuthInfoSQL {
     (sql"""DELETE FROM AUTH_INFO """ ++ Fragments.whereAndOpt(Some(fr"ID = $id"), kind.map(k => fr"KIND = $k"))).update
   }
 
-  def selectByUserId(userId: Long): Query0[AuthInfo] = sql"""
+  def selectByUserId(userId: Long, kind: Option[AuthInfoKind] = None): Query0[AuthInfo] =
+    (sql"""
     SELECT ID, USER_ID, EXPIRY, LAST_TOUCHED, KIND
-    FROM AUTH_INFO
-    WHERE USER_ID = $userId
-  """.query
+    FROM AUTH_INFO """ ++ Fragments.whereAndOpt(Some(fr"USER_ID = $userId"), kind.map(k => fr"KIND = $k"))).query
 }
 
 class DoobieAuthInfoRepositoryInterpreter[F[_]](val xa: Transactor[F])(implicit ev: MonadError[F, Throwable])
@@ -63,7 +62,7 @@ class DoobieAuthInfoRepositoryInterpreter[F[_]](val xa: Transactor[F])(implicit 
     AuthInfoSQL.delete(id,kind).run.transact(xa).as(user)
   ).value
 
-  def findByUserId(userId:Long): F[Option[AuthInfo]] = selectByUserId(userId).option.transact(xa)
+  def findByUserId(userId:Long, kind: Option[AuthInfoKind] = None): F[Option[AuthInfo]] = selectByUserId(userId,kind).option.transact(xa)
 
   override def ME: MonadError[F, Throwable] = ev
 }

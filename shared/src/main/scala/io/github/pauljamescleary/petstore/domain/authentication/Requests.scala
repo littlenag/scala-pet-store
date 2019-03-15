@@ -71,8 +71,7 @@ object PasswordRecoveryRequest {
 }
 
 final case class PasswordResetRequest(
-                                       newPassword: String,
-                                       token:String
+                                       newPassword: String
                                      )
 
 object PasswordResetRequest {

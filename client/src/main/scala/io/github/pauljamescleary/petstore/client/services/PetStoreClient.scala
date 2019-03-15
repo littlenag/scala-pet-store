@@ -75,7 +75,7 @@ object PetStoreClient {
 
   def recoveryEmail(): Future[Unit] = recoveryEmailEP(()).run[Future](cm)
   def validateResetToken(token:String): Future[Unit] = validateResetTokenEP(token).run[Future](cm)
-  def resetPassword(req: PasswordResetRequest): Future[User] = resetPasswordEP(req.token, req).run[Future](cm)
+  def resetPassword(token:String, req: PasswordResetRequest): Future[User] = resetPasswordEP(token, req).run[Future](cm)
 
   private val (listPetsEP, createPetEP, updatePetEP, deletePetEP) = deriveAll(PetstoreApi.PetsApi)
 

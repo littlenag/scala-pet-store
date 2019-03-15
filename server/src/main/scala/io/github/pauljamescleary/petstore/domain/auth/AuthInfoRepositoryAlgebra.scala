@@ -18,7 +18,7 @@ trait AuthInfoRepositoryAlgebra[F[_]] { outer =>
 
   //
 
-  def findByUserId(userId:Long): F[Option[AuthInfo]]
+  def findByUserId(userId:Long, kind: Option[AuthInfoKind] = None): F[Option[AuthInfo]]
 
   //
 

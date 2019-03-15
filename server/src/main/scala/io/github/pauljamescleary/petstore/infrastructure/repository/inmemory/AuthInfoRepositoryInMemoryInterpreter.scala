@@ -24,8 +24,8 @@ class AuthInfoRepositoryInMemoryInterpreter[F[_]](implicit ev: MonadError[F, Thr
 
   def delete(id: String, kind: Option[AuthInfoKind]): F[Option[AuthInfo]] = cache.remove(id).pure[F]
 
-  def findByUserId(userId:Long): F[Option[AuthInfo]] =
-    cache.values.find(_.userId == userId).pure[F]
+  def findByUserId(userId:Long, kind: Option[AuthInfoKind] = None): F[Option[AuthInfo]] =
+    cache.values.find(u => u.userId == userId && Option(u.kind) == kind).pure[F]
 
   override def ME: MonadError[F, Throwable] = ev
 }

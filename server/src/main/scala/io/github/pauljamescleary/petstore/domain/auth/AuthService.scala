@@ -13,6 +13,7 @@ import cats._
 import cats.implicits._
 import cats.data.{Kleisli, OptionT}
 import cats.effect.Sync
+import io.github.pauljamescleary.petstore.domain.authentication.PasswordResetRequest
 import io.github.pauljamescleary.petstore.domain.mailer.MailerService
 import tsec.authentication.{TSecAuthService, _}
 import tsec.authorization._
@@ -59,18 +60,19 @@ class AuthService[F[_]](mailerService: MailerService[F], userRepo: UserRepositor
         case Some(user) if !user.activated => user.pure[F]
         case _ => F.raiseError[User](new IllegalArgumentException)
       }
-      maybeAuthInfo <- authInfoRepo.findByUserId(user.id.get)
+      maybeAuthInfo <- authInfoRepo.findByUserId(user.id.get, AuthInfoKind.Activation.some)
       authInfo <- maybeAuthInfo match {
-        case Some(authInfo) if authInfo.kind == AuthInfoKind.Activation => authInfo.pure[F]
-        case Some(_) => F.raiseError[AuthInfo](new IllegalArgumentException("Invalid user account state."))  // This should be impossible.
+        case Some(authInfo) => authInfo.pure[F]
         case None => createActivationInfo(user)  // If the token was cleaned up, then just regen.
       }
 
       activationUrl = mailerService.mkResponseUrl("/auth/account/activation/" + authInfo.id)
-      _ <- mailerService.send(Envelope.from("scala-pet-store" at "example.com")
+      _ <- mailerService.send(
+        Envelope.from("scala-pet-store" at "example.com")
         .to(user.email.addr)
         .subject("Welcome to the Scala Pet Store")
-        .content(Text(s"""To activate your account visit <a href="$activationUrl">$activationUrl</a>""")))
+        .content(Text(s"""To activate your account visit <a href="$activationUrl">$activationUrl</a>"""))
+      )
 
     } yield ()
 
@@ -97,6 +99,8 @@ class AuthService[F[_]](mailerService: MailerService[F], userRepo: UserRepositor
     } yield ()
   }
 
+  ////
+
   def generateRecoveryToken: F[String] = F.pure(java.util.UUID.randomUUID().toString)
 
   def createRecoveryInfo(user:User): F[AuthInfo] = user.id match {
@@ -109,6 +113,74 @@ class AuthService[F[_]](mailerService: MailerService[F], userRepo: UserRepositor
         created <- authInfoRepo.create(authInfo)
       } yield created
   }
+
+
+  /**
+    * Pre-conditions for the user:
+    *   - exists
+    *   - must be active
+    *   - has an activation token
+    *
+    * @param email
+    * @return
+    */
+  def sendRecoveryEmail(email:String): F[Unit] = {
+    import courier._
+
+    val action: F[Unit] = for {
+      maybeUser <- userRepo.findByEmail(email)
+      user <- maybeUser match {
+        case Some(user) if user.activated => user.pure[F]
+        case _ => F.raiseError[User](new IllegalArgumentException)
+      }
+
+      // generate a new recovery token every time
+      authInfo <- createRecoveryInfo(user)
+
+      recoveryUrl = mailerService.mkResponseUrl("/#/password-reset/" + authInfo.id)
+      _ <- mailerService.send(
+        Envelope.from("scala-pet-store" at "example.com")
+        .to(user.email.addr)
+        .subject("Scala Pet Store - Password Reset")
+        .content(Text(s"""To reset your password visit <a href="$recoveryUrl">$recoveryUrl</a>"""))
+      )
+
+    } yield ()
+
+    action orElse ().pure[F]
+  }
+
+  def checkRecoveryToken(token:String): F[Unit] = {
+    for {
+      maybeAuthInfo <- authInfoRepo.get(token, AuthInfoKind.Recovery.some)
+      resp <- maybeAuthInfo match {
+        case Some(_) => ().pure[F]
+        case None => F.raiseError[Unit](new IllegalArgumentException("Invalid token."))
+      }
+    } yield resp
+  }
+
+  def processPasswordReset(token:String, passwordReset: PasswordResetRequest): F[Unit] = {
+    for {
+      maybeAuthInfo <- authInfoRepo.get(token, AuthInfoKind.Recovery.some)
+      authInfo <- maybeAuthInfo match {
+        case Some(authInfo) => authInfo.pure[F]
+        case None => F.raiseError[AuthInfo](new IllegalArgumentException("Invalid token."))
+      }
+
+      maybeUser <- userRepo.get(authInfo.userId)
+      user <- maybeUser match {
+        case Some(user) if user.activated => user.pure[F]
+        case Some(user) if !user.activated => F.raiseError[User](new IllegalArgumentException("User not activated but needs password reset !?!"))
+        case None => F.raiseError[User](new IllegalArgumentException("No user for valid recovery token !?!"))
+      }
+
+      hashed <- hashPassword(passwordReset.newPassword)
+      _ <- userRepo.update(user.copy(hash = hashed.toString))
+
+    } yield ()
+  }
+
 
   /**
     * Normal TSec helpers compose with an overly secure default. That is, they error out rather than trying subsequent routes. Thus we have to use our

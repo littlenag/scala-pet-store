@@ -1,5 +1,7 @@
 package io.github.pauljamescleary.petstore.client.services
 
+import java.util.UUID
+
 import io.github.pauljamescleary.petstore._
 import client.logger._
 import domain.pets.Pet
@@ -8,7 +10,7 @@ import diode._
 import diode.data._
 import diode.util._
 import diode.react.ReactConnector
-import io.github.pauljamescleary.petstore.domain.authentication.{SignInRequest, RegistrationRequest}
+import io.github.pauljamescleary.petstore.domain.authentication.{PasswordResetRequest, RegistrationRequest, SignInRequest}
 import io.github.pauljamescleary.petstore.domain.users.User
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -36,6 +38,10 @@ case object SignOut extends Action
 case class Register(username:String, email:String, password:String) extends Action
 case class AccountCreated(user:User) extends Action
 case class RegistrationError(ex:Throwable) extends Action
+
+case class PasswordReset(token:UUID, newPassword:String) extends Action
+case class ResetSuccess(user:User) extends Action
+case class ResetError(ex:Throwable) extends Action
 
 // The base model of our application
 case class RootModel(userProfile:Pot[UserProfile], pets: Pot[PetsData])
@@ -78,8 +84,7 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
       log.debug("Tried to register account")
       updated(Pending(),
         Effect(
-          PetStoreClient.registerAccount(
-            RegistrationRequest(username,"", "", email, password, ""))
+          PetStoreClient.registerAccount(RegistrationRequest(username,"", "", email, password, ""))
               .map[Action] { user => AccountCreated(user) }
               .recover { case x => RegistrationError(x) }
         )
@@ -91,6 +96,25 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
     case RegistrationError(ex) =>
       log.debug("Registration failed")
       updated(Failed(ex))
+
+    case PasswordReset(token, newPassword) =>
+      log.debug("Password reset")
+      effectOnly(
+        Effect(
+          PetStoreClient.resetPassword(token, PasswordResetRequest(newPassword))
+          .map[Action] { user => ResetSuccess(user) }
+          .recover { case x => ResetError(x) }
+        )
+      )
+
+    case ResetSuccess(user) =>
+      log.debug("Reset accepted")
+      noChange
+
+    case ResetError(ex) =>
+      log.debug("Reset failed")
+      noChange
+
   }
 }
 
@@ -136,6 +160,7 @@ class PetHandler[M](modelRW: ModelRW[M, Pot[PetsData]]) extends ActionHandler(mo
 
 // Application circuit
 object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
+
   // initial application model
   override protected def initialModel = RootModel(
     Empty,         // because the user isn't logged in
