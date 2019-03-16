@@ -17,6 +17,7 @@ import io.github.pauljamescleary.petstore.domain.auth.{AuthHelpers, AuthService}
 import tsec.authentication.TSecBearerToken
 import tsec.common.Verified
 import tsec.passwordhashers.PasswordHash
+import tsec.authentication._
 
 class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: AuthService[F]) extends Http4sDsl[F] {
 
@@ -73,18 +74,14 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
     }
 
   private val signOutEndpoint: HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case req @ POST -> Root / "auth" / "sign-out" =>
-        val action = for {
+    authService.liftRoute {
+      case req @ POST -> Root / "auth" / "sign-out" asAuthed user =>
+        for {
           // remove the web token
-          logout <- req.as[SignOutRequest]
-          result <- userService.signOut(logout).value
-        } yield result
-
-        action.flatMap {
-          case Right(_) => Ok()
-          case Left(UserTokenNotFoundError) => Conflict(s"The token was not found.")
-        }
+          signOutRequest <- req.request.as[SignOutRequest]
+          _ <- authService.securedRequestHandler.authenticator.discard(req.authenticator)
+          resp <- Ok(signOutRequest.userName)
+        } yield resp
     }
 
   private val registerEndpoint: HttpRoutes[F] =
@@ -111,7 +108,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
         for {
           activate <- req.as[ActivationEmailRequest]
           _ <- authService.sendActivationEmail(activate.email)
-          resp <- Ok()
+          resp <- Ok(activate.email)
         } yield resp
     }
 
@@ -120,7 +117,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
       case req @ GET -> Root / "auth" / "account" / "activation" / token =>
         for {
           _ <- authService.processActivationToken(token)
-          resp <- Ok()
+          resp <- Ok(token)
         } yield resp
     }
 
@@ -131,7 +128,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
         for {
           recover <- req.as[PasswordRecoveryRequest]
           _ <- authService.sendRecoveryEmail(recover.email)
-          resp <- Ok()
+          resp <- Ok(recover.email)
         } yield resp
     }
 
@@ -141,8 +138,8 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
     HttpRoutes.of[F] {
       case req @ GET -> Root / "auth" / "password" / "recovery" / token =>
         for {
-          _ <- authService.checkRecoveryToken(token)
-          resp <- Ok()
+          isValid <- authService.checkRecoveryToken(token)
+          resp <- if (isValid) Ok(token) else UnprocessableEntity(token)
         } yield resp
     }
 
@@ -153,7 +150,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
         for {
           reset <- req.as[PasswordResetRequest]
           _ <- authService.processPasswordReset(token,reset)
-          resp <- Ok()
+          resp <- Ok(token)
         } yield resp
     }
 

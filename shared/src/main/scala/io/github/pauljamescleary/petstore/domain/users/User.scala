@@ -11,7 +11,6 @@ case class User(
     phone: String,
     role: String,
     activated: Boolean,
-    // password recovery token?
     id: Option[Long] = None
 )
 

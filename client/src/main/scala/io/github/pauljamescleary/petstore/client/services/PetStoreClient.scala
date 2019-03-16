@@ -1,6 +1,8 @@
 package io.github.pauljamescleary.petstore.client.services
 
-import io.github.pauljamescleary.petstore.domain.authentication._
+import java.util.UUID
+
+import io.github.pauljamescleary.petstore.domain.authentication.{ActivationEmailRequest, _}
 import io.github.pauljamescleary.petstore.domain.pets.Pet
 import io.github.pauljamescleary.petstore.domain.users.User
 import io.github.pauljamescleary.petstore.client.logger._
@@ -17,16 +19,29 @@ import io.github.pauljamescleary.petstore.domain.{PetAlreadyExistsError, PetNotF
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import io.github.pauljamescleary.petstore.shared.PetstoreApi
+import typedapi.util
 
 object PetStoreClient {
 
   final case class DecodeException(msg: String) extends Exception
 
-  implicit def decoder[A: io.circe.Decoder] = typedapi.util.Decoder[Future, A](json => decode[A](json).fold(
-    error => Future.successful(Left(DecodeException(error.toString()))),
-    user  => Future.successful(Right(user))
-  ))
+  implicit def decoder[A: io.circe.Decoder] = typedapi.util.Decoder[Future, A](json =>
+    decode[A](json).fold(
+      error => Future.successful(Left(DecodeException(error.toString))),
+      user  => Future.successful(Right(user))
+    )
+  )
   implicit def encoder[A: io.circe.Encoder] = typedapi.util.Encoder[Future, A](obj => Future.successful(obj.asJson.noSpaces))
+
+  implicit val decodeUnit: util.Decoder[Future, Unit] = typedapi.util.Decoder {
+    case "" => Future.successful(Right[Exception, Unit](()))
+    case json =>
+      decode[Unit](json).fold(
+        error => Future.successful(Left(DecodeException(error.toString))),
+        _  => Future.successful(Right(()))
+      )
+  }
+  implicit val encodeUnit: util.Encoder[Future, Unit] = typedapi.util.Encoder(_ => Future.successful(""))
 
   // https://github.com/scala-js/scala-js-dom/issues/201
   private val getOrigin = {
@@ -70,12 +85,12 @@ object PetStoreClient {
   }
 
   def registerAccount(req: RegistrationRequest): Future[User] = registerEP(req).run[Future](cm)
-  def activationEmail(): Future[Unit] = activationEmailEP(()).run[Future](cm)
+  def activationEmail(req: ActivationEmailRequest): Future[Unit] = activationEmailEP(req).run[Future](cm)
   def activateAccount(token: String): Future[User] = activateEP(token).run[Future](cm)
 
-  def recoveryEmail(): Future[Unit] = recoveryEmailEP(()).run[Future](cm)
-  def validateResetToken(token:String): Future[Unit] = validateResetTokenEP(token).run[Future](cm)
-  def resetPassword(token:String, req: PasswordResetRequest): Future[User] = resetPasswordEP(token, req).run[Future](cm)
+  def recoveryEmail(req: PasswordRecoveryRequest): Future[Unit] = recoveryEmailEP(req).run[Future](cm)
+  def validateResetToken(token:UUID): Future[Unit] = validateResetTokenEP(token.toString).run[Future](cm)
+  def resetPassword(token:UUID, req: PasswordResetRequest): Future[User] = resetPasswordEP(token.toString, req).run[Future](cm)
 
   private val (listPetsEP, createPetEP, updatePetEP, deletePetEP) = deriveAll(PetstoreApi.PetsApi)
 

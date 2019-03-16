@@ -5,12 +5,10 @@ import java.util.UUID
 import io.github.pauljamescleary.petstore._
 import client.logger._
 import domain.pets.Pet
-import shared.PetstoreApi
 import diode._
 import diode.data._
-import diode.util._
 import diode.react.ReactConnector
-import io.github.pauljamescleary.petstore.domain.authentication.{PasswordResetRequest, RegistrationRequest, SignInRequest}
+import io.github.pauljamescleary.petstore.domain.authentication.{PasswordRecoveryRequest, PasswordResetRequest, RegistrationRequest, SignInRequest}
 import io.github.pauljamescleary.petstore.domain.users.User
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -39,9 +37,8 @@ case class Register(username:String, email:String, password:String) extends Acti
 case class AccountCreated(user:User) extends Action
 case class RegistrationError(ex:Throwable) extends Action
 
+case class PasswordRecovery(email:String) extends Action
 case class PasswordReset(token:UUID, newPassword:String) extends Action
-case class ResetSuccess(user:User) extends Action
-case class ResetError(ex:Throwable) extends Action
 
 // The base model of our application
 case class RootModel(userProfile:Pot[UserProfile], pets: Pot[PetsData])
@@ -102,19 +99,18 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
       effectOnly(
         Effect(
           PetStoreClient.resetPassword(token, PasswordResetRequest(newPassword))
-          .map[Action] { user => ResetSuccess(user) }
-          .recover { case x => ResetError(x) }
+            .map{ _ => NoAction }
         )
       )
 
-    case ResetSuccess(user) =>
-      log.debug("Reset accepted")
-      noChange
-
-    case ResetError(ex) =>
-      log.debug("Reset failed")
-      noChange
-
+    case PasswordRecovery(email) =>
+      log.debug("Password recovery email")
+      effectOnly(
+        Effect(
+          PetStoreClient.recoveryEmail(PasswordRecoveryRequest(email))
+            .map{ _ => NoAction }
+        )
+      )
   }
 }
 

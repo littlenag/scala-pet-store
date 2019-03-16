@@ -81,7 +81,7 @@ object PetstoreApi {
     // (Re-)Send activation email
     apiWithBody(
       method = Post[Json, Unit],
-      body = ReqBody[Json, Unit],
+      body = ReqBody[Json, ActivationEmailRequest],
       path = Root / "auth" / "account" / "activation",
       headers = baseHeaders) :|:
     // Activate account
@@ -90,11 +90,12 @@ object PetstoreApi {
       path = Root / "auth" / "account" / "activation" / Segment[String]("token"),
       headers = baseHeaders)
 
+
   private val passwordRts =
     // Recover - sends recovery email
     apiWithBody(
       method = Post[Json, Unit],
-      body = ReqBody[Json, Unit],
+      body = ReqBody[Json, PasswordRecoveryRequest],
       path = Root / "auth" / "password" / "recovery",
       headers = baseHeaders) :|:
     // Validate recovery token

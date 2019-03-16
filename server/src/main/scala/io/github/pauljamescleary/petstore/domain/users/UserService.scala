@@ -4,7 +4,7 @@ import cats._
 import cats.data._
 import cats.effect.Sync
 import cats.syntax.functor._
-import io.github.pauljamescleary.petstore.domain.authentication.{SignInRequest, SignOutRequest}
+import io.github.pauljamescleary.petstore.domain.authentication.SignInRequest
 import io.github.pauljamescleary.petstore.domain._
 import io.github.pauljamescleary.petstore.domain.auth.AuthService
 import tsec.common.Verified
@@ -23,11 +23,9 @@ class UserService[F[_]: Monad: Sync](userRepo: UserRepositoryAlgebra[F], validat
     } yield resp
   }
 
-  def signOut(signOut:SignOutRequest): EitherT[F, UserTokenNotFoundError.type, Unit] = {
-    //val name = signOut.userName
-    // Hit the backing cache/store and remove the token
-    EitherT.rightT[F, UserTokenNotFoundError.type](())
-  }
+//  def signOut(signOut:SignOutRequest): F[Unit] = {
+//    ().pure[F]
+//  }
 
   def createUser(user: User): EitherT[F, UserAlreadyExistsError, User] =
     for {

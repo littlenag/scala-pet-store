@@ -150,14 +150,10 @@ class AuthService[F[_]](mailerService: MailerService[F], userRepo: UserRepositor
     action orElse ().pure[F]
   }
 
-  def checkRecoveryToken(token:String): F[Unit] = {
+  def checkRecoveryToken(token:String): F[Boolean] = {
     for {
       maybeAuthInfo <- authInfoRepo.get(token, AuthInfoKind.Recovery.some)
-      resp <- maybeAuthInfo match {
-        case Some(_) => ().pure[F]
-        case None => F.raiseError[Unit](new IllegalArgumentException("Invalid token."))
-      }
-    } yield resp
+    } yield maybeAuthInfo.isDefined
   }
 
   def processPasswordReset(token:String, passwordReset: PasswordResetRequest): F[Unit] = {

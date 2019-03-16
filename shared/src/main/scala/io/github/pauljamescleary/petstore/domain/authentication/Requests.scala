@@ -31,8 +31,7 @@ object SignInResponse {
 }
 
 final case class SignOutRequest(
-                                 userName: String,
-                                 authToken: AuthToken
+                                 userName: String
                                )
 
 object SignOutRequest {

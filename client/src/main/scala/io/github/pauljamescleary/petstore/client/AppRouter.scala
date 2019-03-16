@@ -33,15 +33,13 @@ object AppRouter {
 
     val rootModelWrapper = AppCircuit.connect(x => x)
 
-    val resetRoute: StaticDsl.RouteB[PasswordResetRt] = "#/password-reset" / uuid.caseClass[PasswordResetRt]
-
     // wrap/connect components to the circuit
     (staticRoute("#/home", HomePageRt) ~> renderR(ctl => rootModelWrapper(HomePage(ctl,_)))
       | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => userProfileWrapper(SignInPage(ctl,_)))
       | staticRoute("#/sign-out", SignOutRt) ~> renderR(ctl => userProfileWrapper(SignOutPage(ctl,_)))
       | staticRoute("#/register", RegisterRt) ~> renderR(ctl => userProfileWrapper(RegistrationPage(ctl,_)))
-      | staticRoute("#/recovery", RecoveryRt) ~> renderR(ctl => userProfileWrapper(RecoveryPage(ctl,_)))
-      | dynamicRouteCT(resetRoute) ~> dynRender((rt:PasswordResetRt) => renderR(ctl => PasswordResetPage(ctl,rt.token)))
+      | staticRoute("#/recovery", RecoveryRt) ~> renderR(RecoveryPage(_))
+      | dynamicRouteCT("#/password-reset" / uuid.caseClass[PasswordResetRt]) ~> dynRenderR((rt, ctl) => PasswordResetPage(ctl,rt.token))
       | emptyRule
       ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
       .renderWith(layout)

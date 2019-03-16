@@ -2,16 +2,18 @@ package io.github.pauljamescleary.petstore.client.pages
 
 import java.util.UUID
 
-import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, SignInRt}
+import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, RecoveryRt, SignInRt}
 import io.github.pauljamescleary.petstore.client._
 import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
-import io.github.pauljamescleary.petstore.client.services.{AppCircuit, PasswordReset}
+import io.github.pauljamescleary.petstore.client.services.{AppCircuit, PasswordReset, PetStoreClient}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^.{^, _}
 
+import scala.concurrent.ExecutionContext
 import scala.language.existentials
+import scala.util.{Failure, Success, Try}
 
 object PasswordResetPage {
 
@@ -86,12 +88,26 @@ object PasswordResetPage {
     }
   }
 
-    // create the React component for Dashboard
-  private val component = ScalaComponent.builder[Props]("PasswordReset")
+  import ExecutionContext.Implicits.global
+
+  val component = ScalaComponent.builder[Props]("PasswordReset")
     // create and store the connect proxy in state for later use
     .initialState(State("",""))
     .renderBackend[Backend]
+    .componentDidMount { $ =>
+      logger.log.debug("Password Reset component mount")
+      // This should be a callback, but oh well.
+      PetStoreClient.validateResetToken($.props.token).onComplete {
+        case Success(_) =>
+          logger.log.debug("Valid reset token")
+        case Failure(_) =>
+          logger.log.debug("Invalid reset token")
+          $.props.router.set(RecoveryRt)
+      }
+      Callback.empty
+    }
     .build
 
+  // create the React component for Dashboard
   def apply(router: RouterCtl[AppPage], token: UUID) = component(Props(router, token))
 }
