@@ -2,7 +2,7 @@ package io.github.pauljamescleary.petstore.client.pages
 
 import java.util.UUID
 
-import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, RecoveryRt, SignInRt}
+import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, RecoveryRt, RegisterRt, SignInRt}
 import io.github.pauljamescleary.petstore.client._
 import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
@@ -22,7 +22,7 @@ object PasswordResetPage {
 
   case class Props(router: RouterCtl[AppPage], token: UUID)
 
-  case class State(password1: String, password2: String)
+  case class State(password1: String, password2: String, isValidToken:Option[Boolean])
 
   import css.CssSettings._
   import scalacss.ScalaCssReact._
@@ -79,10 +79,26 @@ object PasswordResetPage {
     def render(p: Props, s: State) = {
       <.div(Style.outerDiv,
         <.div(Style.innerDiv,
-          Card()(
-            CardHeader()(s"Password Reset"),
-            CardBody()(passwordResetForm($,p,s))
-          )
+          s.isValidToken match {
+            case Some(true) =>
+              Card()(
+                CardHeader()(s"Password Reset"),
+                CardBody()(passwordResetForm($,p,s))
+              )
+            case Some(false) =>
+              Card()(
+                CardHeader()(s"The token is not valid."),
+                CardBody()(
+                  <.span(p.router.link(SignInRt)("Sign In.")),
+                  <.br,
+                  <.span(p.router.link(RegisterRt)("Create an account."))
+                )
+              )
+            case None =>
+              Card()(
+                CardBody()(s"Verifying Token"),
+              )
+          }
         )
       )
     }
@@ -92,19 +108,19 @@ object PasswordResetPage {
 
   val component = ScalaComponent.builder[Props]("PasswordReset")
     // create and store the connect proxy in state for later use
-    .initialState(State("",""))
+    .initialState(State("","",None))
     .renderBackend[Backend]
     .componentDidMount { $ =>
-      logger.log.debug("Password Reset component mount")
       // This should be a callback, but oh well.
-      PetStoreClient.validateResetToken($.props.token).onComplete {
-        case Success(_) =>
-          logger.log.debug("Valid reset token")
-        case Failure(_) =>
-          logger.log.debug("Invalid reset token")
-          $.props.router.set(RecoveryRt)
-      }
-      Callback.empty
+      Callback.future(
+        PetStoreClient
+        .validateResetToken($.props.token)
+        .transform { t =>
+          if (t.isFailure)
+            logger.log.error("Failed.", t.failed.get.asInstanceOf[Exception])
+          Try($.modState(_.copy(isValidToken = Some(t.isSuccess))))
+        }
+      )
     }
     .build
 

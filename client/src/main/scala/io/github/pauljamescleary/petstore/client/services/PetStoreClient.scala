@@ -25,23 +25,16 @@ object PetStoreClient {
 
   final case class DecodeException(msg: String) extends Exception
 
-  implicit def decoder[A: io.circe.Decoder] = typedapi.util.Decoder[Future, A](json =>
+  implicit def typDecoder[A: io.circe.Decoder] = typedapi.util.Decoder[Future, A](json =>
     decode[A](json).fold(
       error => Future.successful(Left(DecodeException(error.toString))),
       user  => Future.successful(Right(user))
     )
   )
-  implicit def encoder[A: io.circe.Encoder] = typedapi.util.Encoder[Future, A](obj => Future.successful(obj.asJson.noSpaces))
+  implicit def typEncoder[A: io.circe.Encoder] = typedapi.util.Encoder[Future, A](obj => Future.successful(obj.asJson.noSpaces))
 
-  implicit val decodeUnit: util.Decoder[Future, Unit] = typedapi.util.Decoder {
-    case "" => Future.successful(Right[Exception, Unit](()))
-    case json =>
-      decode[Unit](json).fold(
-        error => Future.successful(Left(DecodeException(error.toString))),
-        _  => Future.successful(Right(()))
-      )
-  }
-  implicit val encodeUnit: util.Encoder[Future, Unit] = typedapi.util.Encoder(_ => Future.successful(""))
+  implicit val decodeUnit = typedapi.util.Decoder[Future, Unit]{_ => Future.successful(Right(()))}
+  implicit val encodeUnit = typedapi.util.Encoder[Future, Unit](_ => Future.successful(""))
 
   // https://github.com/scala-js/scala-js-dom/issues/201
   private val getOrigin = {

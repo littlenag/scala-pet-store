@@ -139,7 +139,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
       case req @ GET -> Root / "auth" / "password" / "recovery" / token =>
         for {
           isValid <- authService.checkRecoveryToken(token)
-          resp <- if (isValid) Ok(token) else UnprocessableEntity(token)
+          resp <- if (isValid) Ok(token) else UnprocessableEntity(token)  // include content to make firefox happy
         } yield resp
     }
 
