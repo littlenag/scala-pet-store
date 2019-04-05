@@ -8,11 +8,10 @@ import diode.react.ReactPot._
 import diode.react._
 import diode.data.Pot
 import diode.react.ModelProxy
-import io.github.pauljamescleary.petstore.client.bootstrap.{Nav, NavLink, Navbar, NavbarBrand}
+import io.github.littlenag.scalajs.components.reactbootstrap.{Nav, NavLink, Navbar, NavbarBrand}
 import io.github.pauljamescleary.petstore.client.services.UserProfile
 import scalacss.ScalaCssReact._
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 
@@ -58,9 +57,6 @@ object AppMenu {
 
   case class State()
 
-  implicit val currentPageReuse = Reusability.by_==[AppPage]
-  implicit val propsReuse = Reusability.by((_: Props).selectedPage)
-
   class Backend($: BackendScope[Props, State]) {
     def unauthenticated(p: Props) = {
       Nav()(
@@ -72,8 +68,10 @@ object AppMenu {
 
     def authenticated(userProfile: UserProfile, p: Props) = {
       Nav()(
-        ^.`class` := "mr-auto",
-        NavLink(href = p.ctrl.pathFor(SignOutRt).value)("Sign Out")
+        ^.`class` := "ml-auto",
+        NavLink(href = p.ctrl.pathFor(SignOutRt).value)(
+          "Sign Out"
+        )
       )
     }
 

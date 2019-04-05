@@ -3,7 +3,6 @@ package infrastructure.endpoint
 
 import cats.effect.Effect
 import cats.implicits._
-//import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl

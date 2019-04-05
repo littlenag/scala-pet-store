@@ -6,7 +6,7 @@ import diode.data.PotState.PotEmpty
 import diode.react._
 import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, HomePageRt, SignInRt}
 import io.github.pauljamescleary.petstore.client._
-import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
+import io.github.littlenag.scalajs.components.reactbootstrap.{Card, CardBody, CardHeader}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import io.github.pauljamescleary.petstore.client.services.{Register, UserProfile}
 import japgolly.scalajs.react._
@@ -107,7 +107,7 @@ object RegistrationPage {
       <.div(
         p.userProfile().renderReady { up =>
           // This seems to be the easy way to redirect. but have to make sure to run AFTER rendering!
-          p.router.set(HomePageRt).async.runNow()
+          p.router.set(HomePageRt).async.unsafeToFuture()
           <.div(
             Style.outerDiv,
             up.toString

@@ -2,7 +2,7 @@ package io.github.pauljamescleary.petstore.client.pages
 
 import io.github.pauljamescleary.petstore.client.AppRouter.AppPage
 import io.github.pauljamescleary.petstore.client._
-import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody}
+import io.github.littlenag.scalajs.components.reactbootstrap.{Card, CardBody}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import io.github.pauljamescleary.petstore.client.services.{AppCircuit, PasswordRecovery}
 import japgolly.scalajs.react.{Callback, _}
@@ -65,17 +65,17 @@ object RecoveryPage {
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
       <.div(
-      <.div(Style.outerDiv,
-        <.div(Style.innerDiv,
-          Card()(
-            if (!s.submitted) {
-              CardBody()(emailForm($,p,s))
-            } else {
-              CardBody()(<.div("An email with a recovery link should arrive in the next few minutes."))
-            }
+        <.div(Style.outerDiv,
+          <.div(Style.innerDiv,
+            Card()(
+              if (!s.submitted) {
+                CardBody()(emailForm($,p,s))
+              } else {
+                CardBody()(<.div("An email with a recovery link should arrive in the next few minutes."))
+              }
+            )
           )
         )
-      )
       )
     }
   }

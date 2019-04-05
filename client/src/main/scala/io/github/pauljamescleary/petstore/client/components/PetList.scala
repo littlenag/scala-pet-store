@@ -1,6 +1,6 @@
 package io.github.pauljamescleary.petstore.client.components
 
-import io.github.pauljamescleary.petstore.client.bootstrap.{Badge, Button, Table}
+import io.github.littlenag.scalajs.components.reactbootstrap.{Badge, Button, Table}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeTags
 import io.github.pauljamescleary.petstore.domain.pets.Pet

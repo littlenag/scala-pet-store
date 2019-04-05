@@ -89,8 +89,13 @@ object Settings {
     val diode = "1.1.4"
     val diodeReact = "1.1.4.131"
 
-    val scalajsReactBridge = "0.7.0"
+    val scalajsReactBridge = "0.8.0"
+
+    // Material-UI
     val scalajsReactComponents = "1.0.0-M2"
+
+    // react-bootstrap
+    val scalajsReactBootstrap = "0.0.1-SNAPSHOT"
 
     val scalaCSS = "0.5.5"
 
@@ -161,10 +166,10 @@ object Settings {
     "io.circe"            %%% "circe-java8"           % CirceVersion,
 
     // Shared so that the JSWriter macro can be compiled separately
-    "com.payalabs"  %%% "scalajs-react-bridge"  % versions.scalajsReactBridge,
+    "com.payalabs"        %%% "scalajs-react-bridge"  % versions.scalajsReactBridge,
 
-    "org.scalacheck"        %% "scalacheck"           % ScalaCheckVersion % Test,
-    "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % Test
+    "org.scalacheck"       %% "scalacheck"           % ScalaCheckVersion % Test,
+    "org.scalatest"        %% "scalatest"            % ScalaTestVersion  % Test
   ))
 
   /** Dependencies only used by the ScalaJS client (note the use of %%% instead of %%) */
@@ -185,6 +190,8 @@ object Settings {
 
     // Facades of other JavaScript libraries
     "com.github.karasiq"                %%% "scalajs-bootstrap-v4"      % versions.bootstrapFacade,
+
+    "io.github.littlenag"               %%% "scalajs-react-bootstrap"   % versions.scalajsReactBootstrap,
 
     "org.scalacheck"                    %%% "scalacheck"                % ScalaCheckVersion % Test,
     "org.scalatest"                     %%% "scalatest"                 % ScalaTestVersion  % Test

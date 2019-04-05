@@ -95,9 +95,9 @@ lazy val client = (project in file("client"))
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer in Test := false,
     scalaJSLinkerConfig := {
-      val fastOptJSURI = (artifactPath in (Compile, fastOptJS)).value.toURI
+      //val fastOptJSURI = (artifactPath in (Compile, fastOptJS)).value.toURI
       scalaJSLinkerConfig.value
-        .withRelativizeSourceMapBase(Some(fastOptJSURI))
+        //.withRelativizeSourceMapBase(Some(fastOptJSURI))
         .withOptimizer(false)
         .withSourceMap(true)
         .withPrettyPrint(true)
@@ -129,7 +129,7 @@ lazy val client = (project in file("client"))
     //artifactPath in(Compile, packageMinifiedJSDependencies) := ((crossTarget in(Compile, fullOptJS)).value / "deps.min.js"),
     //artifactPath in(Test, packageMinifiedJSDependencies) := ((crossTarget in(Test, fullOptJS)).value / "deps.min.test.js")
   )
-  .enablePlugins(ScalaJSBundlerPlugin,ScalaJSWeb,SbtWeb)
+  .enablePlugins(ScalaJSBundlerPlugin,ScalaJSWeb/*,SbtWeb*/)
   .dependsOn(sharedJs)
 
 lazy val shared =

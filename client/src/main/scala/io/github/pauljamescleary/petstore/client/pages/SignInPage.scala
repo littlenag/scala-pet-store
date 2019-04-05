@@ -9,7 +9,7 @@ import japgolly.scalajs.react.vdom.html_<^.{^, _}
 import io.github.pauljamescleary.petstore.client._
 import AppRouter.{AppPage, HomePageRt, RecoveryRt, RegisterRt}
 import diode.data.PotState.PotEmpty
-import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
+import io.github.littlenag.scalajs.components.reactbootstrap.{Card, CardBody, CardHeader}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import io.github.pauljamescleary.petstore.client.services.SignIn
 import io.github.pauljamescleary.petstore.client.services.UserProfile
@@ -90,7 +90,7 @@ object SignInPage {
       <.div(
         p.userProfile().renderReady { up =>
           // This seems to be the easy way to redirect. but have to make sure to run AFTER rendering!
-          p.router.set(HomePageRt).async.runNow()
+          p.router.set(HomePageRt).async.unsafeToFuture()
           <.div(
             Style.outerDiv,
             up.toString

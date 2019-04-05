@@ -16,7 +16,7 @@ object AppRouter {
   case object SignOutRt extends AppPage
   case object RegisterRt extends AppPage
   case object RecoveryRt extends AppPage
-  case class PasswordResetRt(token:UUID) extends AppPage
+  case class PasswordResetRt(token:String) extends AppPage
 
   val userProfileWrapper = AppCircuit.connect(_.userProfile)
 
@@ -39,7 +39,7 @@ object AppRouter {
       | staticRoute("#/sign-out", SignOutRt) ~> renderR(ctl => userProfileWrapper(SignOutPage(ctl,_)))
       | staticRoute("#/register", RegisterRt) ~> renderR(ctl => userProfileWrapper(RegistrationPage(ctl,_)))
       | staticRoute("#/recovery", RecoveryRt) ~> renderR(RecoveryPage(_))
-      | dynamicRouteCT("#/password-reset" / uuid.caseClass[PasswordResetRt]) ~> dynRenderR((rt, ctl) => PasswordResetPage(ctl,rt.token))
+      | dynamicRouteCT("#/password-reset" / remainingPath.caseClass[PasswordResetRt]) ~> dynRenderR((rt, ctl) => PasswordResetPage(ctl,rt.token))
       | emptyRule
       ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
       .renderWith(layout)

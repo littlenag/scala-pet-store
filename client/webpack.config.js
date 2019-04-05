@@ -19,15 +19,19 @@ const merged = merge(scalajswebpack, {
   module: {
     rules: [
       {
+        test: /\.scala$/,
+        use: ['file-loader'],
+      },
+      {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
       {
         test: /\.(scss)$/,
         use: [{
-          loader: 'style-loader', // inject CSS to page
+          loader: 'style-loader',   // inject CSS to page
         }, {
-          loader: 'css-loader', // translates CSS into CommonJS modules
+          loader: 'css-loader',     // translates CSS into CommonJS modules
         }, {
           loader: 'postcss-loader', // Run postcss actions
           options: {

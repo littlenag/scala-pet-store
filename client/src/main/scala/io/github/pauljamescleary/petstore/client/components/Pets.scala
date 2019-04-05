@@ -10,7 +10,7 @@ import domain.pets.PetStatus.{Adopted, Available, Pending}
 import client.logger._
 import client.css.GlobalStyles
 import client.services.{DeletePet, PetsData, RefreshPets, UpsertPet}
-import io.github.pauljamescleary.petstore.client.bootstrap._
+import io.github.littlenag.scalajs.components.reactbootstrap._
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeTags
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._

@@ -1,10 +1,8 @@
 package io.github.pauljamescleary.petstore.client.pages
 
-import java.util.UUID
-
 import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, RecoveryRt, RegisterRt, SignInRt}
 import io.github.pauljamescleary.petstore.client._
-import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
+import io.github.littlenag.scalajs.components.reactbootstrap.{Card, CardBody, CardHeader, CardTitle}
 import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import io.github.pauljamescleary.petstore.client.services.{AppCircuit, PasswordReset, PetStoreClient}
 import japgolly.scalajs.react._
@@ -13,14 +11,14 @@ import japgolly.scalajs.react.vdom.html_<^.{^, _}
 
 import scala.concurrent.ExecutionContext
 import scala.language.existentials
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 object PasswordResetPage {
 
   // shorthand for styles
   @inline private def bss = GlobalStyles.bootstrapStyles
 
-  case class Props(router: RouterCtl[AppPage], token: UUID)
+  case class Props(router: RouterCtl[AppPage], token: String)
 
   case class State(password1: String, password2: String, isValidToken:Option[Boolean])
 
@@ -87,9 +85,9 @@ object PasswordResetPage {
               )
             case Some(false) =>
               Card()(
-                CardHeader()(s"The token is not valid."),
                 CardBody()(
-                  <.span(p.router.link(SignInRt)("Sign In.")),
+                  CardTitle()("The token is not valid or has expired."),
+                  <.span(p.router.link(RecoveryRt)("Forgot your password?")),
                   <.br,
                   <.span(p.router.link(RegisterRt)("Create an account."))
                 )
@@ -125,5 +123,5 @@ object PasswordResetPage {
     .build
 
   // create the React component for Dashboard
-  def apply(router: RouterCtl[AppPage], token: UUID) = component(Props(router, token))
+  def apply(router: RouterCtl[AppPage], token: String) = component(Props(router, token))
 }

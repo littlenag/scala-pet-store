@@ -38,7 +38,7 @@ case class AccountCreated(user:User) extends Action
 case class RegistrationError(ex:Throwable) extends Action
 
 case class PasswordRecovery(email:String) extends Action
-case class PasswordReset(token:UUID, newPassword:String) extends Action
+case class PasswordReset(token:String, newPassword:String) extends Action
 
 // The base model of our application
 case class RootModel(userProfile:Pot[UserProfile], pets: Pot[PetsData])

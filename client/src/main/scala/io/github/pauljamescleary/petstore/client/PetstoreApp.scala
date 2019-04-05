@@ -2,7 +2,7 @@ package io.github.pauljamescleary.petstore.client
 
 import com.karasiq.bootstrap.jquery.BootstrapJQueryContext
 import css.AppCSS
-import io.github.pauljamescleary.petstore.client.bootstrap.ReactBootstrap
+import io.github.littlenag.scalajs.components.reactbootstrap.ReactBootstrap
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeCss
 import io.github.pauljamescleary.petstore.client.logger._
 import org.scalajs.dom

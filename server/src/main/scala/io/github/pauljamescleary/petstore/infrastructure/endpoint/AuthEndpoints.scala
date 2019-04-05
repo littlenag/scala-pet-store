@@ -132,8 +132,7 @@ class AuthEndpoints[F[_]: Effect](userService: UserService[F], authService: Auth
         } yield resp
     }
 
-  // validate the password reset token (used by the SPA)
-  // should try to re-direct the spa if it can
+  // validate the password reset token, used by the client to either prompt for a new password, or inform that is invalid/expired
   private val validateRecoveryTokenEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ GET -> Root / "auth" / "password" / "recovery" / token =>
