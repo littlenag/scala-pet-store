@@ -1,7 +1,5 @@
 package io.github.pauljamescleary.petstore.client
 
-import java.util.UUID
-
 import io.github.pauljamescleary.petstore.client.components.Footer
 import io.github.pauljamescleary.petstore.client.pages._
 import japgolly.scalajs.react.extra.router._
@@ -17,6 +15,7 @@ object AppRouter {
   case object RegisterRt extends AppPage
   case object RecoveryRt extends AppPage
   case class PasswordResetRt(token:String) extends AppPage
+  case class AccountActivationRt(token:String) extends AppPage
 
   val userProfileWrapper = AppCircuit.connect(_.userProfile)
 
@@ -35,14 +34,15 @@ object AppRouter {
 
     // wrap/connect components to the circuit
     (staticRoute("#/home", HomePageRt) ~> renderR(ctl => rootModelWrapper(HomePage(ctl,_)))
-      | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => userProfileWrapper(SignInPage(ctl,_)))
-      | staticRoute("#/sign-out", SignOutRt) ~> renderR(ctl => userProfileWrapper(SignOutPage(ctl,_)))
-      | staticRoute("#/register", RegisterRt) ~> renderR(ctl => userProfileWrapper(RegistrationPage(ctl,_)))
-      | staticRoute("#/recovery", RecoveryRt) ~> renderR(RecoveryPage(_))
-      | dynamicRouteCT("#/password-reset" / remainingPath.caseClass[PasswordResetRt]) ~> dynRenderR((rt, ctl) => PasswordResetPage(ctl,rt.token))
-      | emptyRule
-      ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
-      .renderWith(layout)
+    | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => userProfileWrapper(SignInPage(ctl,_)))
+    | staticRoute("#/sign-out", SignOutRt) ~> renderR(ctl => userProfileWrapper(SignOutPage(ctl,_)))
+    | staticRoute("#/register", RegisterRt) ~> renderR(ctl => userProfileWrapper(RegistrationPage(ctl,_)))
+    | staticRoute("#/recovery", RecoveryRt) ~> renderR(RecoveryPage(_))
+    | dynamicRouteCT("#/password-reset" / remainingPath.caseClass[PasswordResetRt]) ~> dynRenderR((rt, ctl) => PasswordResetPage(ctl,rt.token))
+    | dynamicRouteCT("#/activation" / remainingPath.caseClass[AccountActivationRt]) ~> dynRenderR((rt, ctl) => AccountActivationPage(ctl,rt.token))
+    | emptyRule
+    ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
+    .renderWith(layout)
   }
 
   // create the router

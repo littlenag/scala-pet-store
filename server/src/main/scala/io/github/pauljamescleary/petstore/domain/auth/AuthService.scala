@@ -54,19 +54,23 @@ class AuthService[F[_]](mailerService: MailerService[F], userRepo: UserRepositor
   def sendActivationEmail(email:String): F[Unit] = {
     import courier._
 
+    logger.info(s"Send activation email $email")
+
     val action: F[Unit] = for {
       maybeUser <- userRepo.findByEmail(email)
+      _ = logger.debug(s"User $maybeUser for email $email")
       user <- maybeUser match {
         case Some(user) if !user.activated => user.pure[F]
-        case _ => F.raiseError[User](new IllegalArgumentException)
+        case _ => F.raiseError[User](new IllegalArgumentException("User is already active."))
       }
+      _ = logger.debug(s"Found user $user for email $email")
       maybeAuthInfo <- authInfoRepo.findByUserId(user.id.get, AuthInfoKind.Activation.some)
       authInfo <- maybeAuthInfo match {
         case Some(authInfo) => authInfo.pure[F]
         case None => createActivationInfo(user)  // If the token was cleaned up, then just regen.
       }
 
-      activationUrl = mailerService.mkResponseUrl("/auth/account/activation/" + authInfo.id)
+      activationUrl = mailerService.mkResponseUrl("/#/activation/" + authInfo.id)
       _ <- mailerService.send(
         Envelope.from("scala-pet-store" at "example.com")
         .to(user.email.addr)

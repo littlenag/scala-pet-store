@@ -13,6 +13,7 @@ object AppCSS {
       SignInPage.Style,
       RecoveryPage.Style,
       PasswordResetPage.Style,
+      AccountActivationPage.Style,
       RegistrationPage.Style,
       HomePage.Style,
       AppMenu.Style)

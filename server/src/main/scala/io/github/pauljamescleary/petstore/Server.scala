@@ -57,7 +57,7 @@ object Server extends IOApp {
       _ <- Resource.liftF(petService.create(Pet("Emmy", "cat", "meow")).value)
       _ <- Resource.liftF(petService.create(Pet("Carrie", "dog", "sleepy")).value)
       hashpw <- Resource.liftF(authService.hashPassword("test"))
-      _ <- Resource.liftF(userService.createUser(User("test", "test", "test", "test@test.com", hashpw.toString, "", "User", true)).value)
+      _ <- Resource.liftF(userService.createUser(User("test", "test", "test", "test@test.com", hashpw.toString, "", "User", false)).value)
       server <-
         BlazeServerBuilder[F]
         .bindHttp(conf.server.port, conf.server.host)

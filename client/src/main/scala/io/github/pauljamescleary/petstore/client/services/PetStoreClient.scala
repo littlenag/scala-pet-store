@@ -1,7 +1,5 @@
 package io.github.pauljamescleary.petstore.client.services
 
-import java.util.UUID
-
 import io.github.pauljamescleary.petstore.domain.authentication.{ActivationEmailRequest, _}
 import io.github.pauljamescleary.petstore.domain.pets.Pet
 import io.github.pauljamescleary.petstore.domain.users.User
@@ -10,7 +8,7 @@ import org.scalajs.dom
 import typedapi.client._
 import typedapi.client.js._
 import org.scalajs.dom.ext.Ajax
-import io.circe._
+//import io.circe._
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
@@ -19,7 +17,7 @@ import io.github.pauljamescleary.petstore.domain.{PetAlreadyExistsError, PetNotF
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import io.github.pauljamescleary.petstore.shared.PetstoreApi
-import typedapi.util
+//import typedapi.util
 
 object PetStoreClient {
 
@@ -79,7 +77,7 @@ object PetStoreClient {
 
   def registerAccount(req: RegistrationRequest): Future[User] = registerEP(req).run[Future](cm)
   def activationEmail(req: ActivationEmailRequest): Future[Unit] = activationEmailEP(req).run[Future](cm)
-  def activateAccount(token: String): Future[User] = activateEP(token).run[Future](cm)
+  def activateAccount(token: String): Future[Unit] = activateEP(token).run[Future](cm)
 
   def recoveryEmail(req: PasswordRecoveryRequest): Future[Unit] = recoveryEmailEP(req).run[Future](cm)
   def validateResetToken(token:String): Future[Unit] = validateResetTokenEP(token.toString).run[Future](cm)

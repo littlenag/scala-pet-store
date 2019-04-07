@@ -86,7 +86,7 @@ object PetstoreApi {
       headers = baseHeaders) :|:
     // Activate account
     api(
-      method = Get[Json, User],
+      method = Get[Json, Unit],
       path = Root / "auth" / "account" / "activation" / Segment[String]("token"),
       headers = baseHeaders)
 

@@ -8,7 +8,7 @@ import domain.pets.Pet
 import diode._
 import diode.data._
 import diode.react.ReactConnector
-import io.github.pauljamescleary.petstore.domain.authentication.{PasswordRecoveryRequest, PasswordResetRequest, RegistrationRequest, SignInRequest}
+import io.github.pauljamescleary.petstore.domain.authentication._
 import io.github.pauljamescleary.petstore.domain.users.User
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -39,6 +39,8 @@ case class RegistrationError(ex:Throwable) extends Action
 
 case class PasswordRecovery(email:String) extends Action
 case class PasswordReset(token:String, newPassword:String) extends Action
+
+case class ActivationEmail(email:String) extends Action
 
 // The base model of our application
 case class RootModel(userProfile:Pot[UserProfile], pets: Pot[PetsData])
@@ -109,6 +111,15 @@ class UserProfileHandler[M](modelRW: ModelRW[M, Pot[UserProfile]]) extends Actio
         Effect(
           PetStoreClient.recoveryEmail(PasswordRecoveryRequest(email))
             .map{ _ => NoAction }
+        )
+      )
+
+    case ActivationEmail(email) =>
+      log.debug("Account activation email")
+      effectOnly(
+        Effect(
+          PetStoreClient.activationEmail(ActivationEmailRequest(email))
+          .map{ _ => NoAction }
         )
       )
   }
