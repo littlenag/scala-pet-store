@@ -37,25 +37,11 @@ object PetstoreApi {
     }
   }
 
-
   val baseHeaders = `allow-origin`
 
   val unsecuredEp = baseHeaders
 
   val securedEpHeaders = baseHeaders :|: `Authorization`
-
-  /*
-  POST        /sign-in                    auth.controllers.SignInController.signIn
-  GET         /sign-out                   auth.controllers.SignOutController.signOut
-
-  POST        /account/register           auth.controllers.AccountController.register
-  POST        /account/activation         auth.controllers.AccountController.send
-  GET         /account/activation/:token  auth.controllers.AccountController.activate(token: java.util.UUID)
-
-  POST        /password/recovery          auth.controllers.PasswordController.recover                           // re-send recovery email
-  GET         /password/recovery/:token   auth.controllers.PasswordController.validate(token: java.util.UUID)   // only validates the token
-  POST        /password/recovery/:token   auth.controllers.PasswordController.reset(token: java.util.UUID)      // allows password reset
-  */
 
   private val authRts =
     // Sign In
