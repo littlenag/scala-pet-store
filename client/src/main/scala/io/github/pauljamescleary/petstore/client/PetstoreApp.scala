@@ -1,6 +1,5 @@
 package io.github.pauljamescleary.petstore.client
 
-import com.karasiq.bootstrap.jquery.BootstrapJQueryContext
 import css.AppCSS
 import io.github.pauljamescleary.petstore.client.bootstrap.ReactBootstrap
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeCss
@@ -18,11 +17,25 @@ object PetstoreApp {
 
   object imports {
     @js.native
+    @JSImport("jquery", JSImport.Namespace)
+    object jQuery extends js.Object
+
+    @js.native
+    @JSImport("popper", JSImport.Namespace)
+    object popper extends js.Object
+
+    @js.native
+    @JSImport("bootstrap", JSImport.Namespace)
+    object bootstrap extends js.Object
+
+    @js.native
     @JSImport("bootstrap/dist/css/bootstrap.css", JSImport.Namespace)
-    object BootstrapCssImport extends js.Object
-
-
+    object bootstrapCss extends js.Object
   }
+
+  //import typings.std.stdStrings.Pick
+
+  //import typings.
 
   def main(args: Array[String]): Unit = {
     // Ensure we have logging
@@ -32,11 +45,12 @@ object PetstoreApp {
     FontAwesomeCss
 
     // Load jQuery, then init both the bootstrap javascript and css
-    BootstrapJQueryContext.useNpmImports()
-    imports.BootstrapCssImport
+    imports.jQuery
+    imports.bootstrap
+    imports.bootstrapCss
 
     // Load React and React-Bootstrap
-    ReactBootstrap
+    ReactBootstrap.useNpmImports()
 
     ///
     /// At this point all our app deps have been loaded and we good to start initializing

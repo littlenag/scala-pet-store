@@ -96,7 +96,7 @@ object Settings {
 
     val typedApi = "0.2.0"
 
-    val bootstrapFacade = "2.3.5"
+    val bootstrapFacade = "2.3.4"
   }
 
   /**
@@ -182,9 +182,6 @@ object Settings {
 
     "org.scala-js"                      %%% "scalajs-dom"               % versions.scalaDom,
 
-    // Facades of other JavaScript libraries
-    "com.github.karasiq"                %%% "scalajs-bootstrap-v4"      % versions.bootstrapFacade,
-
     "org.scalacheck"                    %%% "scalacheck"                % ScalaCheckVersion % Test,
     "org.scalatest"                     %%% "scalatest"                 % ScalaTestVersion  % Test
   ))
@@ -192,15 +189,16 @@ object Settings {
   val npmDeps = Seq(
     "@fortawesome/fontawesome-free" -> "5.7.2",
 
-    "react-bootstrap" -> "1.0.0-beta.5",
-    "bootstrap" -> "4.1.1",
-    "jquery" -> "3.2.1",
-    "popper.js" -> "1.14.6",
+    // https://getbootstrap.com/docs/4.3/getting-started/introduction/
+    "react-bootstrap" -> "1.0.0-beta.16",
+    "bootstrap"       -> "4.3.1",
+    "jquery"          -> "3.3.1",
+    "popper.js"       -> "1.14.7",
 
-    "log4javascript" ->  "1.4.15",
+    "log4javascript"  ->  "1.4.15",
 
-    "react" ->  "16.8.4",
-    "react-dom" ->  "16.8.4"
+    "react"           ->  "16.8.4",
+    "react-dom"       ->  "16.8.4",
   )
 
   val npmDevDeps = Seq(
@@ -209,8 +207,8 @@ object Settings {
     "css-loader" -> "0.28.9",
     "postcss-loader" -> "^2.1.1",
     "precss" -> "^3.1.2",
-    "file-loader" -> "1.1.6",
-    "node-sass" -> "4.9.2",
+    "file-loader" -> "4.3.0",
+    "node-sass" -> "4.12.0",
     "sass-loader" -> "6.0.7",
     "style-loader" -> "0.20.0",
     "url-loader" -> "0.6.2"

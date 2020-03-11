@@ -15,11 +15,22 @@ abstract class ReactBootstrapComponent extends ReactBridgeComponent {
   override lazy val componentNamespace: String = "ReactBootstrap"
 }
 
-@js.native
-@JSImport("react-bootstrap", JSImport.Namespace)
-private object ReactBootstrapGlobal extends js.Object
-
 object ReactBootstrap {
-  // In order for ReactBootstrapComponent to work, the object needs to be in global scope.
-  js.Dynamic.global.ReactBootstrap = ReactBootstrapGlobal
+  object imports {
+    @js.native
+    @JSImport("react", JSImport.Namespace)
+    object React extends js.Object
+
+    @js.native
+    @JSImport("react-bootstrap", JSImport.Namespace)
+    object ReactBootstrapGlobal extends js.Object
+  }
+
+  def useNpmImports() = {
+    imports.React
+
+    // In order for ReactBootstrapComponent to work, the object needs to be in global scope.
+    js.Dynamic.global.ReactBootstrap = imports.ReactBootstrapGlobal
+  }
+
 }

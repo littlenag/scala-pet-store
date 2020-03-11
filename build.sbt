@@ -5,8 +5,6 @@ import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
 //enablePlugins(ScalafmtPlugin, JavaAppPackaging, GhpagesPlugin, MicrositesPlugin, TutPlugin)
 
-enablePlugins(ScalablyTypedConverterPlugin)
-
 //git.remoteRepo := "git@github.com:pauljamescleary/scala-pet-store.git"
 
 //micrositeGithubOwner := "pauljamescleary"
@@ -80,7 +78,6 @@ lazy val npmDevOverrides = Seq( "source-map-loader" -> "git+https://github.com/s
 lazy val elideOptions = settingKey[Seq[String]]("Set limit for elidable functions")
 
 lazy val client = (project in file("client"))
-  //.settings(name := Settings.name + "-client")
   .settings(commonSettings:_*)
   .settings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
@@ -97,27 +94,34 @@ lazy val client = (project in file("client"))
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer in Test := false,
     scalaJSLinkerConfig := {
-      val fastOptJSURI = (artifactPath in (Compile, fastOptJS)).value.toURI
+      //val fastOptJSURI = (artifactPath in (Compile, fastOptJS)).value.toURI
       scalaJSLinkerConfig.value
-        .withRelativizeSourceMapBase(Some(fastOptJSURI))
-        .withOptimizer(false)
-        .withSourceMap(true)
-        .withPrettyPrint(true)
+      .withOptimizer(false)
+      .withSourceMap(true)
+      .withPrettyPrint(true)
+      .withModuleKind(ModuleKind.CommonJSModule)
+      //.withRelativizeSourceMapBase(Some(fastOptJSURI))
     },
     scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) },
 
     libraryDependencies ++= Settings.clientDependencies.value,
 
-    npmDependencies in Compile ++= Settings.npmDeps,
-    npmDevDependencies in Compile ++= Settings.npmDevDeps,
-
-    //
+    // Create scalajs-react bindings
     stFlavour := Flavour.Japgolly,
-    useYarn := true,
+    //useYarn := true,
+
+    Compile / npmDependencies ++= Settings.npmDeps,
+    Compile / npmDevDependencies ++= Settings.npmDevDeps,
 
     // Use a custom config file to export the JS dependencies to the global namespace,
     // as expected by the scalajs-react facade
     webpackConfigFile := Some(baseDirectory.value / "webpack.config.js"),
+
+    // Use a custom config file to export the JS dependencies to the global namespace,
+    // as expected by the scalajs-react facade
+//    webpackConfigFile in fastOptJS := Some(baseDirectory.value / "dev.webpack.config.js"),
+//    webpackConfigFile in fullOptJS := Some(baseDirectory.value / "prod.webpack.config.js"),
+
 
     // https://github.com/scalacenter/scalajs-bundler/issues/111
     version in webpack := "4.28.1",
@@ -132,6 +136,7 @@ lazy val client = (project in file("client"))
     artifactPath in(Test, fullOptJS) := ((crossTarget in(Test, fullOptJS)).value / "app.min.test.js"),
   )
   .enablePlugins(ScalaJSBundlerPlugin,ScalaJSWeb,SbtWeb)
+  .enablePlugins(ScalablyTypedConverterPlugin)
   .dependsOn(sharedJs)
 
 lazy val shared =
