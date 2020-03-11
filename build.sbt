@@ -25,7 +25,7 @@ enablePlugins(ScalablyTypedConverterPlugin)
 val badConsoleFlags = Seq("-Xfatal-warnings", "-Ywarn-unused:imports")
 
 lazy val commonSettings = Def.settings(
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.12.8",  // 2.13.1?
   organization := "io.github.pauljamescleary",
   version      := Settings.version,
   scalacOptions ++= Settings.scalacOptions,
@@ -111,6 +111,10 @@ lazy val client = (project in file("client"))
     npmDependencies in Compile ++= Settings.npmDeps,
     npmDevDependencies in Compile ++= Settings.npmDevDeps,
 
+    //
+    stFlavour := Flavour.Japgolly,
+    useYarn := true,
+
     // Use a custom config file to export the JS dependencies to the global namespace,
     // as expected by the scalajs-react facade
     webpackConfigFile := Some(baseDirectory.value / "webpack.config.js"),
@@ -125,11 +129,7 @@ lazy val client = (project in file("client"))
     artifactPath in(Compile, fastOptJS) := ((crossTarget in(Compile, fastOptJS)).value / "app.js"),
     artifactPath in(Test, fastOptJS) := ((crossTarget in(Test, fastOptJS)).value / "app.test.js"),
     artifactPath in(Compile, fullOptJS) := ((crossTarget in(Compile, fullOptJS)).value / "app.min.js"),
-    artifactPath in(Test, fullOptJS) := ((crossTarget in(Test, fullOptJS)).value / "app.min.test.js")
-    //artifactPath in(Compile, packageJSDependencies) := ((crossTarget in(Compile, fastOptJS)).value / "deps.js"),
-    //artifactPath in(Test, packageJSDependencies) := ((crossTarget in(Test, fastOptJS)).value / "deps.test.js"),
-    //artifactPath in(Compile, packageMinifiedJSDependencies) := ((crossTarget in(Compile, fullOptJS)).value / "deps.min.js"),
-    //artifactPath in(Test, packageMinifiedJSDependencies) := ((crossTarget in(Test, fullOptJS)).value / "deps.min.test.js")
+    artifactPath in(Test, fullOptJS) := ((crossTarget in(Test, fullOptJS)).value / "app.min.test.js"),
   )
   .enablePlugins(ScalaJSBundlerPlugin,ScalaJSWeb,SbtWeb)
   .dependsOn(sharedJs)

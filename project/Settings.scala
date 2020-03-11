@@ -77,7 +77,7 @@ object Settings {
   val ScalaTestVersion       = "3.0.5"
   val FlywayVersion          = "5.2.4"
   val TsecVersion            = "0.1.0-M3"
-  val CourierVersion                = "1.0.0"
+  val CourierVersion         = "1.0.0"
 
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */

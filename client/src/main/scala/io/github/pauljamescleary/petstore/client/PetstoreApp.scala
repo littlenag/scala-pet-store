@@ -16,9 +16,13 @@ import scala.scalajs.js.annotation.{JSExportTopLevel, JSImport}
 @JSExportTopLevel("PetstoreApp")
 object PetstoreApp {
 
-  @js.native
-  @JSImport("bootstrap/dist/css/bootstrap.css", JSImport.Namespace)
-  object BootstrapCss extends js.Object
+  object imports {
+    @js.native
+    @JSImport("bootstrap/dist/css/bootstrap.css", JSImport.Namespace)
+    object BootstrapCssImport extends js.Object
+
+
+  }
 
   def main(args: Array[String]): Unit = {
     // Ensure we have logging
@@ -29,7 +33,7 @@ object PetstoreApp {
 
     // Load jQuery, then init both the bootstrap javascript and css
     BootstrapJQueryContext.useNpmImports()
-    BootstrapCss
+    imports.BootstrapCssImport
 
     // Load React and React-Bootstrap
     ReactBootstrap
