@@ -19,7 +19,7 @@ object PetList {
                           )
 
   private val PetList = ScalaComponent.builder[PetListProps]("PetList")
-    .render_P(p => {
+  .render_P(p => {
       val head = <.thead(
         <.tr(
           <.th("#"),
