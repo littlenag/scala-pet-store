@@ -3,19 +3,21 @@ import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
 // Top-level settings
 
-enablePlugins(ScalafmtPlugin, JavaAppPackaging, GhpagesPlugin, MicrositesPlugin, TutPlugin)
+//enablePlugins(ScalafmtPlugin, JavaAppPackaging, GhpagesPlugin, MicrositesPlugin, TutPlugin)
 
-git.remoteRepo := "git@github.com:pauljamescleary/scala-pet-store.git"
+enablePlugins(ScalablyTypedConverterPlugin)
 
-micrositeGithubOwner := "pauljamescleary"
+//git.remoteRepo := "git@github.com:pauljamescleary/scala-pet-store.git"
 
-micrositeGithubRepo := Settings.name
+//micrositeGithubOwner := "pauljamescleary"
 
-micrositeName := "Scala Pet Store"
+//micrositeGithubRepo := Settings.name
 
-micrositeDescription := "An example application using FP techniques in Scala"
+//micrositeName := "Scala Pet Store"
 
-micrositeBaseUrl := Settings.name
+//micrositeDescription := "An example application using FP techniques in Scala"
+
+//micrositeBaseUrl := Settings.name
 
 // Settings for server, client, and shared code
 
@@ -28,7 +30,7 @@ lazy val commonSettings = Def.settings(
   version      := Settings.version,
   scalacOptions ++= Settings.scalacOptions,
   scalacOptions in (Compile, console) ~= (_.filterNot(badConsoleFlags.contains(_))),
-  resolvers += Resolver.sonatypeRepo("snapshots"),
+  //resolvers += Resolver.sonatypeRepo("snapshots"),
 
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9"),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)

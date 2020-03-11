@@ -11,7 +11,7 @@ object Settings {
   val name = "scala-pet-store"
 
   /** The version of your application */
-  val version = "0.0.1-SNAPSHOT"
+  val version = "0.0.2-SNAPSHOT"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
@@ -108,7 +108,6 @@ object Settings {
     "io.circe"              %% "circe-literal"        % CirceVersion,
     "io.circe"              %% "circe-generic-extras" % CirceVersion,
     "io.circe"              %% "circe-parser"         % CirceVersion,
-    "io.circe"              %% "circe-java8"          % CirceVersion,
     "io.circe"              %% "circe-config"         % CirceConfigVersion,
     "org.tpolecat"          %% "doobie-core"          % DoobieVersion,
     "org.tpolecat"          %% "doobie-h2"            % DoobieVersion,
@@ -161,10 +160,10 @@ object Settings {
     "io.circe"            %%% "circe-java8"           % CirceVersion,
 
     // Shared so that the JSWriter macro can be compiled separately
-    "com.payalabs"  %%% "scalajs-react-bridge"  % versions.scalajsReactBridge,
+    "com.payalabs"        %%% "scalajs-react-bridge"  % versions.scalajsReactBridge,
 
-    "org.scalacheck"        %% "scalacheck"           % ScalaCheckVersion % Test,
-    "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % Test
+    "org.scalacheck"      %%% "scalacheck"            % ScalaCheckVersion % Test,
+    "org.scalatest"       %%% "scalatest"             % ScalaTestVersion  % Test
   ))
 
   /** Dependencies only used by the ScalaJS client (note the use of %%% instead of %%) */
@@ -191,23 +190,6 @@ object Settings {
   ))
 
   val npmDeps = Seq(
-    //"react-event-listener" -> "0.6.6",
-    //"@material-ui/core" ->  "3.9.2",
-
-    //"@babel/runtime" ->  "7.3.4",
-
-    //"classnames" ->  "2.2.5",
-    //"cross-env" ->  "5.1.2",
-
-    //"i18next" ->  "11.3.2",
-    //"i18next-browser-languagedetector" ->  "2.2.0",
-
-    //"material-ui" ->  "1.0.0-beta.4",
-    //"material-ui-chip-input" ->  "1.0.0-beta.4",
-    //"material-ui-icons" ->  "1.0.0-beta.17",
-    //"material-ui-pickers" ->  "1.0.0-rc.9",
-    //"moment" ->  "2.22.1",
-
     "@fortawesome/fontawesome-free" -> "5.7.2",
 
     "react-bootstrap" -> "1.0.0-beta.5",
@@ -217,22 +199,8 @@ object Settings {
 
     "log4javascript" ->  "1.4.15",
 
-    "react" ->  "16.8.3",
-    "react-dom" ->  "16.8.3"
-    //"react-clamp-lines" ->  "1.1.0",
-    //"react-custom-scrollbars" ->  "4.2.1",
-    //"react-i18next" ->  "7.6.1",
-    //"react-popper" ->  "0.10.4",
-    //"react-router-dom" ->  "4.2.2",
-    //"react-scroll" ->  "1.7.9",
-    //"react-select" ->  "1.2.1",
-    //"validator" ->  "9.4.1",
-    //"@types/recompose" ->  "0.26.1",
-    //"recompose" ->  "0.27.1",
-
-    //"i18next-xhr-backend" -> "1.4.3",
-    //"uglifyjs-webpack-plugin" -> "^2.0.1",
-    //"numeral" -> "~2.0.6"
+    "react" ->  "16.8.4",
+    "react-dom" ->  "16.8.4"
   )
 
   val npmDevDeps = Seq(
