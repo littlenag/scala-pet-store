@@ -48,7 +48,7 @@ object PetList {
           TableCell()(pet.name),
           TableCell()(pet.category),
           TableCell()(pet.bio),
-          TableCell()(pet.tags.map{t => Chip()(t):VdomNode}.toSeq: _*),
+          TableCell()(pet.tags.map{t => Chip(label = t)():VdomNode}.toSeq: _*),
           //<.td(pet.photoUrls toTagMod {t => Badge(variant = "light")(t)}),
           TableCell()(
             Button(onClick = _ => p.deleteItem(pet))(FontAwesomeTags.trash, " Delete"),

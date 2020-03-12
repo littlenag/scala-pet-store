@@ -9,7 +9,7 @@ import domain.pets.Pet
 import domain.pets.PetStatus.{Adopted, Available, Pending}
 import client.logger._
 import client.services.{DeletePet, PetsData, RefreshPets, UpsertPet}
-import typings.materialUiCore.components.{Button, Card, CardContent, CardHeader, TextField, Modal, Typography}
+import typings.materialUiCore.components.{Button, Card, CardContent, CardHeader, Modal, Typography}
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeTags
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -62,9 +62,9 @@ object Pets {
             ),
             // if the dialog is open, add it to the panel
             if (s.showPetForm)
-              PetForm(PetForm.Props(s.selectedItem, petEdited))
+              PetForm(s.selectedItem, petEdited)
             else // otherwise add an empty placeholder
-              VdomArray.empty()
+              EmptyVdom
           )
         )
       )
@@ -84,7 +84,7 @@ object Pets {
 object PetForm {
   case class Props(item: Option[Pet], submitHandler: (Pet, Boolean) => Callback)
 
-  case class State(pet: Pet, tagText: String, cancelled: Boolean = true, show: Boolean = true)
+  case class State(pet: Pet, tagText: String, cancelled: Boolean = false, show: Boolean = true)
 
   class Backend($: ScalaComponent.BackendScope[Props, State]) {
 
@@ -138,54 +138,56 @@ object PetForm {
         open = s.show,
         onClose = _ => onExit(s,p), // to handle clicking outside the modal
       )(
-        <.h2(
-          headerText
-        ),
+        Card()(
+          <.h2(
+            headerText
+          ),
 
-        /**
-          * <.th("#"),
-          * <.th("Status"),
-          * <.th("Name"),
-          * <.th("Category"),
-          * <.th("Bio"),
-          * <.th("Tags"),
-          * //<.th("Photos"),
-          * <.th("Actions")
-          */
-        <.div(
+          /**
+            * <.th("#"),
+            * <.th("Status"),
+            * <.th("Name"),
+            * <.th("Category"),
+            * <.th("Bio"),
+            * <.th("Tags"),
+            * //<.th("Photos"),
+            * <.th("Actions")
+            */
           <.div(
-            <.label(^.`for` := "status", "Status"),
-            // using defaultValue = "Normal" instead of option/selected due to React
-            <.select(^.id := "status", ^.value := s.pet.status.toString, ^.onChange ==> updateStatus,
-              <.option(^.value := Available.toString, "Available"),
-              <.option(^.value := Pending.toString, "Pending"),
-              <.option(^.value := Adopted.toString, "Adopted")
+            <.div(
+              <.label(^.`for` := "status", "Status"),
+              // using defaultValue = "Normal" instead of option/selected due to React
+              <.select(^.id := "status", ^.value := s.pet.status.toString, ^.onChange ==> updateStatus,
+                <.option(^.value := Available.toString, "Available"),
+                <.option(^.value := Pending.toString, "Pending"),
+                <.option(^.value := Adopted.toString, "Adopted")
+              )
+            ),
+            <.div(
+              <.label(^.`for` := "name", "Name"),
+              <.input.text(^.id := "name", ^.value := s.pet.name,
+                ^.placeholder := "Name", ^.onChange ==> updateName)
+            ),
+            <.div(
+              <.label(^.`for` := "category", "Category"),
+              <.input.text(^.id := "category", ^.value := s.pet.category,
+                ^.placeholder := "Category", ^.onChange ==> updateCategory)
+            ),
+            <.div(
+              <.label(^.`for` := "bio", "Biography"),
+              <.input.text(^.id := "bio", ^.value := s.pet.bio,
+                ^.placeholder := "Biography", ^.onChange ==> updateBio)
+            ),
+            <.div(
+              <.label(^.`for` := "tags", "Tags"),
+              <.input.text(^.id := "tags", ^.value := s.tagText,
+                ^.placeholder := "Tags (comma separated)", ^.onChange ==> updateTags)
             )
           ),
           <.div(
-            <.label(^.`for` := "name", "Name"),
-            <.input.text(^.id := "name", ^.value := s.pet.name,
-              ^.placeholder := "Name", ^.onChange ==> updateName)
-          ),
-          <.div(
-            <.label(^.`for` := "category", "Category"),
-            <.input.text(^.id := "category", ^.value := s.pet.category,
-              ^.placeholder := "Category", ^.onChange ==> updateCategory)
-          ),
-          <.div(
-            <.label(^.`for` := "bio", "Biography"),
-            <.input.text(^.id := "bio", ^.value := s.pet.bio,
-              ^.placeholder := "Biography", ^.onChange ==> updateBio)
-          ),
-          <.div(
-            <.label(^.`for` := "tags", "Tags"),
-            <.input.text(^.id := "tags", ^.value := s.tagText,
-              ^.placeholder := "Tags (comma separated)", ^.onChange ==> updateTags)
+            Button(onClick = _ => cancel())("Close"),
+            Button(onClick = _ => save())("Save Changes")
           )
-        ),
-        <.div(
-          Button(onClick = _ => cancel())("Close"),
-          Button(onClick = _ => save())("Save Changes")
         )
       )
     }
@@ -197,7 +199,11 @@ object PetForm {
       State(pet, pet.tags.mkString(", "))
     }
     .renderBackend[Backend]
+    .componentWillReceiveProps { props =>
+      val pet = props.nextProps.item.getOrElse(Pet("", "", ""))
+      props.setState(State(pet, pet.tags.mkString(", "), false, true))
+    }
     .build
 
-  def apply(props: Props) = component(props)
+  def apply(item: Option[Pet], submitHandler: (Pet, Boolean) => Callback) = component(Props(item, submitHandler))
 }

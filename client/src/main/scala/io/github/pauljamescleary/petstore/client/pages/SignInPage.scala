@@ -13,7 +13,7 @@ import typings.materialUiCore.components.{Button, Card, CardContent, CardHeader,
 import io.github.pauljamescleary.petstore.client.services.SignIn
 import io.github.pauljamescleary.petstore.client.services.UserProfile
 import io.github.pauljamescleary.petstore.client.util._
-import typings.materialUiCore.materialUiCoreStrings.outlined
+import typings.materialUiCore.materialUiCoreStrings.{outlined, submit}
 import typings.materialUiCore.mod.PropTypes.Margin
 
 import scala.language.existentials
@@ -56,7 +56,7 @@ object SignInPage {
 
     def signInForm(p: Props, s: State) = {
       <.div(
-        <.form(
+        <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
           TextField.OutlinedTextFieldProps(
             variant = outlined,
             margin = Margin.normal,
@@ -81,7 +81,7 @@ object SignInPage {
             `type` = "password",
             onChange = _.withInputValue.map(text => $.modState(_.copy(password = text))).getOrElse(Callback.empty)
           )(),
-          Button(onClick = { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) })("Submit")
+          Button(`type` = submit)("Submit")
         ),
         <.div(
           Style.links,
