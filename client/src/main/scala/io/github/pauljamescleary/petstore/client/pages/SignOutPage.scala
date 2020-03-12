@@ -31,7 +31,7 @@ object SignOutPage {
   private val component = ScalaComponent.builder[Props]("Log Out Page")
       .renderP { (_, props) =>
         val cb = props.userProfileProxy.dispatchCB(SignOut) >> props.router.set(SignInRt)
-        cb.async.runNow()
+        cb.async.unsafeToFuture()
         <.div()
       }
       .build

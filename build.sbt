@@ -110,6 +110,9 @@ lazy val client = (project in file("client"))
     stFlavour := Flavour.Japgolly,
     //useYarn := true,
 
+    stEnableScalaJsDefined := Selection.AllExcept("@material-ui/core"),
+    stIgnore ++= List("@material-ui/icons", "csstype"),
+
     Compile / npmDependencies ++= Settings.npmDeps,
     Compile / npmDevDependencies ++= Settings.npmDevDeps,
 

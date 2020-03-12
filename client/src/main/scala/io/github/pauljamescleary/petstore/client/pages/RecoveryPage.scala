@@ -1,18 +1,17 @@
 package io.github.pauljamescleary.petstore.client.pages
 
+import typings.materialUiCore.components.{Button, Card, CardContent, TextField}
 import io.github.pauljamescleary.petstore.client.AppRouter.AppPage
 import io.github.pauljamescleary.petstore.client._
-import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody}
-import io.github.pauljamescleary.petstore.client.css.GlobalStyles
 import io.github.pauljamescleary.petstore.client.services.{AppCircuit, PasswordRecovery}
-import japgolly.scalajs.react.{Callback, _}
+import io.github.pauljamescleary.petstore.client.util._
+import japgolly.scalajs.react.{Callback, ReactEventFromInput, _}
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^.{^, _}
+import typings.materialUiCore.materialUiCoreStrings.{outlined, submit}
+import typings.materialUiCore.mod.PropTypes.Margin
 
 object RecoveryPage {
-
-  // shorthand for styles
-  @inline private def bss = GlobalStyles.bootstrapStyles
 
   case class Props(router: RouterCtl[AppPage])
 
@@ -47,31 +46,33 @@ object RecoveryPage {
     )
   }
 
-  def emailForm($: BackendScope[Props, State], p: Props, s: State) = {
-    <.form(^.onSubmit ==> {ev => $.modState(_.copy(submitted = true)) >> Callback(AppCircuit.dispatch(PasswordRecovery(s.email)))},
-      <.div(bss.formGroup,
-        //<.label(^.`for` := "description", "Email"),
-        <.input.text(bss.formControl,
-          ^.id := "email",
-          ^.value := s.email,
-          ^.placeholder := "Email",
-          ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(email = text))}
-        )
-      ),
-      <.button(^.disabled := {s.email.isEmpty})("Send Email")
-    )
-  }
+  class Backend($: ScalaComponent.BackendScope[Props, State]) {
+    def emailForm(p: Props, s: State) = {
+      <.form(^.onSubmit ==> {ev => $.modState(_.copy(submitted = true)) >> Callback(AppCircuit.dispatch(PasswordRecovery(s.email)))},
+        TextField.OutlinedTextFieldProps(
+          variant = outlined,
+          margin = Margin.normal,
+          required = true,
+          fullWidth = true,
+          id = "email",
+          label = "Email",
+          name = "email",
+          autoComplete = "email",
+          onChange = _.withInputValue.map(text => $.modState(_.copy(email = text))).getOrElse(Callback.empty)
+        )(),
+        Button(`type` = submit, disabled = {s.email.isEmpty})("Send Email")
+      )
+    }
 
-  class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
       <.div(
       <.div(Style.outerDiv,
         <.div(Style.innerDiv,
           Card()(
             if (!s.submitted) {
-              CardBody()(emailForm($,p,s))
+              CardContent()(emailForm(p,s))
             } else {
-              CardBody()(<.div("An email with a recovery link should arrive in the next few minutes."))
+              CardContent()(<.div("An email with a recovery link should arrive in the next few minutes."))
             }
           )
         )

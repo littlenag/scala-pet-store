@@ -15,8 +15,9 @@ object AppCSS {
       PasswordResetPage.Style,
       RegistrationPage.Style,
       HomePage.Style,
-      AppMenu.Style)
-    GlobalRegistry.register(GlobalStyles.bootstrapStyles)
+      AppMenu.Style,
+    )
+
     GlobalRegistry.onRegistration(_.addToDocument())
   }
 }

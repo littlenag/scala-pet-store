@@ -24,6 +24,7 @@ object Settings {
     "-language:experimental.macros",     // Allow macro definition (besides implementation and application)
     "-language:higherKinds",             // Allow higher-kinded types
     "-language:implicitConversions",     // Allow definition of implicit functions called views
+    "-language:postfixOps",              // Allow postfix operations
     "-unchecked",                        // Enable additional warnings where generated code depends on assumptions.
     "-Xcheckinit",                       // Wrap field accessors to throw an exception on uninitialized access.
     //"-Xfatal-warnings",                  // Fail the compilation if there are any warnings.
@@ -85,18 +86,18 @@ object Settings {
     val scalaTags = "0.6.7"
     val scalaDom = "0.9.6"
 
-    val scalajsReactFacade = "1.3.1"
-    val diode = "1.1.4"
-    val diodeReact = "1.1.4.131"
-
-    val scalajsReactBridge = "0.7.0"
-    val scalajsReactComponents = "1.0.0-M2"
-
     val scalaCSS = "0.5.5"
 
-    val typedApi = "0.2.0"
+    val scalajsReactFacade = "1.4.2"
+    val diode = "1.1.5"
+    val diodeReact = "1.1.4.131"
 
-    val bootstrapFacade = "2.3.4"
+    val scalajsReactBridge = "0.8.1"
+
+    // react-bootstrap
+    val scalajsReactBootstrap = "0.0.6"
+
+    val typedApi = "0.2.0"
   }
 
   /**
@@ -169,9 +170,9 @@ object Settings {
   /** Dependencies only used by the ScalaJS client (note the use of %%% instead of %%) */
   val clientDependencies = Def.setting(Seq(
     "com.github.pheymann"               %%% "typedapi-js-client"        % versions.typedApi,
+
     "com.github.japgolly.scalajs-react" %%% "core"                      % versions.scalajsReactFacade, // withSources (),
     "com.github.japgolly.scalajs-react" %%% "extra"                     % versions.scalajsReactFacade,
-    "com.olvind"                        %%% "scalajs-react-components"  % versions.scalajsReactComponents,
     "com.payalabs"                      %%% "scalajs-react-bridge"      % versions.scalajsReactBridge,
 
     "com.github.japgolly.scalacss"      %%% "core"                      % versions.scalaCSS,
@@ -182,6 +183,8 @@ object Settings {
 
     "org.scala-js"                      %%% "scalajs-dom"               % versions.scalaDom,
 
+    //"io.github.littlenag"               %%% "scalajs-react-bootstrap"   % versions.scalajsReactBootstrap,
+
     "org.scalacheck"                    %%% "scalacheck"                % ScalaCheckVersion % Test,
     "org.scalatest"                     %%% "scalatest"                 % ScalaTestVersion  % Test
   ))
@@ -189,16 +192,22 @@ object Settings {
   val npmDeps = Seq(
     "@fortawesome/fontawesome-free" -> "5.7.2",
 
+    //"@material-ui/core" -> "4.9.5",
+    "@material-ui/core" -> "3.9.3",
+    "typeface-roboto" -> "0.0.75",
+
     // https://getbootstrap.com/docs/4.3/getting-started/introduction/
-    "react-bootstrap" -> "1.0.0-beta.16",
-    "bootstrap"       -> "4.3.1",
-    "jquery"          -> "3.3.1",
-    "popper.js"       -> "1.14.7",
+    //"react-bootstrap" -> "1.0.0-beta.16",
+    //"bootstrap"       -> "4.3.1",
+    //"jquery"          -> "3.3",
+    //"@types/jquery"   -> "3.3.31",
+    //"@popperjs/core"  -> "2.1.0",  //https://popper.js.org/
 
-    "log4javascript"  ->  "1.4.15",
+    "log4javascript"  -> "1.4.15",
 
-    "react"           ->  "16.8.4",
-    "react-dom"       ->  "16.8.4",
+    "@types/react"    -> "16.8.4",
+    "react"           -> "16.8.4",
+    "react-dom"       -> "16.8.4",
   )
 
   val npmDevDeps = Seq(

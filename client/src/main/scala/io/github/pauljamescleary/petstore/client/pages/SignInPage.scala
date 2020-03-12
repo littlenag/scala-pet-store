@@ -9,17 +9,16 @@ import japgolly.scalajs.react.vdom.html_<^.{^, _}
 import io.github.pauljamescleary.petstore.client._
 import AppRouter.{AppPage, HomePageRt, RecoveryRt, RegisterRt}
 import diode.data.PotState.PotEmpty
-import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
-import io.github.pauljamescleary.petstore.client.css.GlobalStyles
+import typings.materialUiCore.components.{Button, Card, CardContent, CardHeader, TextField}
 import io.github.pauljamescleary.petstore.client.services.SignIn
 import io.github.pauljamescleary.petstore.client.services.UserProfile
+import io.github.pauljamescleary.petstore.client.util._
+import typings.materialUiCore.materialUiCoreStrings.outlined
+import typings.materialUiCore.mod.PropTypes.Margin
 
 import scala.language.existentials
 
 object SignInPage {
-
-  // shorthand for styles
-  @inline private def bss = GlobalStyles.bootstrapStyles
 
   case class Props(router: RouterCtl[AppPage], userProfile: ModelProxy[Pot[UserProfile]])
 
@@ -45,38 +44,45 @@ object SignInPage {
       width(400.px),
       alignItems.flexStart,
       float.none,
-      margin(0 px, auto)
+      margin(0.px, auto)
     )
 
     val links = style(
-      margin(17 px)
+      margin(17.px)
     )
   }
 
-  class Backend($: BackendScope[Props, State]) {
+  class Backend($: ScalaComponent.BackendScope[Props, State]) {
 
     def signInForm(p: Props, s: State) = {
-      <.form(^.onSubmit ==> { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) },
-        <.div(bss.formGroup,
-          <.label(^.`for` := "description", "Username"),
-          <.input.text(bss.formControl,
-            ^.id := "username",
-            ^.value := s.username,
-            ^.placeholder := "Username",
-            ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(username = text)) }
-          )
+      <.div(
+        <.form(
+          TextField.OutlinedTextFieldProps(
+            variant = outlined,
+            margin = Margin.normal,
+            fullWidth = true,
+            id = "email",
+            label = "Email Address",
+            name = "email",
+            autoComplete = "email",
+            autoFocus = true,
+            required = true,
+            onChange = _.withInputValue.map(text => $.modState(_.copy(username = text))).getOrElse(Callback.empty)
+          )(),
+          TextField.OutlinedTextFieldProps(
+            variant = outlined,
+            margin = Margin.normal,
+            required = true,
+            fullWidth = true,
+            id = "password",
+            label = "Password",
+            name = "password",
+            autoComplete = "current-password",
+            `type` = "password",
+            onChange = _.withInputValue.map(text => $.modState(_.copy(password = text))).getOrElse(Callback.empty)
+          )(),
+          Button(onClick = { ev => p.userProfile.dispatchCB(SignIn(s.username, s.password)) })("Submit")
         ),
-        <.div(bss.formGroup,
-          <.label(^.`for` := "description", "Password"),
-          <.input.text(bss.formControl,
-            ^.id := "password",
-            ^.value := s.password,
-            ^.`type` := "password",
-            ^.placeholder := "Password",
-            ^.onChange ==> { ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password = text)) }
-          )
-        ),
-        <.button("Submit"),
         <.div(
           Style.links,
           <.span(p.router.link(RecoveryRt)("Forgot your password?")),
@@ -90,7 +96,7 @@ object SignInPage {
       <.div(
         p.userProfile().renderReady { up =>
           // This seems to be the easy way to redirect. but have to make sure to run AFTER rendering!
-          p.router.set(HomePageRt).async.runNow()
+          p.router.set(HomePageRt).async.unsafeToFuture()
           <.div(
             Style.outerDiv,
             up.toString
@@ -107,7 +113,7 @@ object SignInPage {
             <.div(Style.innerDiv,
               Card()(
                 CardHeader()("Sign In -- Failed!"),
-                CardBody()(signInForm(p,s))
+                CardContent()(signInForm(p,s))
               )
             )
           )
@@ -118,7 +124,7 @@ object SignInPage {
             <.div(Style.innerDiv,
               Card()(
                 CardHeader()("Sign In"),
-                CardBody()(signInForm(p,s))
+                CardContent()(signInForm(p,s))
               )
             )
           )

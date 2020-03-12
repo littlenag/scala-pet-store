@@ -5,7 +5,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import io.github.pauljamescleary.petstore.client._
-import AppRouter.{AppPage, SignInRt}
+import AppRouter.AppPage
 import io.github.pauljamescleary.petstore.client.components.Pets
 import io.github.pauljamescleary.petstore.client.services.RootModel
 
@@ -32,7 +32,7 @@ object HomePage {
       .renderP { (_, props) =>
         // If the user hasn't authenticated re-direct to the sign-in page
         if (props.rootModel.zoom(_.userProfile).value.isEmpty) {
-          props.router.set(SignInRt).async.runNow()
+          // Router should auto-redirect
           <.div()
         } else {
           <.div(Style.innerDiv, Pets(props.rootModel.zoom(_.pets)))

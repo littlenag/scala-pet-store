@@ -43,6 +43,8 @@ class FrontendEndpoints[F[_]: Effect: ContextShift] extends Http4sDsl[F] {
         title("Scala Pet Store")
       ),
       body(
+        // Load fonts for Material UI
+        //link(rel := "stylesheet", href := "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"),
         // This div is where our SPA is rendered.
         div(`class` := "app-container", id := "root"),
         script(`type`:= "text/javascript", src := s"/webjars/${BuildInfo.name}/${BuildInfo.version}/shared-bundle.js"),

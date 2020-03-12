@@ -1,7 +1,6 @@
 package io.github.pauljamescleary.petstore.client
 
 import css.AppCSS
-import io.github.pauljamescleary.petstore.client.bootstrap.ReactBootstrap
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeCss
 import io.github.pauljamescleary.petstore.client.logger._
 import org.scalajs.dom
@@ -17,25 +16,14 @@ object PetstoreApp {
 
   object imports {
     @js.native
-    @JSImport("jquery", JSImport.Namespace)
-    object jQuery extends js.Object
+    @JSImport("react", JSImport.Namespace)
+    object react extends js.Object
 
     @js.native
-    @JSImport("popper", JSImport.Namespace)
-    object popper extends js.Object
+    @JSImport("typeface-roboto", JSImport.Namespace)
+    object typefaceRoboto extends js.Object
 
-    @js.native
-    @JSImport("bootstrap", JSImport.Namespace)
-    object bootstrap extends js.Object
-
-    @js.native
-    @JSImport("bootstrap/dist/css/bootstrap.css", JSImport.Namespace)
-    object bootstrapCss extends js.Object
   }
-
-  //import typings.std.stdStrings.Pick
-
-  //import typings.
 
   def main(args: Array[String]): Unit = {
     // Ensure we have logging
@@ -44,13 +32,11 @@ object PetstoreApp {
     // Load FontAwesome (nice fonts!)
     FontAwesomeCss
 
-    // Load jQuery, then init both the bootstrap javascript and css
-    imports.jQuery
-    imports.bootstrap
-    imports.bootstrapCss
+    // Load fonts for Material UI
+    imports.typefaceRoboto
 
-    // Load React and React-Bootstrap
-    ReactBootstrap.useNpmImports()
+    // Load React
+    imports.react
 
     ///
     /// At this point all our app deps have been loaded and we good to start initializing

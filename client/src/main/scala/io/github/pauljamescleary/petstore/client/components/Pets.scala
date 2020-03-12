@@ -8,9 +8,8 @@ import io.github.pauljamescleary.petstore.client
 import domain.pets.Pet
 import domain.pets.PetStatus.{Adopted, Available, Pending}
 import client.logger._
-import client.css.GlobalStyles
 import client.services.{DeletePet, PetsData, RefreshPets, UpsertPet}
-import io.github.pauljamescleary.petstore.client.bootstrap._
+import typings.materialUiCore.components.{Button, Card, CardContent, CardHeader, TextField, Modal, Typography}
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeTags
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -22,7 +21,7 @@ object Pets {
 
   case class State(selectedItem: Option[Pet] = None, showPetForm: Boolean = false)
 
-  class Backend($: BackendScope[Props, State]) {
+  class Backend($: ScalaComponent.BackendScope[Props, State]) {
     def mounted(props: Props) =
     // dispatch a message to refresh the todos, which will cause TodoStore to fetch todos from the server
       Callback.when(props.proxy().isEmpty)(props.proxy.dispatchCB(RefreshPets))
@@ -45,11 +44,10 @@ object Pets {
 
     def render(p: Props, s: State) =
       Card()(
-        CardBody()(
-          CardTitle()("Pets in the Store"),
+        CardHeader()("Pets in the Store"),
+        CardContent()(
           <.div(
-            Button(onClick = editPet(None).toJsCallback)(
-              GlobalStyles.bootstrapStyles.floatRight,
+            Button(onClick = _ => editPet(None))(
               FontAwesomeTags.plusSquare, " New"
             ),
             p.proxy().renderFailed(ex => "Error loading"),
@@ -84,14 +82,11 @@ object Pets {
 }
 
 object PetForm {
-  // shorthand for styles
-  @inline private def bss = GlobalStyles.bootstrapStyles
-
   case class Props(item: Option[Pet], submitHandler: (Pet, Boolean) => Callback)
 
   case class State(pet: Pet, tagText: String, cancelled: Boolean = true, show: Boolean = true)
 
-  class Backend($: BackendScope[Props, State]) {
+  class Backend($: ScalaComponent.BackendScope[Props, State]) {
 
     def cancel(): Callback = {
       $.modState(s => s.copy(cancelled = true, show = false))
@@ -140,12 +135,11 @@ object PetForm {
       val headerText = if (s.pet.id.isEmpty) "Add new pet" else "Edit pet"
 
       Modal(
-        show = s.show,
-        onExit = onExit(s,p).toJsCallback,
-        onHide = onExit(s,p).toJsCallback      // to handle clicking outside the modal
+        open = s.show,
+        onClose = _ => onExit(s,p), // to handle clicking outside the modal
       )(
-        ModalHeader()(
-          ModalTitle()(headerText)
+        <.h2(
+          headerText
         ),
 
         /**
@@ -158,40 +152,40 @@ object PetForm {
           * //<.th("Photos"),
           * <.th("Actions")
           */
-        ModalBody()(
-          <.div(bss.formGroup,
+        <.div(
+          <.div(
             <.label(^.`for` := "status", "Status"),
             // using defaultValue = "Normal" instead of option/selected due to React
-            <.select(bss.formControl, ^.id := "status", ^.value := s.pet.status.toString, ^.onChange ==> updateStatus,
+            <.select(^.id := "status", ^.value := s.pet.status.toString, ^.onChange ==> updateStatus,
               <.option(^.value := Available.toString, "Available"),
               <.option(^.value := Pending.toString, "Pending"),
               <.option(^.value := Adopted.toString, "Adopted")
             )
           ),
-          <.div(bss.formGroup,
+          <.div(
             <.label(^.`for` := "name", "Name"),
-            <.input.text(bss.formControl, ^.id := "name", ^.value := s.pet.name,
+            <.input.text(^.id := "name", ^.value := s.pet.name,
               ^.placeholder := "Name", ^.onChange ==> updateName)
           ),
-          <.div(bss.formGroup,
+          <.div(
             <.label(^.`for` := "category", "Category"),
-            <.input.text(bss.formControl, ^.id := "category", ^.value := s.pet.category,
+            <.input.text(^.id := "category", ^.value := s.pet.category,
               ^.placeholder := "Category", ^.onChange ==> updateCategory)
           ),
-          <.div(bss.formGroup,
+          <.div(
             <.label(^.`for` := "bio", "Biography"),
-            <.input.text(bss.formControl, ^.id := "bio", ^.value := s.pet.bio,
+            <.input.text(^.id := "bio", ^.value := s.pet.bio,
               ^.placeholder := "Biography", ^.onChange ==> updateBio)
           ),
-          <.div(bss.formGroup,
+          <.div(
             <.label(^.`for` := "tags", "Tags"),
-            <.input.text(bss.formControl, ^.id := "tags", ^.value := s.tagText,
+            <.input.text(^.id := "tags", ^.value := s.tagText,
               ^.placeholder := "Tags (comma separated)", ^.onChange ==> updateTags)
           )
         ),
-        ModalFooter()(
-          Button(variant = "secondary", onClick = cancel().toJsCallback)("Close"),
-          Button(variant = "primary", onClick = save().toJsCallback)("Save Changes")
+        <.div(
+          Button(onClick = _ => cancel())("Close"),
+          Button(onClick = _ => save())("Save Changes")
         )
       )
     }

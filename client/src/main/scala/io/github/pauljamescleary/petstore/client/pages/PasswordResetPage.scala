@@ -2,23 +2,22 @@ package io.github.pauljamescleary.petstore.client.pages
 
 import java.util.UUID
 
-import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, RecoveryRt, RegisterRt, SignInRt}
+import io.github.pauljamescleary.petstore.client.AppRouter.{AppPage, RegisterRt, SignInRt}
 import io.github.pauljamescleary.petstore.client._
-import io.github.pauljamescleary.petstore.client.bootstrap.{Card, CardBody, CardHeader}
-import io.github.pauljamescleary.petstore.client.css.GlobalStyles
+import io.github.pauljamescleary.petstore.client.util._
 import io.github.pauljamescleary.petstore.client.services.{AppCircuit, PasswordReset, PetStoreClient}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^.{^, _}
+import typings.materialUiCore.components.{Button, Card, CardContent, CardHeader, TextField}
+import typings.materialUiCore.materialUiCoreStrings.{submit,outlined}
+import typings.materialUiCore.mod.PropTypes.Margin
 
 import scala.concurrent.ExecutionContext
 import scala.language.existentials
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 object PasswordResetPage {
-
-  // shorthand for styles
-  @inline private def bss = GlobalStyles.bootstrapStyles
 
   case class Props(router: RouterCtl[AppPage], token: UUID)
 
@@ -45,37 +44,43 @@ object PasswordResetPage {
       width(400.px),
       alignItems.flexStart,
       float.none,
-      margin(0 px, auto)
+      margin(0.px, auto)
     )
   }
 
-  def passwordResetForm($: BackendScope[Props, State], p: Props, s: State) = {
-    <.form(^.onSubmit ==> {_ => Callback(AppCircuit.dispatch(PasswordReset(p.token,s.password1))) >> p.router.set(SignInRt)},
-      <.div(bss.formGroup,
-        <.label(^.`for` := "description", "Password"),
-        <.input.text(bss.formControl,
-          ^.id := "password",
-          ^.value := s.password1,
-          ^.`type` := "password",
-          ^.placeholder := "Password",
-          ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password1 = text))}
-        )
-      ),
-      <.div(bss.formGroup,
-        <.label(^.`for` := "description", "Confirm Password"),
-        <.input.text(bss.formControl,
-          ^.id := "password2",
-          ^.value := s.password2,
-          ^.`type` := "password",
-          ^.placeholder := "Confirm Password",
-          ^.onChange ==> {ev: ReactEventFromInput => val text = ev.target.value; $.modState(_.copy(password2 = text))}
-        )
-      ),
-      <.button(^.disabled := {s.password1 != s.password2})("Reset")
-    )
-  }
+  class Backend($: ScalaComponent.BackendScope[Props, State]) {
+    def passwordResetForm(p: Props, s: State) = {
+      <.form(^.onSubmit ==> {_ => Callback(AppCircuit.dispatch(PasswordReset(p.token,s.password1))) >> p.router.set(SignInRt)},
+        TextField.OutlinedTextFieldProps(
+          variant = outlined,
+          margin = Margin.normal,
+          required = true,
+          fullWidth = true,
+          id = "password",
+          label = "Password",
+          name = "password",
+          //autoComplete = "current-password",
+          `type` = "password",
+          autoFocus = true,
+          onChange = _.withInputValue.map(text => $.modState(_.copy(password1 = text))).getOrElse(Callback.empty)
+        )(),
+        TextField.OutlinedTextFieldProps(
+          variant = outlined,
+          margin = Margin.normal,
+          required = true,
+          fullWidth = true,
+          id = "password2",
+          label = "Confirm Password",
+          name = "password2",
+          //autoComplete = "current-password",
+          `type` = "password",
+          onChange = _.withInputValue.map(text => $.modState(_.copy(password2 = text))).getOrElse(Callback.empty)
+        )(),
 
-  class Backend($: BackendScope[Props, State]) {
+        Button(`type` = submit, disabled = {s.password1 != s.password2})("Reset")
+      )
+    }
+
     def render(p: Props, s: State) = {
       <.div(Style.outerDiv,
         <.div(Style.innerDiv,
@@ -83,12 +88,12 @@ object PasswordResetPage {
             case Some(true) =>
               Card()(
                 CardHeader()(s"Password Reset"),
-                CardBody()(passwordResetForm($,p,s))
+                CardContent()(passwordResetForm(p,s))
               )
             case Some(false) =>
               Card()(
                 CardHeader()(s"The token is not valid."),
-                CardBody()(
+                CardContent()(
                   <.span(p.router.link(SignInRt)("Sign In.")),
                   <.br,
                   <.span(p.router.link(RegisterRt)("Create an account."))
@@ -96,7 +101,7 @@ object PasswordResetPage {
               )
             case None =>
               Card()(
-                CardBody()(s"Verifying Token"),
+                CardContent()(s"Verifying Token"),
               )
           }
         )

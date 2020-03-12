@@ -8,11 +8,15 @@ import diode.react.ReactPot._
 import diode.react._
 import diode.data.Pot
 import diode.react.ModelProxy
-import io.github.pauljamescleary.petstore.client.bootstrap.{Nav, NavLink, Navbar, NavbarBrand}
+import typings.materialUiCore.components.{AppBar, Button, Card, CardContent, TextField, Toolbar}
+import typings.materialUiCore.materialUiCoreStrings.static
+
+import scala.scalajs.js
+//import io.github.pauljamescleary.petstore.client.bootstrap.{Nav, NavLink, Navbar, NavbarBrand}
 import io.github.pauljamescleary.petstore.client.services.UserProfile
 import scalacss.ScalaCssReact._
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.extra.Reusability
+//import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 
@@ -63,26 +67,24 @@ object AppMenu {
 
   class Backend($: BackendScope[Props, State]) {
     def unauthenticated(p: Props) = {
-      Nav()(
-        ^.`class` := "ml-auto",
-        NavLink(href = p.ctrl.pathFor(SignInRt).value)("Sign In"),
-        NavLink(href = p.ctrl.pathFor(RegisterRt).value)("Sign Up"),
+      <.div(
+        Button(href = p.ctrl.pathFor(SignInRt).value)("Sign In"),
+        Button(href = p.ctrl.pathFor(RegisterRt).value)("Sign Up"),
       )
     }
 
     def authenticated(userProfile: UserProfile, p: Props) = {
-      Nav()(
-        ^.`class` := "mr-auto",
-        NavLink(href = p.ctrl.pathFor(SignOutRt).value)("Sign Out")
-      )
+      Button(href = p.ctrl.pathFor(SignOutRt).value)("Sign Out")
     }
 
     def render(p: Props, s: State) = {
       <.header(
-        Navbar(bg = "light", expand = "lg", fixed = "top")(
-          NavbarBrand(href = p.ctrl.pathFor(HomePageRt).value)("Pet Store"),
-          p.userProfile().render { up => authenticated(up,p)},
-          p.userProfile().renderEmpty { unauthenticated(p)}
+        AppBar(position = static)(
+          Toolbar()(
+            Button(href = p.ctrl.pathFor(HomePageRt).value)("Pet Store"),
+            p.userProfile().render { up => authenticated(up,p)},
+            p.userProfile().renderEmpty { unauthenticated(p) }
+          )
         )
       )
     }

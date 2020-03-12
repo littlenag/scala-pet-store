@@ -1,7 +1,6 @@
 package io.github.pauljamescleary.petstore.client.components
 
-import io.github.pauljamescleary.petstore.client.bootstrap.{Badge, Button, Table}
-import io.github.pauljamescleary.petstore.client.css.GlobalStyles
+import typings.materialUiCore.components.{Button, Chip, Table, TableBody, TableCell, TableHead, TableRow}
 import io.github.pauljamescleary.petstore.client.img.FontAwesomeTags
 import io.github.pauljamescleary.petstore.domain.pets.Pet
 import io.github.pauljamescleary.petstore.domain.pets.PetStatus.{Adopted, Available, Pending}
@@ -20,48 +19,48 @@ object PetList {
 
   private val PetList = ScalaComponent.builder[PetListProps]("PetList")
   .render_P(p => {
-      val head = <.thead(
-        <.tr(
-          <.th("#"),
-          <.th("Status"),
-          <.th("Name"),
-          <.th("Category"),
-          <.th("Bio"),
-          <.th("Tags"),
-          //<.th("Photos"),
-          <.th("Actions")
+      val head =
+        TableHead()(
+          TableRow()(
+            TableCell()("#"),
+            TableCell()("Status"),
+            TableCell()("Name"),
+            TableCell()("Category"),
+            TableCell()("Bio"),
+            TableCell()("Tags"),
+            //<.th("Photos"),
+            TableCell()("Actions")
+          )
         )
-      )
 
-      def renderPet(pet: Pet) = {
+      def renderPet(pet: Pet): VdomNode = {
         val id = pet.id.getOrElse(-1l)
-        <.tr(
+        TableRow()(
           // # / id
-          <.td(id),
+          TableCell()(id),
           // status
-          <.td(
+          TableCell()(
             pet.status match {
               case Adopted | Pending => <.s(pet.status.toString)
               case Available => <.span(pet.status.toString)
             }
           ),
-          <.td(pet.name),
-          <.td(pet.category),
-          <.td(pet.bio),
-          <.td(pet.tags toTagMod {t => Badge(variant = "light")(t)}),
+          TableCell()(pet.name),
+          TableCell()(pet.category),
+          TableCell()(pet.bio),
+          TableCell()(pet.tags.map{t => Chip()(t):VdomNode}.toSeq: _*),
           //<.td(pet.photoUrls toTagMod {t => Badge(variant = "light")(t)}),
-          <.td(
-            GlobalStyles.bootstrapStyles.floatRight,
-            Button(variant = "secondary", onClick = p.deleteItem(pet).toJsCallback)(FontAwesomeTags.trash, " Delete"),
+          TableCell()(
+            Button(onClick = _ => p.deleteItem(pet))(FontAwesomeTags.trash, " Delete"),
             <.span(),
-            Button(variant = "primary", onClick = p.editItem(pet).toJsCallback)(FontAwesomeTags.edit, " Edit")
+            Button(onClick = _ => p.editItem(pet))(FontAwesomeTags.edit, " Edit")
           )
         )
       }
 
-      val body = <.tbody(p.pets toTagMod renderPet)
+      val body = TableBody()(p.pets.map(renderPet):_*)
 
-      Table(striped = true, bordered = true, hover = true, size = "sm")(head,body)
+      Table()(head,body)
     })
     .build
 

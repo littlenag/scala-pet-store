@@ -4,6 +4,7 @@ import java.util.UUID
 
 import io.github.pauljamescleary.petstore.client.components.Footer
 import io.github.pauljamescleary.petstore.client.pages._
+import japgolly.scalajs.react.CallbackTo
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import services._
@@ -33,16 +34,28 @@ object AppRouter {
 
     val rootModelWrapper = AppCircuit.connect(x => x)
 
-    // wrap/connect components to the circuit
-    (staticRoute("#/home", HomePageRt) ~> renderR(ctl => rootModelWrapper(HomePage(ctl,_)))
-      | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => userProfileWrapper(SignInPage(ctl,_)))
-      | staticRoute("#/sign-out", SignOutRt) ~> renderR(ctl => userProfileWrapper(SignOutPage(ctl,_)))
-      | staticRoute("#/register", RegisterRt) ~> renderR(ctl => userProfileWrapper(RegistrationPage(ctl,_)))
-      | staticRoute("#/recovery", RecoveryRt) ~> renderR(RecoveryPage(_))
-      | dynamicRouteCT("#/password-reset" / uuid.caseClass[PasswordResetRt]) ~> dynRenderR((rt, ctl) => PasswordResetPage(ctl,rt.token))
-      | emptyRule
-      ).notFound(redirectToPage(SignInRt)(Redirect.Replace))
-      .renderWith(layout)
+    val appPages = ( emptyRule
+    | staticRoute("#/home", HomePageRt) ~> renderR(ctl => rootModelWrapper(HomePage(ctl,_)))
+    )
+    .addCondition(CallbackTo(AppCircuit.zoom(_.userProfile).value.isReady))(_ => redirectToPage(SignInRt)(Redirect.Push))
+
+
+    val loginPages = ( emptyRule
+    | staticRoute("#/sign-in", SignInRt) ~> renderR(ctl => userProfileWrapper(SignInPage(ctl,_)))
+    | staticRoute("#/sign-out", SignOutRt) ~> renderR(ctl => userProfileWrapper(SignOutPage(ctl,_)))
+    | staticRoute("#/register", RegisterRt) ~> renderR(ctl => userProfileWrapper(RegistrationPage(ctl,_)))
+    | staticRoute("#/recovery", RecoveryRt) ~> renderR(RecoveryPage(_))
+    | dynamicRouteCT("#/password-reset" / uuid.caseClass[PasswordResetRt]) ~> dynRenderR((rt: PasswordResetRt, ctl) => PasswordResetPage(ctl,rt.token))
+    )
+
+    val allPages = ( emptyRule
+      | appPages
+      | loginPages
+      )
+
+    allPages
+    .notFound(redirectToPage(SignInRt)(Redirect.Replace))
+    .renderWith(layout)
   }
 
   // create the router
